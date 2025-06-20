@@ -1,0 +1,79 @@
+<mat-sidenav-container class="sidenav-container">
+  <!-- Menu lateral -->
+  <mat-sidenav #sidenav mode="side" [opened]="opened" class="sidenav" [fixedInViewport]="true">
+    <div class="sidenav-inner">
+      <div class="logo">DiCasa</div>
+      <div class="user-info">👤 {{ usuario }}</div>
+
+      <mat-divider></mat-divider>
+
+      <mat-accordion class="submenu-accordion" [multi]="false">
+
+        <!-- Pedidos -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header class="menu-btn">
+            <mat-panel-title>
+              <mat-icon class="menu-icon">inventory_2</mat-icon>
+              Pedidos
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="submenu-wrapper">
+            <button mat-button class="submenu-btn" routerLink="/pedidos-list">📄 Consultar</button>
+            <button mat-button class="submenu-btn" disabled>➕ Novo Pedido</button>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Estoque -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header class="menu-btn">
+            <mat-panel-title>
+              <mat-icon class="menu-icon">warehouse</mat-icon>
+              Estoque
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="submenu-wrapper">
+            <button mat-button class="submenu-btn" disabled>📦 Produtos</button>
+            <button mat-button class="submenu-btn" disabled>📝 Inventário</button>
+          </div>  
+        </mat-expansion-panel>
+
+        <!-- Financeiro -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header class="menu-btn">
+            <mat-panel-title>
+              <mat-icon class="menu-icon">attach_money</mat-icon>
+              Financeiro
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <!-- Submenus alinhados verticalmente -->
+            <div class="submenu-wrapper">
+              <button mat-button class="submenu-btn" routerLink="dashboard">📊 Dashboard</button>
+              <button mat-button class="submenu-btn" disabled>📈 Fluxo de Caixa</button>
+              <button mat-button class="submenu-btn" disabled>💳 Contas a Receber</button>
+            </div>
+        </mat-expansion-panel>
+
+      </mat-accordion>
+
+      <mat-divider></mat-divider>
+      
+    </div>
+      <div class="logout-fixed">
+        <button mat-flat-button color="warn" (click)="logout()">
+          <mat-icon class="menu-icon">logout</mat-icon>
+          Sair
+        </button>
+      </div>
+  </mat-sidenav>
+
+  <!-- Conteúdo principal -->
+  <mat-sidenav-content class="main-content">
+    <button class="menu-toggle" mat-icon-button (click)="toggleSidenav(sidenav)">
+      <mat-icon>{{ menuIcon }}</mat-icon>
+    </button>
+
+
+    <router-outlet></router-outlet>
+  
+  </mat-sidenav-content>
+</mat-sidenav-container>

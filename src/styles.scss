@@ -1,1 +1,44 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Montserrat:wght@400;500;700&display=swap');
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+.w-100 {
+  width: 100%;
+}
+
+$font-family-base: 'Inter', sans-serif !default;
+$font-family-heading: 'Montserrat', sans-serif !default;
+$font-size-base: 16px !default;
+$font-size-h1: 2rem !default;
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;  
+}
+
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  line-height: 1.5;
+}
+
+h1, .mat-h1 { font-family: $font-family-heading; font-size: $font-size-h1; }
+
+.mat-expansion-panel-header .mat-content span,
+.mat-expansion-panel-header .mat-content .mat-expansion-panel-header-title,
+.mat-expansion-panel-header .mat-content .mat-panel-title {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+
+.sidenav {
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);
+}
+
+.mat-icon {
+  font-family: 'Material Symbols Outlined' !important;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}

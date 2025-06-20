@@ -1,0 +1,16 @@
+<div class="login-card">
+  
+  <img src="assets/img/logo2.png" alt="Logo" class="logo" />
+
+  <mat-form-field appearance="outline" class="w-100">
+    <mat-label>Usuário</mat-label>
+    <input matInput [(ngModel)]="usuario" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="w-100">
+    <mat-label>Senha</mat-label>
+    <input matInput type="password" [(ngModel)]="senha" />
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" class="w-100" (click)="logar()">Entrar</button>
+</div>

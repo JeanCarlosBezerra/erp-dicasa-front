@@ -1,0 +1,249 @@
+:host {
+  display: block;
+  height: 100vh;
+  //overflow: hidden;
+}
+
+/* Divider sutil */
+::ng-deep mat-divider {
+  margin: 16px 0;
+  border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Contêiner lateral */
+.sidenav-container {
+  height: 100vh;
+  width: 100%;
+  //overflow: hidden;
+  display: flex;
+
+  .mat-sidenav-content {
+    height: 100%;
+    //overflow: hidden; // impede rolagem do container principal
+  }
+  .mat-sidenav {
+    height: 100vh !important;
+    -ms-overflow-style: none;  // IE
+    scrollbar-width: none;     // Firefox
+    //height: 100%;
+    //overflow: hidden !important;
+  }
+}
+
+.mat-sidenav::-webkit-scrollbar {
+  overflow-x: hidden;
+  display: none;
+}
+
+.sidenav {
+  width: 255px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  box-sizing: border-box;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.85), rgba(0,0,0,0.95)),
+              url('/assets/img/bg-textura.jpg');
+  background-size: cover;
+  background-position: center;
+  justify-content: space-between;
+  height: 100vh; // garante altura fixa da lateral
+  overflow: hidden; // importante para ocultar barra extra
+}
+
+.sidenav-inner {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 90%;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+/* Logo e usuário */
+.logo {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  color: #ffffffdd;
+}
+
+.user-info {
+  font-size: 15px;
+  margin-bottom: 30px;
+  color: #c9c9c9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Botões principais e headers de submenu */
+.menu-btn,
+.mat-expansion-panel-header {
+  width: 100%;
+  color: #fff !important;
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  //transition: background-color 0.2s ease;
+
+  .menu.mat-panel-title {
+    color: #fff !important;
+  }
+  .menu-icon {
+    color: #fff !important;
+    font-size: 20px;
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Accordion de submenus */
+.submenu-accordion {
+  background: transparent;
+
+  .mat-expansion-panel {
+    background: transparent;
+    color: white;
+    box-shadow: none;
+    border: none;
+    margin: 0;
+
+    .mat-expansion-panel-header {
+      padding: 0 !important;
+    }
+
+    .mat-panel-title {
+      display: flex;
+      color: #fff !important;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .mat-expansion-indicator::after {
+      color: white;
+    }
+
+    .submenu-btn {
+      padding-left: 8px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #ccc;
+      text-align: left;
+      border-radius: 6px;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.05);
+        color: #fff;
+      }
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .mat-icon {
+        margin-right: 8px;
+        font-size: 18px;
+        color: #aaa;
+      }
+    }
+  }
+}
+
+.submenu-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+
+  // alinhamento perfeito com o título
+  padding-left: 8px; // <- era 36px, reduzi para igualar ao título
+}
+
+/* Botão sair fixado */
+.logout-fixed {
+  margin-top: auto;
+  padding: 0 12px; // Adiciona espaçamento lateral interno
+  width: 100%;
+  box-sizing: border-box; // 💥 garante que padding não ultrapasse o tamanho do container
+
+  button {
+    width: 100%;
+    border-radius: 6px;
+    font-weight: bold;
+    background-color: #ff4d4d;
+    color: white;
+
+    &:hover {
+      background-color: #ff1a1a;
+    }
+  }
+}
+
+
+/* Botão menu toggle flutuante */
+.menu-toggle {
+  position: absolute; // muda para fixo para responsividade total
+  top: 4px;
+  left: 16px;
+  z-index: 1200;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.3s ease;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.menu-toggle.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.95);
+}
+
+/* Responsivo para telas pequenas */
+@media (max-width: 768px) {
+  .menu-toggle {
+    top: 6px;
+    left: 12px;
+    transform: scale(0.9);
+  }
+}
+
+/* Conteúdo principal da página */
+.main-content {
+  background: url('assets/img/background3.png') no-repeat center center fixed;
+  background-size: cover;
+  backdrop-filter: blur(2px); // opcional para dar um efeito moderno
+  min-height: 100vh;
+  //consegue ajustar tamanho do toggle aqui.
+  padding: 20px 20px 40px;
+  background-color: #f8f8f8;
+  height: 100%;
+  overflow: auto;
+  position: relative;
+
+
+  .main-content h1,
+  .main-content p {
+    color: #fff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.4); // melhor leitura
+  }
+
+  h1 {
+    font-size: 28px;
+    margin-bottom: 12px;
+    color: #222;
+  }
+
+  p {
+    color: #666;
+  }
+}

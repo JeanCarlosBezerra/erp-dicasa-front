@@ -1,0 +1,36 @@
+:host {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 100vh;
+  background: url('assets/img/background.jpg') no-repeat center center;
+  background-size: cover;
+  font-family: Arial, sans-serif;
+}
+
+.login-card {
+  width: 400px;
+  margin-right: 5%;
+  background: rgba(255, 255, 255, 0.2); // translúcido
+  backdrop-filter: blur(12px); // efeito blur
+  -webkit-backdrop-filter: blur(12px); // compatibilidade
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.logo {
+  width: 150px; // Tamanho ideal para logo
+  height: auto;
+  max-width: 100%;
+  display: block;
+  margin: 0 auto 16px;
+  object-fit: contain; // Garante que não estoure
+}
+
+//h2 {
+//  margin-bottom: 1.5rem;
+//  font-weight: bold;
+//  color: #333;
+//}
