@@ -7,7 +7,7 @@ import { Contasreceber } from './pages/financeiro/contasreceber/contasreceber.co
 import { HomeComponent } from './pages/home/home.component';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'menu', pathMatch: 'full' },
+  { path: '',   redirectTo: 'login', pathMatch: 'full' },
 
   { path: 'login', component: LoginComponent },
 

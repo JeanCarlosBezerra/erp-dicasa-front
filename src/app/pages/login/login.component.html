@@ -1,16 +1,19 @@
-<div class="login-card">
-  
+<form [formGroup]="loginForm" (ngSubmit)="Logar()" class="login-card">
   <img src="assets/img/logo2.png" alt="Logo" class="logo" />
 
   <mat-form-field appearance="outline" class="w-100">
     <mat-label>Usuário</mat-label>
-    <input matInput [(ngModel)]="usuario" />
+    <input matInput formControlName="usuario" />
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="w-100">
     <mat-label>Senha</mat-label>
-    <input matInput type="password" [(ngModel)]="senha" />
+    <input matInput type="password" formControlName="senha" />
   </mat-form-field>
 
-  <button mat-raised-button color="primary" class="w-100" (click)="logar()">Entrar</button>
-</div>
+  <button mat-raised-button color="primary" class="w-100" type="submit">
+    Entrar
+  </button>
+
+  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+</form>

@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '@app/services/auth.service';
 import { Router } from '@angular/router';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-login',
@@ -19,34 +20,38 @@ import { Router } from '@angular/router';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
-    MatButtonModule
+    MatButtonModule,
+    ReactiveFormsModule
   ]
 })
 export class LoginComponent {
-  usuario = '';
-  senha = '';
+  loginForm: FormGroup;
+  errorMsg = '';
 
   constructor(
-    private authService: AuthService,
+    private fb: FormBuilder,
+    private auth: AuthService,
     private router: Router
-  ) {}
+  ) {
+    this.loginForm = this.fb.group({
+      usuario: ['', Validators.required],
+      senha:   ['', Validators.required],
+    });
+  }
 
-  logar() {
-  this.authService.login(this.usuario, this.senha).subscribe({
-    next: (res) => {
-      if (res.sucesso) {
-        localStorage.setItem('usuario', res.usuario.NOMEUSUARIO);
-        console.log('✅ Login bem-sucedido', res.usuario);
-        this.router.navigate(['/menu']); // ⬅ Aqui redireciona para a tela de menu
-      } else {
-        alert('❌ Usuário ou senha inválidos');
+  Logar() {
+    if (this.loginForm.invalid) return;
+    const { usuario, senha } = this.loginForm.value;
+
+    this.auth.login(usuario, senha).subscribe({
+      next: (res) => {
+        localStorage.setItem('access_token', res.access_token);
+        localStorage.setItem('usuario', usuario);
+        this.router.navigate(['/menu']);   // ← ajuste a rota correta
+      },
+      error: () => {
+        this.errorMsg = 'Usuário ou senha inválidos';
       }
-    },
-    error: (err) => {
-      console.error('❌ Erro ao tentar logar:', err);
-      alert('Erro de conexão com o servidor.');
-    }
-  });
-}
-  
+    });
+  }
 }
