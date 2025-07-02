@@ -1,0 +1,22 @@
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: url('/assets/img/background.jpg') center/cover no-repeat;
+  padding: 1rem;
+  color: white;
+
+  .filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+}
+
+.table-container {
+  margin: 1rem;
+}
+
+.full-width {
+  width: 100%;
+}

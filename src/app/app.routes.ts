@@ -5,6 +5,9 @@ import { DashboardComponent } from './pages/financeiro/dashboard/dashboard.compo
 import { FluxoCaixaComponent } from './pages/financeiro/fluxocaixa/fluxocaixa.component';
 import { Contasreceber } from './pages/financeiro/contasreceber/contasreceber.component';
 import { HomeComponent } from './pages/home/home.component';
+import { ColaboradorComponent } from './pages/comercial/colaborador/colaborador.component';
+import { Dashboard } from './pages/comercial/dashboard/dashboard.component';
+
 
 export const routes: Routes = [
   { path: '',   redirectTo: 'login', pathMatch: 'full' },
@@ -20,7 +23,16 @@ export const routes: Routes = [
       { path: 'fluxo-caixa', component: FluxoCaixaComponent },
       { path: 'contas-receber', component: Contasreceber }
     ]
-  }
+  },
+
+  {
+    path: 'comercial',
+    children: [
+      { path: 'dashboard',       component: Dashboard },
+      { path: 'colaborador',     component: ColaboradorComponent },
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
+    ]
+  },
 ];
 
 //export const routes: Routes = [

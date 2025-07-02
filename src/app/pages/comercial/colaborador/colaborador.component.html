@@ -1,0 +1,83 @@
+<div class="page-header">
+  <h2>Produtividade por Colaborador</h2>
+  <div class="filters">
+    <mat-form-field appearance="fill">
+        <mat-label>Data Início</mat-label>
+        <input matInput [matDatepicker]="dp1" [(ngModel)]="dataInicio">
+        <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
+        <mat-datepicker #dp1></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Data Fim</mat-label>
+      <input matInput [matDatepicker]="dp2" [(ngModel)]="dataFim">
+      <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+      <mat-datepicker #dp2></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Empresa</mat-label>
+      <mat-select [(ngModel)]="empresaFiltro">
+        <input type="number" [(ngModel)]="empresaFiltro">
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="carregar()">Filtrar</button>
+  </div>
+</div>
+
+<div class="table-container mat-elevation-z2">
+  <table mat-table [dataSource]="dataSource" class="full-width">
+
+    <!-- ID -->
+    <ng-container matColumnDef="idVendedor">
+      <th mat-header-cell *matHeaderCellDef>#</th>
+      <td mat-cell *matCellDef="let row">{{ row.idVendedor }}</td>
+    </ng-container>
+
+    <!-- Nome -->
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef>Nome</th>
+      <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
+    </ng-container>
+
+    <!-- Clientes -->
+    <ng-container matColumnDef="clientes">
+      <th mat-header-cell *matHeaderCellDef>Clientes</th>
+      <td mat-cell *matCellDef="let row">{{ row.clientes }}</td>
+    </ng-container>
+
+    <!-- Notas -->
+    <ng-container matColumnDef="notas">
+      <th mat-header-cell *matHeaderCellDef>Notas</th>
+      <td mat-cell *matCellDef="let row">{{ row.notas }}</td>
+    </ng-container>
+
+    <!-- Faturamento -->
+    <ng-container matColumnDef="faturamento">
+      <th mat-header-cell *matHeaderCellDef>Fatur. Líq</th>
+      <td mat-cell *matCellDef="let row">{{ row.faturamento | number:'1.2-2' }}</td>
+    </ng-container>
+
+    <!-- Lucro -->
+    <ng-container matColumnDef="lucro">
+      <th mat-header-cell *matHeaderCellDef>Lucro Líq</th>
+      <td mat-cell *matCellDef="let row">{{ row.lucro | number:'1.2-2' }}</td>
+    </ng-container>
+
+    <!-- Margem -->
+    <ng-container matColumnDef="margem">
+      <th mat-header-cell *matHeaderCellDef>%MG</th>
+      <td mat-cell *matCellDef="let row">{{ row.margem | number:'1.2-2' }}%</td>
+    </ng-container>
+
+    <!-- Devoluções -->
+    <ng-container matColumnDef="devolucoes">
+      <th mat-header-cell *matHeaderCellDef>Devol.</th>
+      <td mat-cell *matCellDef="let row">{{ row.devolucoes | number:'1.2-2' }}</td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
+  </table>
+</div>
