@@ -1,5 +1,5 @@
 <mat-sidenav-container class="sidenav-container">
-  <!-- Menu lateral -->
+  <!-- MENU LATERAL -->
   <mat-sidenav #sidenav mode="side" [opened]="opened" class="sidenav" [fixedInViewport]="true">
     <div class="sidenav-inner">
       <div class="logo">DiCasa</div>
@@ -18,8 +18,12 @@
             </mat-panel-title>
           </mat-expansion-panel-header>
           <div class="submenu-wrapper">
-            <button mat-button class="submenu-btn" routerLink="/pedidos-list">📄 Consultar</button>
-            <button mat-button class="submenu-btn" disabled>➕ Novo Pedido</button>
+            <button mat-button class="submenu-btn" routerLink="/menu/pedidos-list">
+              📄 Consultar
+            </button>
+            <button mat-button class="submenu-btn" disabled>
+              ➕ Novo Pedido
+            </button>
           </div>
         </mat-expansion-panel>
 
@@ -32,9 +36,13 @@
             </mat-panel-title>
           </mat-expansion-panel-header>
           <div class="submenu-wrapper">
-            <button mat-button class="submenu-btn" disabled>📦 Produtos</button>
-            <button mat-button class="submenu-btn" disabled>📝 Inventário</button>
-          </div>  
+            <button mat-button class="submenu-btn" disabled>
+              📦 Produtos
+            </button>
+            <button mat-button class="submenu-btn" disabled>
+              📝 Inventário
+            </button>
+          </div>
         </mat-expansion-panel>
 
         <!-- Financeiro -->
@@ -45,12 +53,17 @@
               Financeiro
             </mat-panel-title>
           </mat-expansion-panel-header>
-          <!-- Submenus alinhados verticalmente -->
-            <div class="submenu-wrapper">
-              <button mat-button class="submenu-btn" routerLink="dashboard">📊 Dashboard</button>
-              <button mat-button class="submenu-btn" disabled>📈 Fluxo de Caixa</button>
-              <button mat-button class="submenu-btn" disabled>💳 Contas a Receber</button>
-            </div>
+          <div class="submenu-wrapper">
+            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/dashboard">
+              📊 Dashboard
+            </button>
+            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/fluxo-caixa">
+              📈 Fluxo de Caixa
+            </button>
+            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/contas-receber">
+              💳 Contas a Receber
+            </button>
+          </div>
         </mat-expansion-panel>
 
         <!-- Comercial -->
@@ -61,34 +74,36 @@
               Comercial
             </mat-panel-title>
           </mat-expansion-panel-header>
-          <!-- Submenus alinhados verticalmente -->
           <div class="submenu-wrapper">
-            <button mat-button class="submenu-btn" routerLink="/comercial/dashboard">📊 Dashboard</button>
-            <button mat-button class="submenu-btn" routerLink="/comercial/colaborador">👤 Colaborador</button>
+            <button mat-button class="submenu-btn" routerLink="/menu/comercial/dashboard">
+              📊 Dashboard
+            </button>
+            <button mat-button class="submenu-btn" routerLink="/menu/comercial/colaborador">
+              👤 Colaborador
+            </button>
           </div>
         </mat-expansion-panel>
 
       </mat-accordion>
 
       <mat-divider></mat-divider>
-      
-    </div>
+
       <div class="logout-fixed">
         <button mat-flat-button color="warn" (click)="logout()">
           <mat-icon class="menu-icon">logout</mat-icon>
           Sair
         </button>
       </div>
+    </div>
   </mat-sidenav>
 
-  <!-- Conteúdo principal -->
+  <!-- CONTEÚDO PRINCIPAL -->
   <mat-sidenav-content class="main-content">
     <button class="menu-toggle" mat-icon-button (click)="toggleSidenav(sidenav)">
       <mat-icon>{{ menuIcon }}</mat-icon>
     </button>
 
-
+    <!-- É aqui que as rotas filhas do “/menu” vão renderizar -->
     <router-outlet></router-outlet>
-  
   </mat-sidenav-content>
 </mat-sidenav-container>

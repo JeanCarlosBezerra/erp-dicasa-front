@@ -10,39 +10,27 @@ import { Dashboard } from './pages/comercial/dashboard/dashboard.component';
 
 
 export const routes: Routes = [
-  { path: '',   redirectTo: 'login', pathMatch: 'full' },
-
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
 
   {
     path: 'menu',
     component: Menu,
     children: [
-      // … suas rotas de Home e Financeiro
+      // Home e Financeiro
       { path: 'home',           component: HomeComponent },
-      { path: 'dashboard',      component: DashboardComponent },
-      { path: 'fluxo-caixa',    component: FluxoCaixaComponent },
-      { path: 'contas-receber', component: Contasreceber },
+      { path: 'financeiro/dashboard',      component: DashboardComponent },
+      { path: 'financeiro/fluxo-caixa',    component: FluxoCaixaComponent },
+      { path: 'financeiro/contas-receber', component: Contasreceber },
 
-      // 3) agora suas rotas de Comercial também entram aqui
-      { path: 'comercial/dashboard',   component: Dashboard },
+      // Comercial agora também
+      { path: 'comercial/dashboard',   component: Dashboard /* renomeie se for ComercialDashboardComponent */ },
       { path: 'comercial/colaborador', component: ColaboradorComponent },
 
-      // você pode redirecionar “/menu” para “/menu/home” se quiser
-      { path: '', redirectTo: 'home', pathMatch: 'full' }
+      // Quando fizer `/menu` sem nada, redirecione para home
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
     ]
-  },
-
-  //{
-  //  path: 'comercial',
-  //  children: [
-  //    { path: 'dashboard',       component: Dashboard },
-  //    { path: 'colaborador',     component: ColaboradorComponent },
-  //    { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
-  //  ]
-  //},
+  }
 ];
 
-//export const routes: Routes = [
- // { path: '', component: LoginComponent }, // rota raiz/
-//];
+
