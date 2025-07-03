@@ -20,21 +20,14 @@
       <input matInput type="number" [(ngModel)]="empresaFiltro">
     </mat-form-field>
 
-    <button
-      type="button"
-      mat-raised-button
-      color="primary"
-      (click)="carregar()"
-      >
-      Filtrar
-    </button>
+    <button mat-raised-button color="primary" (click)="carregar()">Filtrar</button>
   </div>
 </div>
 
 <div class="table-container mat-elevation-z2">
   <table mat-table [dataSource]="dataSource" class="full-width">
 
-    <!-- ID -->
+    <!-- # -->
     <ng-container matColumnDef="idVendedor">
       <th mat-header-cell *matHeaderCellDef>#</th>
       <td mat-cell *matCellDef="let row">{{ row.idVendedor }}</td>
@@ -46,37 +39,36 @@
       <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
     </ng-container>
 
-    <!-- Quantidade de Vendas -->
+    <!-- Vendas (qtdvenda) -->
     <ng-container matColumnDef="qtdvenda">
       <th mat-header-cell *matHeaderCellDef>Vendas</th>
       <td mat-cell *matCellDef="let row">{{ row.qtdvenda }}</td>
     </ng-container>
 
-    <!-- Faturamento Líquido -->
+    <!-- Fatur. Líq -->
     <ng-container matColumnDef="faturamento">
       <th mat-header-cell *matHeaderCellDef>Fatur. Líq</th>
       <td mat-cell *matCellDef="let row">{{ row.faturamento | number:'1.2-2' }}</td>
     </ng-container>
 
-    <!-- Lucro Líquido -->
+    <!-- Lucro Líq -->
     <ng-container matColumnDef="lucro">
       <th mat-header-cell *matHeaderCellDef>Lucro Líq</th>
       <td mat-cell *matCellDef="let row">{{ row.lucro | number:'1.2-2' }}</td>
     </ng-container>
 
-    <!-- Margem % -->
+    <!-- %MG -->
     <ng-container matColumnDef="margem">
       <th mat-header-cell *matHeaderCellDef>%MG</th>
       <td mat-cell *matCellDef="let row">{{ row.margem | number:'1.2-2' }}%</td>
     </ng-container>
 
-    <!-- Devoluções -->
+    <!-- Devol. -->
     <ng-container matColumnDef="devolucoes">
       <th mat-header-cell *matHeaderCellDef>Devol.</th>
       <td mat-cell *matCellDef="let row">{{ row.devolucoes | number:'1.2-2' }}</td>
     </ng-container>
 
-    <!-- cabeçalho e linhas -->
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
   </table>
