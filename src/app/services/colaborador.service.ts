@@ -5,14 +5,12 @@ import { Observable } from 'rxjs';
 export interface ColaboradorProdutividade {
   idVendedor: number;
   nome:       string;
-  clientes:   number;
-  notas:      number;
+  qtdvenda:   number;
   faturamento:number;
   lucro:      number;
   margem:     number;
   devolucoes: number;
 }
-
 @Injectable({ providedIn: 'root' })
 export class ColaboradorService {
   constructor(private http: HttpClient) {}
