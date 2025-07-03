@@ -45,8 +45,7 @@ export class ColaboradorComponent implements OnInit {
   displayedColumns = [
     'idVendedor',
     'nome',
-    'clientes',
-    'notas',
+    'qtdvenda',
     'faturamento',
     'lucro',
     'margem',
