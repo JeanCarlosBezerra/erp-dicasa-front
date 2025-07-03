@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface ColaboradorProdutividade {
   idVendedor: number;
@@ -25,7 +26,7 @@ export class ColaboradorService {
         .set('dataInicio', dataInicio)
         .set('dataFim',    dataFim);
       return this.http.get<ColaboradorProdutividade[]>(
-        '/api/comercial/colaborador/produtividade',
+        `${environment.apiUrl}/comercial/colaborador/produtividade`,
         { params }
       );
     }
