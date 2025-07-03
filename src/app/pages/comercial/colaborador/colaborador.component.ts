@@ -73,10 +73,10 @@ export class ColaboradorComponent implements OnInit {
     const emp = Number(this.empresaFiltro);
     console.log('filtrando…', this.empresaFiltro, this.dataInicio, this.dataFim);
 
-    this.svc
-      .produtividade(emp, d1, d2)
-      .subscribe((rows: ColaboradorProdutividade[]) => {
-        this.dataSource.data = rows;
-      });
+    this.svc.produtividade(emp, d1, d2)
+    .subscribe({
+      next: rows => { this.dataSource.data = rows; },
+      error: err => { /* já logado no service */ }
+    });
   }
 }
