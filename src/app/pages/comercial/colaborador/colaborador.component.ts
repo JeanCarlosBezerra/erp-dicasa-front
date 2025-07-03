@@ -71,6 +71,7 @@ export class ColaboradorComponent implements OnInit {
     const d2 = this.dataFim   .toISOString().slice(0,10);
 
     const emp = Number(this.empresaFiltro);
+    console.log('filtrando…', this.empresaFiltro, this.dataInicio, this.dataFim);
 
     this.svc
       .produtividade(emp, d1, d2)
