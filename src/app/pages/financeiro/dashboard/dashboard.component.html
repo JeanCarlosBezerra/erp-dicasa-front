@@ -124,15 +124,15 @@
     <table mat-table [dataSource]="receberDataSource" class="mat-elevation-z1">
 
       <!-- ID -->
-      <ng-container matColumnDef="idclifor">
+      <ng-container matColumnDef="idctadebito">
         <th mat-header-cell *matHeaderCellDef> ID </th>
-        <td mat-cell *matCellDef="let r"> {{ r.idclifor }} </td>
+        <td mat-cell *matCellDef="let r"> {{ r.idctadebito }} </td>
       </ng-container>
 
       <!-- Cliente -->
-      <ng-container matColumnDef="nome">
-        <th mat-header-cell *matHeaderCellDef> Cliente </th>
-        <td mat-cell *matCellDef="let r"> {{ r.nome }} </td>
+      <ng-container matColumnDef="descrctadebito">
+        <th mat-header-cell *matHeaderCellDef> Conta Contábil </th>
+        <td mat-cell *matCellDef="let r"> {{ r.descrctadebito }} </td>
       </ng-container>
 
       <!-- Valor -->
@@ -151,8 +151,8 @@
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="colunasReceber"></tr>
-      <tr mat-row *matRowDef="let r; columns: colunasReceber"></tr>
+      <tr mat-header-row *matHeaderRowDef="colunasReceberCTA"></tr>
+      <tr mat-row *matRowDef="let r; columns: colunasReceberCTA"></tr>
     </table>
 
     <div class="totals-row">

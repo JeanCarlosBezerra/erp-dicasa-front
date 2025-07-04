@@ -53,7 +53,7 @@ export class DashboardComponent implements AfterViewInit{
   colunasPagar   = ['idclifor','nome','valtitulo','sumvalpagamentotitulo'];
   apagarDataSource   = new MatTableDataSource<ContasPagar>([]);
 
-  colunasReceber = ['idclifor','nome','valtitulo','sumvalpagamentotitulo'];
+  colunasReceberCTA = ['idctadebito','descrctadebito','valtitulo','sumvalpagamentotitulo'];
   receberDataSource = new MatTableDataSource<ContasReceber>([]);
 
   displayedColumns = ['idclifor','cliente','valsaldotitulo','diaspgto'];
@@ -166,8 +166,15 @@ console.log('AQUI ENTROU →');
       valtitulo:           r['valtitulo'],
       sumvalpagamentotitulo:  r['sumvalpagamentotitulo']
       }));
+
+      const ContasReceberCTA = receber.map(r => ({
+      idctadebito:      r['idctadebito'],
+      descrctadebito:         r['descrctadebito'],
+      valtitulo:           r['valtitulo'],
+      sumvalpagamentotitulo:  r['sumvalpagamentotitulo']
+      }));
       this.apagarDataSource.data = ContasPagar;
-      this.receberDataSource.data = receber;
+      this.receberDataSource.data = ContasReceberCTA;
     
       this.totalPagamentosPrevistos     = pagar.reduce((s, c) => s + Number(c.valtitulo), 0);
       this.totalPagamentosRealizados    = pagar.reduce((s, c) => s + Number(c.sumvalpagamentotitulo), 0);

@@ -26,8 +26,8 @@ export interface ContasPagar {
 }
 
 export interface ContasReceber {
-    idclifor: number;
-    nome: string;
+    idctadebito: number;
+    descrctadebito: string;
     valtitulo: number;
     sumvalpagamentotitulo: number;
 }
