@@ -1,1 +1,23 @@
-<p>permissoes works!</p>
+<form [formGroup]="form">
+  <mat-accordion>
+    <mat-expansion-panel *ngFor="let mod of modules">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ displayName(mod) }}</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>Grupos autorizados</mat-label>
+        <!-- aqui! -->
+        <mat-select [formControlName]="mod" multiple>
+          <mat-option *ngFor="let grp of allGroups" [value]="grp">
+            {{ shortName(grp) }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-raised-button color="primary" (click)="save(mod)">
+        Salvar
+      </button>
+    </mat-expansion-panel>
+  </mat-accordion>
+</form>
