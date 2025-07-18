@@ -175,7 +175,7 @@ console.log('AQUI ENTROU →');
       }));
       this.apagarDataSource.data = ContasPagar;
       this.receberDataSource.data = ContasReceberCTA;
-    
+     
       this.totalPagamentosPrevistos     = pagar.reduce((s, c) => s + Number(c.valtitulo), 0);
       this.totalPagamentosRealizados    = pagar.reduce((s, c) => s + Number(c.sumvalpagamentotitulo), 0);
 

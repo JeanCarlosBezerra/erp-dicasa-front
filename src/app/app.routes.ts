@@ -8,7 +8,6 @@ import { HomeComponent } from './pages/home/home.component';
 import { ColaboradorComponent } from './pages/comercial/colaborador/colaborador.component';
 import { Dashboard } from './pages/comercial/dashboard/dashboard.component';
 
-
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
@@ -30,7 +29,13 @@ export const routes: Routes = [
       // Quando fizer `/menu` sem nada, redirecione para home
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ]
-  }
+  },
+   {
+    path: 'settings',
+    loadChildren: () =>
+      import('./settings/settings.module').then(m => m.SettingsModule),
+  },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
 ];
 
 

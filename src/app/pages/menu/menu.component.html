@@ -84,6 +84,27 @@
           </div>
         </mat-expansion-panel>
 
+        <ng-container *ngIf="authService.hasGroup('cn=administradores,cn=builtin,dc=dicasa,dc=lan')">
+          <mat-expansion-panel class="config-panel">
+            <mat-expansion-panel-header>
+              <mat-icon>settings</mat-icon>
+              <span>Configurações</span>
+            </mat-expansion-panel-header>
+              <a mat-list-item (click)="go('/settings/permissions')">
+                <mat-icon>security</mat-icon>
+                <span>Permissões</span>
+              </a>
+              <a mat-list-item (click)="go('/settings/taxas')">
+                <mat-icon>attach_money</mat-icon>
+                <span>Taxas</span>
+              </a>
+              <a mat-list-item (click)="go('/settings/geral')">
+                <mat-icon>tune</mat-icon>
+                <span>Geral</span>
+              </a>
+          </mat-expansion-panel>
+        </ng-container>
+
       </mat-accordion>
 
       <mat-divider></mat-divider>

@@ -8,7 +8,7 @@ import { ThemeService } from '../../services/theme.service';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
-
+import { AuthService } from '../../services/auth.service';  // ajuste o path
 
 @Component({
   selector: 'app-menu',
@@ -30,7 +30,12 @@ export class Menu {
   menuIcon: string = 'menu';
   opened: boolean = window.innerWidth > 768; 
 
-  constructor(private router: Router, private themeService: ThemeService) {}
+  constructor(public authService: AuthService, private router: Router, private themeService: ThemeService) {}
+
+  go(path: string) {
+    this.router.navigateByUrl(path);
+  }
+  
   ngOnInit() {
     this.usuario = localStorage.getItem('usuario') ?? 'Usuário';
   }

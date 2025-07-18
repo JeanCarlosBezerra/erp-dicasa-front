@@ -1,18 +1,45 @@
-import { HttpClient } from '@angular/common/http';
+// src/app/services/auth.service.ts
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = `${environment.apiUrl}/auth/login`; // ajuste se necessário
 
   constructor(private http: HttpClient) {}
+  // pega o token (supondo JWT em localStorage)
+  private get token(): string | null {
+    return localStorage.getItem('access_token');
+  }
 
-  login(usuario: string, senha: string): Observable<any> {
-    console.log('chamando ', this.apiUrl);
-    return this.http.post<any>(this.apiUrl, { usuario, senha });
+  login(user: string, pass: string): Observable<{ access_token: string }> {
+    return this.http.post<{ access_token: string }>(
+      '/auth/login',
+      { usuario: user, senha: pass }
+    );
+  }
+
+  // decodifica o payload do JWT
+  private get payload(): any {
+    if (!this.token) return {};
+    try {
+      return JSON.parse(atob(this.token.split('.')[1]));
+    } catch {
+      return {};
+    }
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.token;
+  }
+
+  // expõe os grupos vindos do AD via JWT
+  get userGroups(): string[] {
+    return this.payload.grupos || [];
+  }
+
+  // checa se o usuário pertence ao grupo DN
+  hasGroup(dn: string): boolean {
+    return this.userGroups.includes(dn);
   }
 }
