@@ -7,6 +7,7 @@ import { MatExpansionModule }                  from '@angular/material/expansion
 import { MatFormFieldModule }                  from '@angular/material/form-field';
 import { MatSelectModule }                     from '@angular/material/select';
 import { MatOptionModule }                     from '@angular/material/core';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -28,6 +29,7 @@ export class PermissoesComponent implements OnInit {
   modules:   string[]   = [];
   allGroups: string[]   = [];
   form:      FormGroup = new FormGroup({});    // <— sem generics aqui
+  private api = environment.apiUrl;
 
   constructor(
     private http:  HttpClient,
@@ -35,29 +37,22 @@ export class PermissoesComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // busca o map de permissões
     this.http
-      .get<Record<string,string[]>>('/settings/permissions')
-      .subscribe(obj => {
-        this.modules = Object.keys(obj);
-        for (const [mod, grps] of Object.entries(obj)) {
-          // agora addControl encaixa sem reclamar
-          this.form.addControl(mod, new FormControl(grps));
-        }
-      });
+      .get<Record<string,string[]>>(`${this.api}/settings/permissions`)
+      .subscribe(obj => { });
 
+    // carrega todos os grupos AD
     this.http
-      .get<string[]>('/settings/ad-groups')
+      .get<string[]>(`${this.api}/settings/ad-groups`)
       .subscribe(gs => this.allGroups = gs);
   }
 
   save(mod: string) {
-    // e aqui pegamos valor também de forma simples
-    const groups = this.form.get(mod)?.value as string[] || [];
+    const groups = this.form.value[mod] as string[];
     this.http
-      .put(`/settings/permissions/${mod}`, { groups })
-      .subscribe(() => {
-        this.snack.open(`Permissões de ${mod} salvas.`, 'OK', { duration:2000 });
-      });
+      .put(`${this.api}/settings/permissions/${mod}`, { groups })
+      .subscribe(() => this.snack.open(`Permissões de ${mod} atualizadas`, 'OK'));
   }
 
   shortName(dn: string): string {
