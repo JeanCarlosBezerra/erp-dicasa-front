@@ -86,21 +86,32 @@
           </mat-expansion-panel>
       
         <!-- Configurações (igual ao Comercial) -->
-        <mat-expansion-panel class="config-panel">
-          <mat-expansion-panel-header class="menu-btn">
-            <mat-panel-title>
-              ⚙️ Configurações
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-        
-          <div class="submenu-wrapper">
-            <button mat-button class="submenu-btn" (click)="go('/settings/permissions')">
-              🛡️ Permissões
-            </button>
-            <button mat-button class="submenu-btn" (click)="go('/settings/geral')">
-              ⚙️ Geral
-            </button>
-          </div>
+       <mat-expansion-panel class="config-panel">
+         <mat-expansion-panel-header class="menu-btn">
+           <mat-panel-title>
+             ⚙️ Configurações
+           </mat-panel-title>
+         </mat-expansion-panel-header>
+       
+         <div class="submenu-wrapper">
+           <button
+             mat-button
+             class="submenu-btn"
+             routerLink="/menu/settings/permissions"
+             routerLinkActive="active-submenu"
+           >
+             🛡️ Permissões
+           </button>
+         
+           <button
+             mat-button
+             class="submenu-btn"
+             routerLink="/menu/settings/geral"
+             routerLinkActive="active-submenu"
+           >
+             ⚙️ Geral
+           </button>
+         </div>
         </mat-expansion-panel>
       </mat-accordion>
 

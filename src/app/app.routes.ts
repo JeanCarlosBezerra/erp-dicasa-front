@@ -26,15 +26,18 @@ export const routes: Routes = [
       { path: 'comercial/dashboard',   component: Dashboard /* renomeie se for ComercialDashboardComponent */ },
       { path: 'comercial/colaborador', component: ColaboradorComponent },
 
+      {
+        path: 'settings',
+        loadChildren: () =>
+          import('./settings/settings.module').then(m => m.SettingsModule),
+      },
+
       // Quando fizer `/menu` sem nada, redirecione para home
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ]
   },
-   {
-    path: 'settings',
-    loadChildren: () =>
-      import('./settings/settings.module').then(m => m.SettingsModule),
-  },
+    // se alguém tentar /settings diretamente, redireciona pra /menu/settings
+  { path: 'settings', redirectTo: 'menu/settings', pathMatch: 'full' },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
 ];
 
