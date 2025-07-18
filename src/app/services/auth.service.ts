@@ -2,11 +2,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
   constructor(private http: HttpClient) {}
+
+  private api = environment.apiUrl;  // defina em environment.ts → apiUrl: 'http://localhost:3000'
   // pega o token (supondo JWT em localStorage)
   private get token(): string | null {
     return localStorage.getItem('access_token');
