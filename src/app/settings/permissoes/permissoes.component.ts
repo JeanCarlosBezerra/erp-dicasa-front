@@ -37,22 +37,27 @@ export class PermissoesComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // busca o map de permissões
     this.http
       .get<Record<string,string[]>>(`${this.api}/settings/permissions`)
-      .subscribe(obj => { });
+      .subscribe(obj => {
+        this.modules = Object.keys(obj);
+        for (const [mod, grps] of Object.entries(obj)) {
+          this.form.addControl(mod, new FormControl(grps));
+        }
+      });
 
-    // carrega todos os grupos AD
     this.http
       .get<string[]>(`${this.api}/settings/ad-groups`)
-      .subscribe(gs => this.allGroups = gs);
+      .subscribe(gs => (this.allGroups = gs));
   }
 
   save(mod: string) {
     const groups = this.form.value[mod] as string[];
     this.http
       .put(`${this.api}/settings/permissions/${mod}`, { groups })
-      .subscribe(() => this.snack.open(`Permissões de ${mod} atualizadas`, 'OK'));
+      .subscribe(() => {
+        this.snack.open(`Permissões de ${mod} atualizadas ✨`, 'OK', { duration: 2_000 });
+      });
   }
 
   shortName(dn: string): string {
