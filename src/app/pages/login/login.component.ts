@@ -42,7 +42,7 @@ export class LoginComponent {
   Logar() {
     if (this.loginForm.invalid) return;
     const { usuario, senha } = this.loginForm.value;
-
+    
     this.auth.login(usuario, senha).subscribe({
       next: (res) => {
         localStorage.setItem('access_token', res.access_token);

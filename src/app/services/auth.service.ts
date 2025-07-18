@@ -17,10 +17,10 @@ export class AuthService {
 
   login(user: string, pass: string): Observable<{ access_token: string }> {
     return this.http.post<{ access_token: string }>(
-      '/auth/login',
+      `${this.api}/auth/login`,
       { usuario: user, senha: pass }
-    );
-  }
+  );
+}
 
   // decodifica o payload do JWT
   private get payload(): any {
