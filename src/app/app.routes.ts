@@ -36,8 +36,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'home', pathMatch: 'full' },
     ]
   },
-    // se alguém tentar /settings diretamente, redireciona pra /menu/settings
-  { path: 'settings', redirectTo: 'menu/settings', pathMatch: 'full' },
+
   { path: '', redirectTo: '/home', pathMatch: 'full' },
 ];
 

@@ -95,22 +95,22 @@
        
          <div class="submenu-wrapper">
            <button
-             mat-button
-             class="submenu-btn"
-             routerLink="/menu/settings/permissions"
-             routerLinkActive="active-submenu"
-           >
-             🛡️ Permissões
-           </button>
-         
-           <button
-             mat-button
-             class="submenu-btn"
-             routerLink="/menu/settings/geral"
-             routerLinkActive="active-submenu"
-           >
-             ⚙️ Geral
-           </button>
+            mat-button
+            class="submenu-btn"
+            [routerLink]="['settings','permissions']"
+            routerLinkActive="active-submenu"
+          >
+            🛡️ Permissões
+          </button>
+        
+          <button
+            mat-button
+            class="submenu-btn"
+            [routerLink]="['settings','geral']"
+            routerLinkActive="active-submenu"
+          >
+            ⚙️ Geral
+          </button>
          </div>
         </mat-expansion-panel>
       </mat-accordion>
