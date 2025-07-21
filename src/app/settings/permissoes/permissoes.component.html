@@ -1,5 +1,5 @@
 <form *ngIf="form" [formGroup]="form">
-  <mat-accordion>
+  <mat-accordion *ngIf="modules.length > 0">
     <!-- painel de roles -->
     <mat-expansion-panel *ngFor="let role of roles">
       <mat-expansion-panel-header>

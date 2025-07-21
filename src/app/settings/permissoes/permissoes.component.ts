@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
+import { environment } from '../../../environments/environment';
 
 interface PermissionsConfig {
   roles: Record<string, string[]>;
@@ -39,6 +40,8 @@ export class PermissoesComponent implements OnInit {
 
   form!: FormGroup;
 
+  private api = environment.apiUrl;
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
@@ -46,7 +49,7 @@ export class PermissoesComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.http.get<PermissionsConfig>('/settings/permissions')
+    this.http.get<PermissionsConfig>(`${this.api}/settings/permissions`)
       .subscribe(cfg => {
         this.config    = cfg;
         this.roles     = Object.keys(cfg.roles);
