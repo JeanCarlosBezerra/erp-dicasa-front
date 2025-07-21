@@ -1,23 +1,53 @@
-<form [formGroup]="form">
-  <mat-accordion>
-    <mat-expansion-panel *ngFor="let mod of modules">
+<mat-accordion>
+  <!-- painel de Roles -->
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title> Papéis (roles) </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <mat-expansion-panel *ngFor="let role of roles">
       <mat-expansion-panel-header>
-        <mat-panel-title>{{ displayName(mod) }}</mat-panel-title>
+        <mat-panel-title>{{ role | titlecase }}</mat-panel-title>
       </mat-expansion-panel-header>
 
       <mat-form-field appearance="fill" class="w-100">
-        <mat-label>Grupos autorizados</mat-label>
-        <!-- aqui! -->
-        <mat-select [formControlName]="mod" multiple>
-          <mat-option *ngFor="let grp of allGroups" [value]="grp">
-            {{ shortName(grp) }}
+        <mat-label>Módulos permitidos</mat-label>
+        <mat-select [formControlName]="role" multiple>
+          <mat-option *ngFor="let mod of modules" [value]="mod">
+            {{ displayModule(mod) }}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
-      <button mat-raised-button color="primary" (click)="save(mod)">
-        Salvar
+      <button mat-flat-button color="primary" (click)="saveRole(role)">
+        Salvar papéis
       </button>
     </mat-expansion-panel>
-  </mat-accordion>
-</form>
+  </mat-expansion-panel>
+
+  <!-- painel de Groups -->
+  <mat-expansion-panel>
+    <mat-expansion-panel-header>
+      <mat-panel-title> Grupos AD </mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <mat-expansion-panel *ngFor="let grp of allGroups">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ shortGroup(grp) }}</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <mat-form-field appearance="fill" class="w-100">
+        <mat-label>Papéis atribuídos</mat-label>
+        <mat-select [formControlName]="grp" multiple>
+          <mat-option *ngFor="let role of roles" [value]="role">
+            {{ role }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-flat-button color="accent" (click)="saveGroup(grp)">
+        Salvar grupos
+      </button>
+    </mat-expansion-panel>
+  </mat-expansion-panel>
+</mat-accordion>

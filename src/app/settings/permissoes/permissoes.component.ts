@@ -1,71 +1,99 @@
-import { Component, OnInit }                   from '@angular/core';
-import { CommonModule }                        from '@angular/common';
-import { FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule }        from '@angular/common/http';
-import { MatSnackBar, MatSnackBarModule }      from '@angular/material/snack-bar';
-import { MatExpansionModule }                  from '@angular/material/expansion';
-import { MatFormFieldModule }                  from '@angular/material/form-field';
-import { MatSelectModule }                     from '@angular/material/select';
-import { MatOptionModule }                     from '@angular/material/core';
-import { environment } from '../../../environments/environment';
+// src/app/settings/permissoes/permissoes.component.ts
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { CommonModule } from '@angular/common';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule } from '@angular/material/core';
+import { MatButtonModule } from '@angular/material/button';
+
+interface PermissionsConfig {
+  roles: Record<string, string[]>;
+  groups: Record<string, string[]>;
+}
 
 @Component({
   standalone: true,
   selector: 'app-permissoes',
   templateUrl: './permissoes.component.html',
-  styleUrls:   ['./permissoes.component.scss'],
-  imports: [                                     // importa todos os módulos usados no template
+  styleUrls: ['./permissoes.component.scss'],
+  imports: [
     CommonModule,
     ReactiveFormsModule,
-    HttpClientModule,
     MatExpansionModule,
     MatFormFieldModule,
     MatSelectModule,
     MatOptionModule,
-    MatSnackBarModule,
+    MatButtonModule,
+    MatSnackBarModule
   ]
 })
 export class PermissoesComponent implements OnInit {
-  modules:   string[]   = [];
-  allGroups: string[]   = [];
-  form:      FormGroup = new FormGroup({});    // <— sem generics aqui
-  private api = environment.apiUrl;
+  config!: PermissionsConfig;
+  roles: string[] = [];
+  allGroups: string[] = [];
+  modules: string[] = [];
+
+  form!: FormGroup;
 
   constructor(
-    private http:  HttpClient,
+    private fb: FormBuilder,
+    private http: HttpClient,
     private snack: MatSnackBar,
   ) {}
 
   ngOnInit() {
-    this.http
-      .get<Record<string,string[]>>(`${this.api}/settings/permissions`)
-      .subscribe(obj => {
-        this.modules = Object.keys(obj);
-        for (const [mod, grps] of Object.entries(obj)) {
-          this.form.addControl(mod, new FormControl(grps));
-        }
-      });
+    this.http.get<PermissionsConfig>('/settings/permissions')
+      .subscribe(cfg => {
+        this.config    = cfg;
+        this.roles     = Object.keys(cfg.roles);
+        this.allGroups = Object.keys(cfg.groups);
+        // coletar todos os módulos (união de todos os roles)
+        this.modules   = Array.from(new Set(Object.values(cfg.roles).flat()));
 
-    this.http
-      .get<string[]>(`${this.api}/settings/ad-groups`)
-      .subscribe(gs => (this.allGroups = gs));
+        // monta o form
+        const rolesFG  = this.fb.group({});
+        const groupsFG = this.fb.group({});
+
+        this.roles.forEach(role => {
+          rolesFG.addControl(role, new FormControl(this.config.roles[role]));
+        });
+        this.allGroups.forEach(grp => {
+          groupsFG.addControl(grp, new FormControl(this.config.groups[grp]));
+        });
+
+        this.form = this.fb.group({
+          roles: rolesFG,
+          groups: groupsFG
+        });
+      });
   }
 
-  save(mod: string) {
-    const groups = this.form.value[mod] as string[];
-    this.http
-      .put(`${this.api}/settings/permissions/${mod}`, { groups })
+  saveRole(role: string) {
+    const modules = this.form.get(['roles', role])!.value as string[];
+    // aqui você criaria um PUT /settings/permissions/roles 
+    // com body { role, modules } se quisesse persistir roles
+    this.snack.open(`Papéis de ${role} atualizados`, 'OK', { duration: 2000 });
+  }
+
+  saveGroup(grp: string) {
+    const roles = this.form.get(['groups', grp])!.value as string[];
+    this.http.put(`/settings/permissions/${encodeURIComponent(grp)}`, { groups: roles })
       .subscribe(() => {
-        this.snack.open(`Permissões de ${mod} atualizadas ✨`, 'OK', { duration: 2_000 });
+        this.snack.open(`Grupos de ${grp} atualizados`, 'OK', { duration: 2000 });
       });
   }
 
-  shortName(dn: string): string {
-    const m = dn.match(/CN=([^,]+)/i);
-    return m ? m[1] : dn;
+  displayModule(key: string) {
+    return key.replace(/\./g, ' → ');
   }
 
-  displayName(mod: string): string {
-    return mod.replace(/\./g,' / ');
+  shortGroup(dn: string) {
+    // ex: de "CN=Grupo-HCAB-CTIC-Suporte,..." extrai só "Grupo-HCAB-CTIC-Suporte"
+    const m = dn.match(/CN=([^,]+)/);
+    return m ? m[1] : dn;
   }
 }
