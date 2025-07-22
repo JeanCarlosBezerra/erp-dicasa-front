@@ -75,25 +75,47 @@ export class PermissoesComponent implements OnInit {
       });
   }
 
-  saveRole(role: string) {
+saveRole(role: string) {
     const modules = this.form.get(['roles', role])!.value as string[];
-    this.http.put(
-      `${this.api}/settings/permissions/roles/${encodeURIComponent(role)}`,
-      { modules }
-    ).subscribe(() => {
-      this.snack.open(`Papéis de "${role}" atualizados`, 'OK', { duration: 2000 });
-    });
+    this.http
+      .put(
+        `${this.api}/settings/permissions/roles/${encodeURIComponent(role)}`,
+        { modules },
+      )
+      .subscribe({
+        next: () =>
+          this.snack.open(`Papéis de ${role} atualizados`, 'OK', { duration: 2000 }),
+        error: err =>
+          this.snack.open(
+            `Erro ao atualizar papéis de ${role}: ${err.message}`,
+            'OK',
+            { duration: 3000 },
+          ),
+      });
   }
 
   saveGroup(grp: string) {
-    const roles = this.form.get(['groups', grp])!.value as string[];
-    this.http.put(
+  const roles = this.form.get(['groups', grp])!.value as string[];
+  this.http
+    .put(
       `${this.api}/settings/permissions/groups/${encodeURIComponent(grp)}`,
-      { roles }
-    ).subscribe(() => {
-      this.snack.open(`Grupos de "${this.shortGroup(grp)}" atualizados`, 'OK', { duration: 2000 });
+      { roles },
+    )
+    .subscribe({
+      next: () =>
+        this.snack.open(
+          `Grupos de ${this.shortGroup(grp)} atualizados`,
+          'OK',
+          { duration: 2000 },
+        ),
+      error: err =>
+        this.snack.open(
+          `Erro ao atualizar grupos de ${this.shortGroup(grp)}: ${err.message}`,
+          'OK',
+          { duration: 3000 },
+        ),
     });
-  }
+}
 
   displayModule(key: string) {
     return key.replace(/\./g, ' → ');
