@@ -1,39 +1,47 @@
 <form [formGroup]="form">
-  <mat-accordion>
+  <!-- 1) Bloco de Papéis -->
+  <div formGroupName="roles">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let role of roles">
+        <mat-expansion-panel-header>
+          <mat-panel-title>Papéis ({{ role }})</mat-panel-title>
+        </mat-expansion-panel-header>
 
-    <!-- bloco de papéis -->
-    <mat-expansion-panel *ngFor="let role of roles">
-      <mat-expansion-panel-header>
-        <mat-panel-title>Papéis ({{ role }})</mat-panel-title>
-      </mat-expansion-panel-header>
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Módulos permitidos</mat-label>
+          <!-- aqui estamos dentro de formGroup.roles -->
+          <mat-select formControlName="{{ role }}" multiple>
+            <mat-option *ngFor="let mod of modules" [value]="mod">
+              {{ displayModule(mod) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-      <mat-form-field appearance="fill" class="w-100">
-        <mat-label>Módulos permitidos</mat-label>
-        <mat-select [formControlName]="role" multiple>
-          <mat-option *ngFor="let mod of modules" [value]="mod">
-            {{ displayModule(mod) }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </mat-expansion-panel>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
 
-    <!-- bloco de grupos -->
-    <mat-expansion-panel *ngFor="let grp of allGroups">
-      <mat-expansion-panel-header>
-        <mat-panel-title>Grupos ({{ shortGroup(grp) }})</mat-panel-title>
-      </mat-expansion-panel-header>
+  <!-- 2) Bloco de Grupos -->
+  <div formGroupName="groups">
+    <mat-accordion>
+      <mat-expansion-panel *ngFor="let grp of allGroups">
+        <mat-expansion-panel-header>
+          <mat-panel-title>Grupos ({{ shortGroup(grp) }})</mat-panel-title>
+        </mat-expansion-panel-header>
 
-      <mat-form-field appearance="fill" class="w-100">
-        <mat-label>Papéis atribuídos</mat-label>
-        <mat-select [formControlName]="grp" multiple>
-          <mat-option *ngFor="let role of roles" [value]="role">
-            {{ role }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-    </mat-expansion-panel>
+        <mat-form-field appearance="fill" class="w-100">
+          <mat-label>Papéis atribuídos</mat-label>
+          <!-- aqui estamos dentro de formGroup.groups -->
+          <mat-select formControlName="{{ grp }}" multiple>
+            <mat-option *ngFor="let role of roles" [value]="role">
+              {{ role }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
 
-  </mat-accordion>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </div>
 
   <button mat-raised-button color="primary" (click)="saveAll()">
     Salvar tudo
