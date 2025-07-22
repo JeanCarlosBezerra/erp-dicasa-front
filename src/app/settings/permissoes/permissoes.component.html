@@ -10,7 +10,7 @@
         <mat-form-field appearance="fill" class="w-100">
           <mat-label>Módulos permitidos</mat-label>
           <!-- aqui estamos dentro de formGroup.roles -->
-          <mat-select formControlName="{{ role }}" multiple>
+          <mat-select [formControlName]="role" multiple>
             <mat-option *ngFor="let mod of modules" [value]="mod">
               {{ displayModule(mod) }}
             </mat-option>
@@ -32,7 +32,7 @@
         <mat-form-field appearance="fill" class="w-100">
           <mat-label>Papéis atribuídos</mat-label>
           <!-- aqui estamos dentro de formGroup.groups -->
-          <mat-select formControlName="{{ grp }}" multiple>
+          <mat-select [formControlName]="grp" multiple>
             <mat-option *ngFor="let role of roles" [value]="role">
               {{ role }}
             </mat-option>
