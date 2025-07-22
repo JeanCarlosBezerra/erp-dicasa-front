@@ -1,22 +1,28 @@
 /* permissions.component.scss */
 
-/* 1) Garante que a `mat-expansion-panel-header` tenha fundo clarinho */
+/* o fundo clarinho continua */
 :host ::ng-deep .mat-expansion-panel-header {
-  background-color: #fafafa;
+  background-color: #fafafa !important;
 }
 
-/* 2) Deixa o título do painel (o "Papéis atribuídos", "Comercial", etc.) em cor escura */
+/* o texto do panel-title (aqui “comercial”, “financeiro”, etc.) */
+:host ::ng-deep .mat-expansion-panel-header .mat-expansion-panel-header-title {
+  color: rgba(0, 0, 0, 0.87) !important;
+  font-weight: 600; /* opcional, deixa o título mais destacado */
+}
+
+/* só para garantir que o conteúdo interno também fique legível */
 :host ::ng-deep .mat-expansion-panel-header .mat-content {
   color: rgba(0, 0, 0, 0.87) !important;
 }
 
-/* 3) Ajusta o rótulo do form-field para ficar bem visível */
+/* rótulo do form-field */
 :host ::ng-deep .mat-form-field-label {
   color: rgba(0, 0, 0, 0.6) !important;
 }
 
-/* 4) Se quiser que o botão Salvar também fique mais destacado */
-:host ::ng-deep button.mat-raised-button {
-  background-color: #e91e63;
-  color: white;
+/* botão salvar mais vivo */
+:host ::ng-deep button.mat-raised-button[color="primary"] {
+  background-color: #3f51b5 !important;
+  color: #fff !important;
 }
