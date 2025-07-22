@@ -1,35 +1,41 @@
-<form *ngIf="form" [formGroup]="form">
-  <mat-accordion *ngIf="modules.length > 0">
-    <!-- painel de roles -->
+<form [formGroup]="form">
+  <!-- PAPÉIS -->
+  <mat-accordion>
     <mat-expansion-panel *ngFor="let role of roles">
       <mat-expansion-panel-header>
-        <mat-panel-title>{{ role }}</mat-panel-title>
+        <mat-panel-title>Papéis ({{ role }})</mat-panel-title>
       </mat-expansion-panel-header>
-
       <mat-form-field appearance="fill" class="w-100">
         <mat-label>Módulos permitidos</mat-label>
-        <mat-select formControlName="{{role}}" multiple>
-          <mat-option *ngFor="let m of modules" [value]="m">{{ displayModule(m) }}</mat-option>
+        <mat-select [formControlName]="role" multiple>
+          <mat-option *ngFor="let mod of modules" [value]="mod">
+            {{ displayModule(mod) }}
+          </mat-option>
         </mat-select>
       </mat-form-field>
-
-      <button mat-flat-button color="primary" (click)="saveRole(role)">Salvar</button>
+      <button mat-raised-button color="primary" (click)="saveRole(role)">
+        Salvar papéis
+      </button>
     </mat-expansion-panel>
+  </mat-accordion>
 
-    <!-- painel de groups -->
+  <!-- GRUPOS -->
+  <mat-accordion>
     <mat-expansion-panel *ngFor="let grp of allGroups">
       <mat-expansion-panel-header>
-        <mat-panel-title>{{ shortGroup(grp) }}</mat-panel-title>
+        <mat-panel-title>Grupos ({{ shortGroup(grp) }})</mat-panel-title>
       </mat-expansion-panel-header>
-
       <mat-form-field appearance="fill" class="w-100">
         <mat-label>Papéis atribuídos</mat-label>
-        <mat-select formControlName="{{grp}}" multiple>
-          <mat-option *ngFor="let role of roles" [value]="role">{{ role }}</mat-option>
+        <mat-select [formControlName]="grp" multiple>
+          <mat-option *ngFor="let role of roles" [value]="role">
+            {{ role }}
+          </mat-option>
         </mat-select>
       </mat-form-field>
-
-      <button mat-flat-button color="accent" (click)="saveGroup(grp)">Salvar</button>
+      <button mat-raised-button color="accent" (click)="saveGroup(grp)">
+        Salvar grupos
+      </button>
     </mat-expansion-panel>
   </mat-accordion>
 </form>

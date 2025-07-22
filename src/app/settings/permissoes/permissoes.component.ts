@@ -57,7 +57,7 @@ export class PermissoesComponent implements OnInit {
         // coletar todos os módulos (união de todos os roles)
         this.modules   = Array.from(new Set(Object.values(cfg.roles).flat()));
 
-        // monta o form
+        // monta o form: dois sub‐formularios (roles e groups)
         const rolesFG  = this.fb.group({});
         const groupsFG = this.fb.group({});
 
@@ -77,16 +77,35 @@ export class PermissoesComponent implements OnInit {
 
   saveRole(role: string) {
     const modules = this.form.get(['roles', role])!.value as string[];
-    // aqui você criaria um PUT /settings/permissions/roles 
-    // com body { role, modules } se quisesse persistir roles
-    this.snack.open(`Papéis de ${role} atualizados`, 'OK', { duration: 2000 });
+    this.http
+      .put<{ ok: boolean }>(
+        `${this.api}/settings/permissions/roles/${encodeURIComponent(role)}`,
+        { modules }
+      )
+      .subscribe({
+        next: () => {
+          this.snack.open(`Papéis de ${role} atualizados`, 'OK', { duration: 2000 });
+        },
+        error: () => {
+          this.snack.open(`Falha ao atualizar papéis de ${role}`, 'OK', { duration: 2000 });
+        }
+      });
   }
 
   saveGroup(grp: string) {
     const roles = this.form.get(['groups', grp])!.value as string[];
-    this.http.put(`/settings/permissions/${encodeURIComponent(grp)}`, { groups: roles })
-      .subscribe(() => {
-        this.snack.open(`Grupos de ${grp} atualizados`, 'OK', { duration: 2000 });
+    this.http
+      .put<{ ok: boolean }>(
+        `${this.api}/settings/permissions/groups/${encodeURIComponent(grp)}`,
+        { roles }
+      )
+      .subscribe({
+        next: () => {
+          this.snack.open(`Grupos de ${this.shortGroup(grp)} atualizados`, 'OK', { duration: 2000 });
+        },
+        error: () => {
+          this.snack.open(`Falha ao atualizar grupos de ${this.shortGroup(grp)}`, 'OK', { duration: 2000 });
+        }
       });
   }
 
@@ -95,7 +114,6 @@ export class PermissoesComponent implements OnInit {
   }
 
   shortGroup(dn: string) {
-    // ex: de "CN=Grupo-HCAB-CTIC-Suporte,..." extrai só "Grupo-HCAB-CTIC-Suporte"
     const m = dn.match(/CN=([^,]+)/);
     return m ? m[1] : dn;
   }
