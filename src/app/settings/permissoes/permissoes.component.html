@@ -5,12 +5,14 @@
     <div formGroupName="roles">
       <mat-expansion-panel *ngFor="let role of roles">
         <mat-expansion-panel-header>
-          <mat-panel-title>Papéis ({{ role }})</mat-panel-title>
+          <mat-panel-title>
+            Papéis ({{ role }})
+          </mat-panel-title>
         </mat-expansion-panel-header>
 
         <mat-form-field appearance="fill" class="w-100">
           <mat-label>Módulos permitidos</mat-label>
-          <mat-select formControlName="{{ role }}" multiple>
+          <mat-select [formControlName]="role" multiple>
             <mat-option *ngFor="let mod of modules" [value]="mod">
               {{ displayModule(mod) }}
             </mat-option>
@@ -24,16 +26,19 @@
       </mat-expansion-panel>
     </div>
 
+
     <!-- Bloco de Grupos -->
     <div formGroupName="groups">
       <mat-expansion-panel *ngFor="let grp of allGroups">
         <mat-expansion-panel-header>
-          <mat-panel-title>Grupos ({{ shortGroup(grp) }})</mat-panel-title>
+          <mat-panel-title>
+            Grupos ({{ shortGroup(grp) }})
+          </mat-panel-title>
         </mat-expansion-panel-header>
 
         <mat-form-field appearance="fill" class="w-100">
           <mat-label>Papéis atribuídos</mat-label>
-          <mat-select formControlName="{{ grp }}" multiple>
+          <mat-select [formControlName]="grp" multiple>
             <mat-option *ngFor="let role of roles" [value]="role">
               {{ role }}
             </mat-option>
