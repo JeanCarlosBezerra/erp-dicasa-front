@@ -34,12 +34,10 @@ interface PermissionsConfig {
 })
 export class PermissoesComponent implements OnInit {
   config!: PermissionsConfig;
-  roles: string[] = [];
-  allGroups: string[] = [];
-  modules: string[] = [];
-
+  modules: string[] = [];        // todos os módulos (união de todos os roles)
+  roles: string[] = [];          // seus "papéis"
+  allGroups: string[] = [];      // seus "grupos"
   form!: FormGroup;
-
   private api = environment.apiUrl;
 
   constructor(
@@ -47,6 +45,7 @@ export class PermissoesComponent implements OnInit {
     private http: HttpClient,
     private snack: MatSnackBar,
   ) {}
+  
 
   ngOnInit() {
     this.http.get<PermissionsConfig>(`${this.api}/settings/permissions`)
@@ -54,20 +53,21 @@ export class PermissoesComponent implements OnInit {
         this.config    = cfg;
         this.roles     = Object.keys(cfg.roles);
         this.allGroups = Object.keys(cfg.groups);
-        // coletar todos os módulos (união de todos os roles)
+        // monta array de todos os módulos
         this.modules   = Array.from(new Set(Object.values(cfg.roles).flat()));
 
-        // monta o form: dois sub‐formularios (roles e groups)
+        // cria FormGroup de roles e groups
         const rolesFG  = this.fb.group({});
         const groupsFG = this.fb.group({});
 
         this.roles.forEach(role => {
-          rolesFG.addControl(role, new FormControl(this.config.roles[role]));
+          rolesFG.addControl(role, new FormControl(cfg.roles[role]));
         });
         this.allGroups.forEach(grp => {
-          groupsFG.addControl(grp, new FormControl(this.config.groups[grp]));
+          groupsFG.addControl(grp, new FormControl(cfg.groups[grp]));
         });
 
+        // agrupa ambos
         this.form = this.fb.group({
           roles: rolesFG,
           groups: groupsFG
@@ -77,36 +77,22 @@ export class PermissoesComponent implements OnInit {
 
   saveRole(role: string) {
     const modules = this.form.get(['roles', role])!.value as string[];
-    this.http
-      .put<{ ok: boolean }>(
-        `${this.api}/settings/permissions/roles/${encodeURIComponent(role)}`,
-        { modules }
-      )
-      .subscribe({
-        next: () => {
-          this.snack.open(`Papéis de ${role} atualizados`, 'OK', { duration: 2000 });
-        },
-        error: () => {
-          this.snack.open(`Falha ao atualizar papéis de ${role}`, 'OK', { duration: 2000 });
-        }
-      });
+    this.http.put(
+      `${this.api}/settings/permissions/roles/${encodeURIComponent(role)}`,
+      { modules }
+    ).subscribe(() => {
+      this.snack.open(`Papéis de "${role}" atualizados`, 'OK', { duration: 2000 });
+    });
   }
 
   saveGroup(grp: string) {
     const roles = this.form.get(['groups', grp])!.value as string[];
-    this.http
-      .put<{ ok: boolean }>(
-        `${this.api}/settings/permissions/groups/${encodeURIComponent(grp)}`,
-        { roles }
-      )
-      .subscribe({
-        next: () => {
-          this.snack.open(`Grupos de ${this.shortGroup(grp)} atualizados`, 'OK', { duration: 2000 });
-        },
-        error: () => {
-          this.snack.open(`Falha ao atualizar grupos de ${this.shortGroup(grp)}`, 'OK', { duration: 2000 });
-        }
-      });
+    this.http.put(
+      `${this.api}/settings/permissions/groups/${encodeURIComponent(grp)}`,
+      { roles }
+    ).subscribe(() => {
+      this.snack.open(`Grupos de "${this.shortGroup(grp)}" atualizados`, 'OK', { duration: 2000 });
+    });
   }
 
   displayModule(key: string) {
