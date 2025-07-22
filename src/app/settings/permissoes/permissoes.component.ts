@@ -45,7 +45,6 @@ export class PermissoesComponent implements OnInit {
     private http: HttpClient,
     private snack: MatSnackBar,
   ) {}
-  
 
   ngOnInit() {
     this.http.get<PermissionsConfig>(`${this.api}/settings/permissions`)
@@ -75,47 +74,26 @@ export class PermissoesComponent implements OnInit {
       });
   }
 
-saveRole(role: string) {
-    const modules = this.form.get(['roles', role])!.value as string[];
+  /**
+   * Envia toda a configuração (roles + groups) num único PUT
+   */
+  saveAll() {
+    // extrai o objeto { roles: { ... }, groups: { ... } }
+    const newConfig: PermissionsConfig = this.form.value;
+
     this.http
-      .put(
-        `${this.api}/settings/permissions/roles/${encodeURIComponent(role)}`,
-        { modules },
-      )
+      .put(`${this.api}/settings/permissions`, newConfig)
       .subscribe({
         next: () =>
-          this.snack.open(`Papéis de ${role} atualizados`, 'OK', { duration: 2000 }),
+          this.snack.open(`Configurações atualizadas com sucesso!`, 'OK', { duration: 2000 }),
         error: err =>
           this.snack.open(
-            `Erro ao atualizar papéis de ${role}: ${err.message}`,
+            `Erro ao salvar: ${err.message}`,
             'OK',
             { duration: 3000 },
           ),
       });
   }
-
-  saveGroup(grp: string) {
-  const roles = this.form.get(['groups', grp])!.value as string[];
-  this.http
-    .put(
-      `${this.api}/settings/permissions/groups/${encodeURIComponent(grp)}`,
-      { roles },
-    )
-    .subscribe({
-      next: () =>
-        this.snack.open(
-          `Grupos de ${this.shortGroup(grp)} atualizados`,
-          'OK',
-          { duration: 2000 },
-        ),
-      error: err =>
-        this.snack.open(
-          `Erro ao atualizar grupos de ${this.shortGroup(grp)}: ${err.message}`,
-          'OK',
-          { duration: 3000 },
-        ),
-    });
-}
 
   displayModule(key: string) {
     return key.replace(/\./g, ' → ');
