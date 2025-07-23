@@ -80,7 +80,8 @@ export class PermissoesComponent implements OnInit {
   saveAll() {
     // extrai o objeto { roles: { ... }, groups: { ... } }
     const newConfig: PermissionsConfig = this.form.value;
-
+    console.log(this.api)
+    console.log('PUT para:', `${this.api}/settings/permissions`);
     this.http
       .put(`${this.api}/settings/permissions`, newConfig)
       .subscribe({
