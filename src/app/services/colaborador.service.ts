@@ -30,7 +30,7 @@ export class ColaboradorService {
       console.log('Angular → chamando API produtividade', { idempresa, dataInicio, dataFim });
 
   return this.http
-    .get<ColaboradorProdutividade[]>('/api/comercial/colaborador/produtividade', { params })
+    .get<ColaboradorProdutividade[]>('/comercial/colaborador/produtividade', { params })
     .pipe(
       tap(res => console.log('Angular ← resposta API', res)),
       catchError(err => {

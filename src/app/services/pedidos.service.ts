@@ -8,6 +8,6 @@ export class PedidosService {
   constructor(private http: HttpClient) {}
 
   getPedidos(): Observable<any[]> {
-    return this.http.get<any[]>('/api/pedidos'); // 👈 use proxy
+    return this.http.get<any[]>('/pedidos'); // 👈 use proxy
   }
 }
