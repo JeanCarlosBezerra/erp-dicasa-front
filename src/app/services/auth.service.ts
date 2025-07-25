@@ -7,9 +7,9 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  constructor(private http: HttpClient) {}
-
   private api = environment.apiUrl;  // defina em environment.ts → apiUrl: 'http://localhost:3000'
+
+  constructor(private http: HttpClient) {}
   // pega o token (supondo JWT em localStorage)
   private get token(): string | null {
     return localStorage.getItem('access_token');
@@ -19,8 +19,8 @@ export class AuthService {
     return this.http.post<{ access_token: string }>(
       `${this.api}/auth/login`,
       { usuario: user, senha: pass }
-  );
-}
+    );
+  }
 
   // decodifica o payload do JWT
   private get payload(): any {
