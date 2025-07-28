@@ -34,7 +34,7 @@ export interface ContasReceber {
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private baseUrl = `${environment.apiUrl}/financeiro/dashboard`;
+  private baseUrl = `${environment.apiUrl}/financeiro`;
 
   constructor(private http: HttpClient) {}
 
@@ -61,7 +61,7 @@ export class DashboardService {
       );
 
     return this.http.get<Faturamento[]>(
-      `${this.baseUrl}/faturamento-liquido/dashboard`,
+      `${this.baseUrl}/faturamento-liquido`,
       { params }
     );
   }
@@ -82,7 +82,7 @@ export class DashboardService {
         formatDate(dataFinal,   'yyyy-MM-dd', 'pt-BR')
       );
 
-    return this.http.get<Pendente[]>(`${this.baseUrl}/pendentes/dashboard`, { params });
+    return this.http.get<Pendente[]>(`${this.baseUrl}/pendentes`, { params });
   }
 
     getContasAPagar(empresa: number, dataInicial: Date, dataFinal: Date): Observable<ContasPagar[]> {
@@ -90,7 +90,7 @@ export class DashboardService {
       .set('empresa', empresa.toString())
       .set('dataInicial', formatDate(dataInicial, 'yyyy-MM-dd', 'en-US'))
       .set('dataFinal',   formatDate(dataFinal,   'yyyy-MM-dd', 'en-US'));
-    return this.http.get<ContasPagar[]>(`${this.baseUrl}/contas-pagar/dashboard`, { params });
+    return this.http.get<ContasPagar[]>(`${this.baseUrl}/contas-pagar`, { params });
   }
 
 
@@ -99,7 +99,7 @@ export class DashboardService {
       .set('empresa', emp.toString())
       .set('dataInicial', formatDate(ini,'yyyy-MM-dd','en-US'))
       .set('dataFinal',   formatDate(fim,'yyyy-MM-dd','en-US'));
-    return this.http.get<ContasReceber[]>(`${this.baseUrl}/contas-receber/dashboard`, { params });
+    return this.http.get<ContasReceber[]>(`${this.baseUrl}/contas-receber`, { params });
   }
 }
 
