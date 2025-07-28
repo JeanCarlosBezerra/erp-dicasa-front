@@ -34,7 +34,7 @@ export interface ContasReceber {
 
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
-  private baseUrl = `${environment.apiUrl}/financeiro`;
+  private baseUrl = `${environment.apiUrl}/financeiro/dashboard`;
 
   constructor(private http: HttpClient) {}
 
