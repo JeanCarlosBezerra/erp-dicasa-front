@@ -18,6 +18,7 @@ import { MatCardModule } from '@angular/material/card';
 import { ColaboradorProdutividade, ColaboradorService } from '../../../services/colaborador.service';
 import { NgForm }                          from '@angular/forms';             // para ngModel
 import { ExportService } from '../../../shared/export.service';
+import { MatIconModule } from '@angular/material/icon'; // ✅ IMPORTAR
 
 
 
@@ -38,6 +39,7 @@ import { ExportService } from '../../../shared/export.service';
     MatPaginatorModule,
     MatCardModule,
     MatTableModule,
+    MatIconModule, // ✅ AQUI!!!
   ],
   providers: [ExportService], // ✅ AQUI!
   templateUrl: './colaborador.component.html',
@@ -52,7 +54,8 @@ export class ColaboradorComponent implements OnInit {
     'faturamento',
     'lucro',
     'margem',
-    'devolucoes'
+    'devolucoes',
+    'acoes'
   ];
 
   dataInicio!    : Date;
