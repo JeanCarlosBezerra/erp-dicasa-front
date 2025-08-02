@@ -1,11 +1,6 @@
 <div class="page-header">
   <h2>Produtividade por Colaborador</h2>
 
-   <div class="export-buttons-inline">
-    <button mat-mini-button color="primary" (click)="exportarExcel()">📊 Excel</button>
-    <button mat-mini-button color="accent" (click)="exportarPDF()">🧾 PDF</button>
-  </div>
-
   <div class="filters">
     <mat-form-field appearance="fill">
       <mat-label>Data Início</mat-label>
@@ -28,6 +23,12 @@
 
     <button mat-raised-button color="primary" (click)="carregar()">Filtrar</button>
   </div>
+</div>
+
+<!-- ✅ Botões fora da .page-header -->
+<div class="export-buttons-inline">
+  <button mat-mini-button color="primary" (click)="exportarExcel()">📊 Excel</button>
+  <button mat-mini-button color="accent" (click)="exportarPDF()">🧾 PDF</button>
 </div>
 
 <div class="table-container mat-elevation-z2">
