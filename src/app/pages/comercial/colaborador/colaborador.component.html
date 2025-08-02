@@ -25,9 +25,7 @@
   </div>
 </div>
 
-
 <div class="table-container mat-elevation-z2">
-
   <table mat-table [dataSource]="dataSource" class="full-width">
 
     <!-- # -->
@@ -42,50 +40,51 @@
       <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
     </ng-container>
 
-    <!-- Vendas (qtdvenda) -->
+    <!-- Vendas -->
     <ng-container matColumnDef="qtdvenda">
       <th mat-header-cell *matHeaderCellDef>Vendas</th>
       <td mat-cell *matCellDef="let row">{{ row.qtdvenda }}</td>
     </ng-container>
 
-    <!-- Fatur. Líq -->
+    <!-- Faturamento -->
     <ng-container matColumnDef="faturamento">
       <th mat-header-cell *matHeaderCellDef>Fatur. Líq</th>
       <td mat-cell *matCellDef="let row">{{ row.faturamento | number:'1.2-2' }}</td>
     </ng-container>
 
-    <!-- Lucro Líq -->
+    <!-- Lucro -->
     <ng-container matColumnDef="lucro">
       <th mat-header-cell *matHeaderCellDef>Lucro Líq</th>
       <td mat-cell *matCellDef="let row">{{ row.lucro | number:'1.2-2' }}</td>
     </ng-container>
 
-    <!-- %MG -->
+    <!-- Margem -->
     <ng-container matColumnDef="margem">
       <th mat-header-cell *matHeaderCellDef>%MG</th>
       <td mat-cell *matCellDef="let row">{{ row.margem | number:'1.2-2' }}%</td>
     </ng-container>
 
-    <!-- Devol. -->
+    <!-- Devoluções -->
     <ng-container matColumnDef="devolucoes">
       <th mat-header-cell *matHeaderCellDef>Devol.</th>
       <td mat-cell *matCellDef="let row">{{ row.devolucoes | number:'1.2-2' }}</td>
     </ng-container>
 
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
+    <!-- Ações -->
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef class="acoes-header">Ações</th>
+      <td mat-cell *matCellDef="let row">
+        <button mat-icon-button color="primary" (click)="exportarExcel()" matTooltip="Exportar Excel">
+          <mat-icon>table_view</mat-icon>
+        </button>
+        <button mat-icon-button color="accent" (click)="exportarPDF()" matTooltip="Exportar PDF">
+          <mat-icon>picture_as_pdf</mat-icon>
+        </button>
+      </td>
+    </ng-container>
 
-      <!-- Ações -->
-<ng-container matColumnDef="acoes">
-  <th mat-header-cell *matHeaderCellDef class="acoes-header">
-    <button mat-icon-button color="primary" (click)="exportarExcel()" matTooltip="Exportar Excel">
-      <mat-icon>table_view</mat-icon>
-    </button>
-    <button mat-icon-button color="accent" (click)="exportarPDF()" matTooltip="Exportar PDF">
-      <mat-icon>picture_as_pdf</mat-icon>
-    </button>
-  </th>
-  <td mat-cell *matCellDef="let row"> </td>
-</ng-container>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    
   </table>
 </div>
