@@ -29,10 +29,10 @@
 <div class="table-container mat-elevation-z2">
 
   <div class="export-buttons-inline">
-    <button mat-mini-button color="primary" (click)="exportarExcel()">📊 Excel</button>
-    <button mat-mini-button color="accent" (click)="exportarPDF()">🧾 PDF</button>
-  </div>
-  
+  <button mat-stroked-button color="primary" (click)="exportarExcel()">📊 Exportar Excel</button>
+  <button mat-stroked-button color="accent" (click)="exportarPDF()">🧾 Exportar PDF</button>
+</div>
+
   <table mat-table [dataSource]="dataSource" class="full-width">
 
     <!-- # -->

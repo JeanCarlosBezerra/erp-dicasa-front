@@ -20,6 +20,7 @@ import { NgForm }                          from '@angular/forms';             //
 import { ExportService } from '../../../shared/export.service';
 
 
+
 @Component({
   selector: 'app-colaborador',
   standalone: true,
