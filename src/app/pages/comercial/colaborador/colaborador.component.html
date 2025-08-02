@@ -25,6 +25,11 @@
   </div>
 </div>
 
+<div style="font-size: 24px; color: green; margin: 1rem 0;">
+  Teste de ícone:
+  <mat-icon>check_circle</mat-icon>
+</div>
+
 <div class="table-container mat-elevation-z2">
   <table mat-table [dataSource]="dataSource" class="full-width">
 
@@ -58,7 +63,7 @@
       <td mat-cell *matCellDef="let row">{{ row.lucro | number:'1.2-2' }}</td>
     </ng-container>
 
-    <!-- %MG -->
+    <!-- Margem -->
     <ng-container matColumnDef="margem">
       <th mat-header-cell *matHeaderCellDef>%MG</th>
       <td mat-cell *matCellDef="let row">{{ row.margem | number:'1.2-2' }}%</td>
@@ -70,23 +75,16 @@
       <td mat-cell *matCellDef="let row">{{ row.devolucoes | number:'1.2-2' }}</td>
     </ng-container>
 
-    <!-- AÇÕES -->
-    <ng-container matColumnDef="acoes">
-      <th mat-header-cell *matHeaderCellDef class="acoes-header">Ações</th>
-      <td mat-cell *matCellDef="let row">
-        <button mat-icon-button color="primary" matTooltip="Exportar Excel" (click)="exportarExcel()">
-          <mat-icon>table_view</mat-icon>
-        </button>
-        <button mat-icon-button color="accent" matTooltip="Exportar PDF" (click)="exportarPDF()">
-          <mat-icon>picture_as_pdf</mat-icon>
-        </button>
-      </td>
-    </ng-container>
-    <td mat-cell *matCellDef="let row">
-  <mat-icon>table_view</mat-icon> Exportar
-</td>
+   <!-- Coluna de Ações -->
+<ng-container matColumnDef="acoes">
+  <th mat-header-cell *matHeaderCellDef class="acoes-header">Ações</th>
+  <td mat-cell *matCellDef="let row">
+    <mat-icon>check_circle</mat-icon>
+  </td>
+</ng-container>
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    
   </table>
 </div>
