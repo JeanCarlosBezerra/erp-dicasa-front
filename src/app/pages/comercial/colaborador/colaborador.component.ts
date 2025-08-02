@@ -17,6 +17,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatCardModule } from '@angular/material/card';
 import { ColaboradorProdutividade, ColaboradorService } from '../../../services/colaborador.service';
 import { NgForm }                          from '@angular/forms';             // para ngModel
+import { ExportService } from '../../../shared/export.service';
 
 
 @Component({
@@ -37,6 +38,7 @@ import { NgForm }                          from '@angular/forms';             //
     MatCardModule,
     MatTableModule,
   ],
+  providers: [ExportService], // ✅ AQUI!
   templateUrl: './colaborador.component.html',
   styleUrl: './colaborador.component.scss'
 })
@@ -56,7 +58,10 @@ export class ColaboradorComponent implements OnInit {
   dataFim!       : Date;
   empresaFiltro! : number;
 
-  constructor(private svc: ColaboradorService) {}
+ constructor(
+  private svc: ColaboradorService,
+  private exportService: ExportService
+) {}
 
   ngOnInit() {
     const hoje = new Date();
@@ -79,4 +84,34 @@ export class ColaboradorComponent implements OnInit {
       error: err => { /* já logado no service */ }
     });
   }
+
+  exportarExcel() {
+  const headers = ['#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG', 'Devol.'];
+  const rows = this.dataSource.data.map((row: ColaboradorProdutividade) => [
+    row.idVendedor,
+    row.nome,
+    row.qtdvenda,
+    row.faturamento,
+    row.lucro,
+    `${row.margem}%`,
+    row.devolucoes
+  ]);
+
+  this.exportService.exportToExcel(headers, rows, 'produtividade-colaborador');
+}
+
+exportarPDF() {
+  const headers = ['#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG', 'Devol.'];
+  const rows = this.dataSource.data.map((row: ColaboradorProdutividade) => [
+    row.idVendedor,
+    row.nome,
+    row.qtdvenda,
+    row.faturamento,
+    row.lucro,
+    `${row.margem}%`,
+    row.devolucoes
+  ]);
+
+  this.exportService.exportToPDF(headers, rows, 'produtividade-colaborador');
+}
 }

@@ -3,9 +3,10 @@
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "baseUrl": "./src",
+    "baseUrl": "src",
     "paths": {
-      "@app/*": ["app/*"]
+      "@app/*": ["app/*"],
+      "shared/*": ["shared/*"]
     },
     "moduleResolution": "Node",
     "target": "ES2022",
