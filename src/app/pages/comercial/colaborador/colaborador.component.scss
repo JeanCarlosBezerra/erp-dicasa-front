@@ -35,5 +35,5 @@
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  margin: 1rem;
+  margin-bottom: 1rem; // 👈 importante para separar da tabela
 }
