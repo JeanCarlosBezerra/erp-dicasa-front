@@ -40,8 +40,15 @@
   background-color: rgba(0, 0, 0, 0.05); // Só para teste
 }
 
+td.mat-cell:last-child,
+th.mat-header-cell:last-child {
+  min-width: 100px;
+  white-space: nowrap;
+}
+
 .acoes-header {
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 8px;
 }
