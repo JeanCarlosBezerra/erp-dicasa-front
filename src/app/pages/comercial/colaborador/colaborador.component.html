@@ -28,19 +28,6 @@
 
 <div class="table-container mat-elevation-z2">
 
-  <!-- Ações -->
-<ng-container matColumnDef="acoes">
-  <th mat-header-cell *matHeaderCellDef class="acoes-header">
-    <button mat-icon-button color="primary" (click)="exportarExcel()" matTooltip="Exportar Excel">
-      <mat-icon>table_view</mat-icon>
-    </button>
-    <button mat-icon-button color="accent" (click)="exportarPDF()" matTooltip="Exportar PDF">
-      <mat-icon>picture_as_pdf</mat-icon>
-    </button>
-  </th>
-  <td mat-cell *matCellDef="let row"> </td>
-</ng-container>
-
   <table mat-table [dataSource]="dataSource" class="full-width">
 
     <!-- # -->
@@ -87,5 +74,18 @@
 
     <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
     <tr mat-row        *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      <!-- Ações -->
+<ng-container matColumnDef="acoes">
+  <th mat-header-cell *matHeaderCellDef class="acoes-header">
+    <button mat-icon-button color="primary" (click)="exportarExcel()" matTooltip="Exportar Excel">
+      <mat-icon>table_view</mat-icon>
+    </button>
+    <button mat-icon-button color="accent" (click)="exportarPDF()" matTooltip="Exportar PDF">
+      <mat-icon>picture_as_pdf</mat-icon>
+    </button>
+  </th>
+  <td mat-cell *matCellDef="let row"> </td>
+</ng-container>
   </table>
 </div>
