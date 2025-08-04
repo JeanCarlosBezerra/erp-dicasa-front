@@ -32,6 +32,7 @@
 //}
 
 .export-buttons {
+  width: 100%; // ✅ força ocupar a linha toda
   display: flex;
   justify-content: flex-end;
   gap: 12px;
