@@ -53,16 +53,21 @@ th.mat-header-cell:last-child {
   align-items: center;
   gap: 8px;
 }
-.floating-export-buttons {
-  position: absolute;
-  top: 7.0rem; // ajuste dependendo do cabeçalho
-  right: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  z-index: 999;
 
-  button {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+.table-wrapper {
+  position: relative; // <- âncora dos botões
+
+  .floating-export-buttons {
+    position: absolute;
+    top: 0.5rem;         // Alinhado ao topo da tabela
+    right: 1rem;         // Encostado à direita da tabela
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    z-index: 999;
+
+    button {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
   }
 }
