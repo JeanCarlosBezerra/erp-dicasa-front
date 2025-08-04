@@ -55,8 +55,7 @@ export class ColaboradorComponent implements OnInit {
     'faturamento',
     'lucro',
     'margem',
-    'devolucoes',
-    'acoes'
+    'devolucoes'
   ];
 
   dataInicio!    : Date;
