@@ -111,12 +111,16 @@ exportarPDF() {
     row.idVendedor,
     row.nome,
     row.qtdvenda,
-    row.faturamento,
-    row.lucro,
-    `${row.margem}%`,
+    row.faturamento.toFixed(2),
+    row.lucro.toFixed(2),
+    `${row.margem.toFixed(2)}%`,
     row.devolucoes
   ]);
 
-  this.exportService.exportToPDF(headers, rows, 'produtividade-colaborador');
+  this.exportService.exportToPDF(headers, rows, 'produtividade-colaborador', {
+    dataInicio: this.dataInicio,
+    dataFim: this.dataFim,
+    empresa: this.empresaFiltro
+  });
 }
 }

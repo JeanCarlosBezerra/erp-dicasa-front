@@ -17,12 +17,37 @@ export class ExportService {
     FileSaver.saveAs(blob, `${fileName}.xlsx`);
   }
 
-  exportToPDF(headers: string[], rows: any[][], fileName: string): void {
-    const doc = new jsPDF('landscape');
-    autoTable(doc, {
-      head: [headers],
-      body: rows,
-    });
-    doc.save(`${fileName}.pdf`);
+  exportToPDF(
+  headers: string[],
+  rows: any[][],
+  filename: string,
+  infoCabecalho: { dataInicio?: Date; dataFim?: Date; empresa?: number } = {}
+): void {
+  const doc = new jsPDF();
+
+  // Cabeçalho do relatório
+  doc.setFontSize(14);
+  doc.text('Relatório de Produtividade por Colaborador', 14, 15);
+
+  // Subcabeçalho com os filtros utilizados
+  doc.setFontSize(10);
+  if (infoCabecalho.dataInicio && infoCabecalho.dataFim) {
+    const ini = new Date(infoCabecalho.dataInicio).toLocaleDateString();
+    const fim = new Date(infoCabecalho.dataFim).toLocaleDateString();
+    doc.text(`Período: ${ini} a ${fim}`, 14, 22);
   }
+
+  if (infoCabecalho.empresa !== undefined) {
+    doc.text(`Empresa: ${infoCabecalho.empresa}`, 14, 28);
+  }
+
+  // Tabela com dados
+  autoTable(doc, {
+    startY: 35,
+    head: [headers],
+    body: rows,
+  });
+
+  doc.save(`${filename}.pdf`);
+}
 }
