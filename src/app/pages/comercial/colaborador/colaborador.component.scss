@@ -53,3 +53,16 @@ th.mat-header-cell:last-child {
   align-items: center;
   gap: 8px;
 }
+.floating-export-buttons {
+  position: absolute;
+  bottom: 1rem;
+  right: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 999;
+
+  button {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+}

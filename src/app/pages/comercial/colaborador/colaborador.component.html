@@ -28,15 +28,15 @@
 
 <div class="table-container mat-elevation-z2">
 
-<div class="export-buttons">
-    <button mat-raised-button color="primary" (click)="exportarExcel()">
-      📥 Exportar Excel
-    </button>
+<div class="floating-export-buttons">
+  <button mat-mini-fab color="primary" matTooltip="Exportar Excel" (click)="exportarExcel()">
+    <mat-icon>grid_on</mat-icon>
+  </button>
 
-    <button mat-raised-button color="accent" (click)="exportarPDF()">
-      🧾 Exportar PDF
-    </button>
-  </div>
+  <button mat-mini-fab color="accent" matTooltip="Exportar PDF" (click)="exportarPDF()">
+    <mat-icon>picture_as_pdf</mat-icon>
+  </button>
+</div>
 
   <table mat-table [dataSource]="dataSource" class="full-width">
 
