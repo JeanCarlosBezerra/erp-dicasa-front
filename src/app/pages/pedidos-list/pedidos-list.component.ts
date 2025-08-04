@@ -6,7 +6,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { CommonModule } from '@angular/common';
-import { PedidosService } from '@app/services/pedidos.service';
+import { PedidosService } from '../../services/pedidos.service';
 
 @Component({
   selector: 'app-pedidos-list',
