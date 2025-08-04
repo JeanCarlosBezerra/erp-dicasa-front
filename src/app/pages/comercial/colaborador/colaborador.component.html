@@ -1,1 +1,102 @@
-<p>colaborador works!</p>
+<div class="page-header">
+  <h2>Produtividade por Colaborador</h2>
+
+  <div class="filters">
+    <mat-form-field appearance="fill">
+      <mat-label>Data Início</mat-label>
+      <input matInput [matDatepicker]="dp1" [(ngModel)]="dataInicio">
+      <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
+      <mat-datepicker #dp1></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Data Fim</mat-label>
+      <input matInput [matDatepicker]="dp2" [(ngModel)]="dataFim">
+      <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+      <mat-datepicker #dp2></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Empresa</mat-label>
+      <input matInput type="number" [(ngModel)]="empresaFiltro">
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="carregar()">Filtrar</button>
+  </div>
+</div>
+
+
+<div class="table-container mat-elevation-z2">
+
+<div class="export-buttons">
+    <button mat-raised-button color="primary" (click)="exportarExcel()">
+      📥 Exportar Excel
+    </button>
+
+    <button mat-raised-button color="accent" (click)="exportarPDF()">
+      🧾 Exportar PDF
+    </button>
+  </div>
+
+  <table mat-table [dataSource]="dataSource" class="full-width">
+
+    <!-- # -->
+    <ng-container matColumnDef="idVendedor">
+      <th mat-header-cell *matHeaderCellDef>#</th>
+      <td mat-cell *matCellDef="let row">{{ row.idVendedor }}</td>
+    </ng-container>
+
+    <!-- Nome -->
+    <ng-container matColumnDef="nome">
+      <th mat-header-cell *matHeaderCellDef>Nome</th>
+      <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
+    </ng-container>
+
+    <!-- Vendas -->
+    <ng-container matColumnDef="qtdvenda">
+      <th mat-header-cell *matHeaderCellDef>Vendas</th>
+      <td mat-cell *matCellDef="let row">{{ row.qtdvenda }}</td>
+    </ng-container>
+
+    <!-- Faturamento -->
+    <ng-container matColumnDef="faturamento">
+      <th mat-header-cell *matHeaderCellDef>Fatur. Líq</th>
+      <td mat-cell *matCellDef="let row">{{ row.faturamento | number:'1.2-2' }}</td>
+    </ng-container>
+
+    <!-- Lucro -->
+    <ng-container matColumnDef="lucro">
+      <th mat-header-cell *matHeaderCellDef>Lucro Líq</th>
+      <td mat-cell *matCellDef="let row">{{ row.lucro | number:'1.2-2' }}</td>
+    </ng-container>
+
+    <!-- Margem -->
+    <ng-container matColumnDef="margem">
+      <th mat-header-cell *matHeaderCellDef>%MG</th>
+      <td mat-cell *matCellDef="let row">{{ row.margem | number:'1.2-2' }}%</td>
+    </ng-container>
+
+    <!-- Devoluções -->
+    <ng-container matColumnDef="devolucoes">
+      <th mat-header-cell *matHeaderCellDef>Devol.</th>
+      <td mat-cell *matCellDef="let row">{{ row.devolucoes | number:'1.2-2' }}</td>
+    </ng-container>
+
+    <!-- Ações -->
+    <ng-container matColumnDef="acoes">
+      <th mat-header-cell *matHeaderCellDef class="acoes-header">Ações</th>
+      <td mat-cell *matCellDef="let row">
+        <button mat-icon-button color="primary" (click)="exportarExcel()" matTooltip="Exportar Excel">
+          <mat-icon>grid_on</mat-icon>
+        </button>
+        <button mat-icon-button color="warn" (click)="exportarPDF()" matTooltip="Exportar PDF">
+          <mat-icon>description</mat-icon>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+  </table>
+</div>
