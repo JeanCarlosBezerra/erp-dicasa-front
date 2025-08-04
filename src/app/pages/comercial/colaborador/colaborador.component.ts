@@ -46,76 +46,83 @@ import { MatIconModule } from '@angular/material/icon'; // ✅ IMPORTAR
   styleUrl: './colaborador.component.scss'
 })
 export class ColaboradorComponent implements OnInit {
-  dataSource = new MatTableDataSource<ColaboradorProdutividade>([]);
-  displayedColumns = [
-    'idVendedor',
-    'nome',
-    'qtdvenda',
-    'faturamento',
-    'lucro',
-    'margem',
-    'devolucoes',
-    'acoes'
-  ];
+  //dataSource = new MatTableDataSource<ColaboradorProdutividade>([]);
 
-  dataInicio!    : Date;
-  dataFim!       : Date;
-  empresaFiltro! : number;
+dataSource = new MatTableDataSource([
+  { id: 1, nome: 'Teste A' },
+  { id: 2, nome: 'Teste B' }
+ ]);
 
- constructor(
-  private svc: ColaboradorService,
-  private exportService: ExportService
-) {}
-
+//  displayedColumns = [
+//    'idVendedor',
+//    'nome',
+//    'qtdvenda',
+//    'faturamento',
+//    'lucro',
+//    'margem',
+//    'devolucoes',
+//    'acoes'
+//  ];
+//
+//  dataInicio!    : Date;
+//  dataFim!       : Date;
+//  empresaFiltro! : number;
+//
+// constructor(
+//  private svc: ColaboradorService,
+//  private exportService: ExportService
+//) {}
+//
+//
   ngOnInit() {
-    const hoje = new Date();
-    this.dataInicio = hoje;
-    this.dataFim    = hoje;
-    this.empresaFiltro = 1;
-    this.carregar();
+//    const hoje = new Date();
+//    this.dataInicio = hoje;
+//    this.dataFim    = hoje;
+//    this.empresaFiltro = 1;
+//    this.carregar();
   }
-
-  carregar() {
-    const d1 = this.dataInicio.toISOString().slice(0,10);
-    const d2 = this.dataFim   .toISOString().slice(0,10);
-
-    const emp = Number(this.empresaFiltro);
-    console.log('filtrando…', this.empresaFiltro, this.dataInicio, this.dataFim);
-
-    this.svc.produtividade(emp, d1, d2)
-    .subscribe({
-      next: rows => { this.dataSource.data = rows; },
-      error: err => { /* já logado no service */ }
-    });
-  }
-
-  exportarExcel() {
-  const headers = ['#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG', 'Devol.'];
-  const rows = this.dataSource.data.map((row: ColaboradorProdutividade) => [
-    row.idVendedor,
-    row.nome,
-    row.qtdvenda,
-    row.faturamento,
-    row.lucro,
-    `${row.margem}%`,
-    row.devolucoes
-  ]);
-
-  this.exportService.exportToExcel(headers, rows, 'produtividade-colaborador');
-}
-
-exportarPDF() {
-  const headers = ['#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG', 'Devol.'];
-  const rows = this.dataSource.data.map((row: ColaboradorProdutividade) => [
-    row.idVendedor,
-    row.nome,
-    row.qtdvenda,
-    row.faturamento,
-    row.lucro,
-    `${row.margem}%`,
-    row.devolucoes
-  ]);
-
-  this.exportService.exportToPDF(headers, rows, 'produtividade-colaborador');
-}
+//
+//  carregar() {
+//    const d1 = this.dataInicio.toISOString().slice(0,10);
+//    const d2 = this.dataFim   .toISOString().slice(0,10);
+//
+//    const emp = Number(this.empresaFiltro);
+//    console.log('filtrando…', this.empresaFiltro, this.dataInicio, this.dataFim);
+//
+//    this.svc.produtividade(emp, d1, d2)
+//    .subscribe({
+//      next: rows => { this.dataSource.data = rows; },
+//      error: err => { /* já logado no service */ }
+//    });
+//  }
+//
+//  exportarExcel() {
+//  const headers = ['#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG', 'Devol.'];
+//  const rows = this.dataSource.data.map((row: ColaboradorProdutividade) => [
+//    row.idVendedor,
+//    row.nome,
+//    row.qtdvenda,
+//    row.faturamento,
+//    row.lucro,
+//    `${row.margem}%`,
+//    row.devolucoes
+//  ]);
+//
+//  this.exportService.exportToExcel(headers, rows, 'produtividade-colaborador');
+//}
+//
+//exportarPDF() {
+//  const headers = ['#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG', 'Devol.'];
+//  const rows = this.dataSource.data.map((row: ColaboradorProdutividade) => [
+//    row.idVendedor,
+//    row.nome,
+//    row.qtdvenda,
+//    row.faturamento,
+//    row.lucro,
+//    `${row.margem}%`,
+//    row.devolucoes
+//  ]);
+//
+//  this.exportService.exportToPDF(headers, rows, 'produtividade-colaborador');
+//}
 }
