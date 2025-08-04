@@ -25,9 +25,14 @@
   </div>
 </div>
 
-<div style="font-size: 24px; color: green; margin: 1rem 0;">
-  Teste de ícone fora da tabela:
-  <mat-icon>check_circle</mat-icon>
+<!-- Botões de exportação (fora da tabela) -->
+<div class="export-buttons">
+  <button mat-raised-button color="primary" (click)="exportarExcel()">
+    <mat-icon>grid_on</mat-icon> Excel
+  </button>
+  <button mat-raised-button color="accent" (click)="exportarPDF()">
+    <mat-icon>picture_as_pdf</mat-icon> PDF
+  </button>
 </div>
 
 <div class="table-container mat-elevation-z2">
