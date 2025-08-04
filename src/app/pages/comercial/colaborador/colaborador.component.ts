@@ -48,6 +48,7 @@ import { MatIconModule } from '@angular/material/icon'; // ✅ IMPORTAR
 export class ColaboradorComponent implements OnInit {
   //dataSource = new MatTableDataSource<ColaboradorProdutividade>([]);
 
+  
 dataSource = new MatTableDataSource([
   { id: 1, nome: 'Teste A' },
   { id: 2, nome: 'Teste B' }
@@ -75,6 +76,7 @@ dataSource = new MatTableDataSource([
 //
 //
   ngOnInit() {
+    console.log("Carregou componente correto");
 //    const hoje = new Date();
 //    this.dataInicio = hoje;
 //    this.dataFim    = hoje;
