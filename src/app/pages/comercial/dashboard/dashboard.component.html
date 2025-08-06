@@ -1,30 +1,53 @@
 <h2>Metas por Empresa</h2>
 
-<mat-table [dataSource]="empresas" class="mat-elevation-z2">
+<div class="grid-cards">
+  <mat-card class="card-empresa" *ngFor="let e of empresas">
 
-  <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
-    <mat-header-cell *matHeaderCellDef> {{ col | titlecase }} </mat-header-cell>
-    <mat-cell *matCellDef="let e">
-      <ng-container [ngSwitch]="col">
-        <!-- Inputs editáveis -->
-        <input *ngSwitchCase="'metaFaturamento'" matInput type="number" [(ngModel)]="e.metaFaturamento">
-        <input *ngSwitchCase="'faturamentoReal'" matInput type="number" [(ngModel)]="e.faturamentoReal">
-        <input *ngSwitchCase="'lucroReal'" matInput type="number" [(ngModel)]="e.lucroReal">
-        <input *ngSwitchCase="'metaMargem'" matInput type="number" [(ngModel)]="e.metaMargem">
+    <h3>🏬 {{ e.loja }}</h3>
 
-        <!-- Campos calculados -->
-        <span *ngSwitchDefault>{{ e[col] | number: '1.0-2' }}</span>
-      </ng-container>
-    </mat-cell>
-  </ng-container>
+    <!-- Campo de entrada -->
+    <mat-form-field>
+      <mat-label>Meta Faturamento</mat-label>
+      <input matInput type="number" [(ngModel)]="e.metaFaturamento">
+    </mat-form-field>
 
-  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-</mat-table>
+    <mat-form-field>
+      <mat-label>Faturamento Real</mat-label>
+      <input matInput type="number" [(ngModel)]="e.faturamentoReal">
+    </mat-form-field>
 
-<button mat-raised-button color="primary" class="botao" (click)="calcular()">Calcular Indicadores</button>
+    <mat-form-field>
+      <mat-label>Meta Margem (%)</mat-label>
+      <input matInput type="number" [(ngModel)]="e.metaMargem">
+    </mat-form-field>
 
-<!-- Cards com totais consolidados -->
+    <mat-form-field>
+      <mat-label>Lucro Real</mat-label>
+      <input matInput type="number" [(ngModel)]="e.lucroReal">
+    </mat-form-field>
+
+    <div class="linha-dados">
+      <p><mat-icon>trending_up</mat-icon> % Faturamento: <span [ngClass]="getCor(e.percFaturamento)">{{ formatPercent(e.percFaturamento) }}</span></p>
+      <p><mat-icon>show_chart</mat-icon> Saldo: {{ e.saldoFaturamento | currency:'BRL' }}</p>
+      <p><mat-icon>percent</mat-icon> Variação: <span [ngClass]="getCor(e.percVarFaturamento)">{{ formatPercent(e.percVarFaturamento) }}</span></p>
+    </div>
+
+    <div class="linha-dados">
+      <p><mat-icon>paid</mat-icon> % Lucro: <span [ngClass]="getCor(e.percLucro)">{{ formatPercent(e.percLucro) }}</span></p>
+      <p><mat-icon>balance</mat-icon> Saldo Lucro: {{ e.saldoLucro | currency:'BRL' }}</p>
+      <p><mat-icon>percent</mat-icon> Variação: <span [ngClass]="getCor(e.percVarLucro)">{{ formatPercent(e.percVarLucro) }}</span></p>
+    </div>
+
+    <div class="linha-dados">
+      <p><mat-icon>trending_flat</mat-icon> Margem Real: {{ formatPercent(e.margemReal! * 100) }}</p>
+      <p><mat-icon>compare_arrows</mat-icon> Diferença Margem: <span [ngClass]="getCor(e.margemVar! * 100)">{{ formatPercent(e.margemVar! * 100) }}</span></p>
+    </div>
+
+  </mat-card>
+</div>
+
+<button mat-raised-button color="primary" (click)="calcular()">Calcular Indicadores</button>
+
 <div class="cards-kpis">
   <mat-card class="kpi-card green">
     <mat-icon>show_chart</mat-icon>

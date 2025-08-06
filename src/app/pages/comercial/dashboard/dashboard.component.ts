@@ -1,18 +1,16 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatTableModule } from '@angular/material/table';
-import { MatInputModule } from '@angular/material/input';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 
 interface EmpresaIndicador {
   loja: string;
   metaFaturamento: number;
   faturamentoReal: number;
-  metaMargem: number; // ex: 0.29 para 29%
+  metaMargem: number; // ex: 0.29
   lucroReal: number;
 
   // Calculados
@@ -28,6 +26,9 @@ interface EmpresaIndicador {
   percLucro?: number;
   saldoLucro?: number;
   percVarLucro?: number;
+
+  margemReal?: number;
+  margemVar?: number;
 }
 
 @Component({
@@ -38,22 +39,13 @@ interface EmpresaIndicador {
   imports: [
     CommonModule,
     FormsModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatTableModule,
     MatCardModule,
     MatIconModule,
+    MatInputModule,
     MatButtonModule
   ]
 })
 export class DashboardComercialComponent {
-  displayedColumns: string[] = [
-    'loja', 'metaFaturamento', 'faturamentoReal', 'percFaturamento',
-    'projFaturamento', 'metaRestanteFaturamento', 'saldoFaturamento', 'percVarFaturamento',
-    'metaMargem', 'metaLucroTotal', 'lucroReal', 'percLucro',
-    'projLucro', 'metaLucroRestante', 'saldoLucro', 'percVarLucro'
-  ];
-
   empresas: EmpresaIndicador[] = [
     { loja: 'HCAB', metaFaturamento: 4908400, faturamentoReal: 4266353, lucroReal: 1178348, metaMargem: 0.29 },
     { loja: 'HCVR', metaFaturamento: 2629500, faturamentoReal: 3206500, lucroReal: 909197, metaMargem: 0.30 },
@@ -81,8 +73,22 @@ export class DashboardComercialComponent {
       e.saldoLucro = e.lucroReal - e.metaLucroTotal;
       e.percVarLucro = (e.lucroReal / e.metaLucroTotal - 1) * 100;
 
+      e.margemReal = e.faturamentoReal ? e.lucroReal / e.faturamentoReal : 0;
+      e.margemVar = e.margemReal - e.metaMargem;
+
       this.totalFaturamento += e.faturamentoReal;
       this.totalLucro += e.lucroReal;
     });
+  }
+
+  formatPercent(value?: number): string {
+    return value != null ? (value).toFixed(1) + '%' : '-';
+  }
+
+  getCor(valor: number | undefined): string {
+    if (valor == null) return '';
+    if (valor >= 100 || valor >= 0) return 'verde';
+    if (valor < 0 && valor > -10) return 'amarelo';
+    return 'vermelho';
   }
 }
