@@ -1,1 +1,79 @@
-<p>dashboard works!</p>
+<!-- Cards principais -->
+<div class="cards-kpis">
+  <mat-card class="kpi-card green">
+    <mat-icon>show_chart</mat-icon>
+    <div class="kpi-text">
+      <h3>Faturamento Previsto</h3>
+      <p>R$ 12.999.733</p>
+    </div>
+  </mat-card>
+
+  <mat-card class="kpi-card red">
+    <mat-icon>trending_down</mat-icon>
+    <div class="kpi-text">
+      <h3>Faturamento Real</h3>
+      <p>R$ 11.291.333</p>
+    </div>
+  </mat-card>
+
+  <mat-card class="kpi-card yellow">
+    <mat-icon>account_balance_wallet</mat-icon>
+    <div class="kpi-text">
+      <h3>Lucro Previsto</h3>
+      <p>R$ 3.657.378</p>
+    </div>
+  </mat-card>
+
+  <mat-card class="kpi-card blue">
+    <mat-icon>attach_money</mat-icon>
+    <div class="kpi-text">
+      <h3>Lucro Real</h3>
+      <p>R$ 3.161.095</p>
+    </div>
+  </mat-card>
+
+  <mat-card class="kpi-card gray">
+    <mat-icon>percent</mat-icon>
+    <div class="kpi-text">
+      <h3>Margem Real</h3>
+      <p>29%</p>
+    </div>
+  </mat-card>
+</div>
+
+<mat-table [dataSource]="dadosLojas" class="mat-elevation-z2" matSort>
+
+  <ng-container matColumnDef="loja">
+    <mat-header-cell *matHeaderCellDef> Loja </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.loja}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="faturamentoPrevisto">
+    <mat-header-cell *matHeaderCellDef> Fat. Previsto </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.faturamentoPrevisto | currency:'BRL'}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="faturamentoReal">
+    <mat-header-cell *matHeaderCellDef> Fat. Real </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.faturamentoReal | currency:'BRL'}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="lucroPrevisto">
+    <mat-header-cell *matHeaderCellDef> Lucro Previsto </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.lucroPrevisto | currency:'BRL'}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="lucroReal">
+    <mat-header-cell *matHeaderCellDef> Lucro Real </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.lucroReal | currency:'BRL'}} </mat-cell>
+  </ng-container>
+
+  <ng-container matColumnDef="margemReal">
+    <mat-header-cell *matHeaderCellDef> Margem % </mat-header-cell>
+    <mat-cell *matCellDef="let element"> {{element.margemReal}}% </mat-cell>
+  </ng-container>
+
+  <mat-header-row *matHeaderRowDef="colunasTabela"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: colunasTabela;"></mat-row>
+
+</mat-table>
