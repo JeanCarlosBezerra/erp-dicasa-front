@@ -2,39 +2,29 @@
 
 <mat-table [dataSource]="empresas" class="mat-elevation-z2">
 
-  <ng-container matColumnDef="loja">
-    <mat-header-cell *matHeaderCellDef> Loja </mat-header-cell>
-    <mat-cell *matCellDef="let e"> {{e.loja}} </mat-cell>
-  </ng-container>
-
-  <ng-container matColumnDef="metaFaturamento">
-    <mat-header-cell *matHeaderCellDef> Meta Faturamento </mat-header-cell>
+  <ng-container *ngFor="let col of displayedColumns" [matColumnDef]="col">
+    <mat-header-cell *matHeaderCellDef> {{ col | titlecase }} </mat-header-cell>
     <mat-cell *matCellDef="let e">
-      <input matInput type="number" [(ngModel)]="e.metaFaturamento">
+      <ng-container [ngSwitch]="col">
+        <!-- Inputs editáveis -->
+        <input *ngSwitchCase="'metaFaturamento'" matInput type="number" [(ngModel)]="e.metaFaturamento">
+        <input *ngSwitchCase="'faturamentoReal'" matInput type="number" [(ngModel)]="e.faturamentoReal">
+        <input *ngSwitchCase="'lucroReal'" matInput type="number" [(ngModel)]="e.lucroReal">
+        <input *ngSwitchCase="'metaMargem'" matInput type="number" [(ngModel)]="e.metaMargem">
+
+        <!-- Campos calculados -->
+        <span *ngSwitchDefault>{{ e[col] | number: '1.0-2' }}</span>
+      </ng-container>
     </mat-cell>
   </ng-container>
 
-  <ng-container matColumnDef="metaLucro">
-    <mat-header-cell *matHeaderCellDef> Meta Lucro </mat-header-cell>
-    <mat-cell *matCellDef="let e">
-      <input matInput type="number" [(ngModel)]="e.metaLucro">
-    </mat-cell>
-  </ng-container>
-
-  <ng-container matColumnDef="metaMargem">
-    <mat-header-cell *matHeaderCellDef> Margem (%) </mat-header-cell>
-    <mat-cell *matCellDef="let e">
-      <input matInput type="number" [(ngModel)]="e.metaMargem">
-    </mat-cell>
-  </ng-container>
-
-  <mat-header-row *matHeaderRowDef="colunasMeta"></mat-header-row>
-  <mat-row *matRowDef="let row; columns: colunasMeta;"></mat-row>
+  <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+  <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
 </mat-table>
 
 <button mat-raised-button color="primary" class="botao" (click)="calcular()">Calcular Indicadores</button>
 
-<!-- Cards com indicadores consolidados -->
+<!-- Cards com totais consolidados -->
 <div class="cards-kpis">
   <mat-card class="kpi-card green">
     <mat-icon>show_chart</mat-icon>

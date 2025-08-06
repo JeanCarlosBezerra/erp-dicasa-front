@@ -1,40 +1,40 @@
 import { Component } from '@angular/core';
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { MatCardModule } from '@angular/material/card';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatSortModule } from '@angular/material/sort';
-import { MatPaginatorModule } from '@angular/material/paginator';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 
-interface Empresa {
+interface EmpresaIndicador {
   loja: string;
   metaFaturamento: number;
-  metaLucro: number;
-  metaMargem: number;
-
   faturamentoReal: number;
+  metaMargem: number; // ex: 0.29 para 29%
   lucroReal: number;
 
-  // calculados
-  saldoFaturamento?: number;
+  // Calculados
+  projFaturamento?: number;
+  metaRestanteFaturamento?: number;
   percFaturamento?: number;
-  saldoLucro?: number;
+  saldoFaturamento?: number;
+  percVarFaturamento?: number;
+
+  metaLucroTotal?: number;
+  projLucro?: number;
+  metaLucroRestante?: number;
   percLucro?: number;
-  percMargem?: number;
-  percMargemVar?: number;
+  saldoLucro?: number;
+  percVarLucro?: number;
 }
 
 @Component({
   selector: 'app-dashboard-comercial',
   standalone: true,
-  styleUrls: ['./dashboard.component.scss'],
   templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.scss'],
   imports: [
     CommonModule,
     FormsModule,
@@ -47,12 +47,17 @@ interface Empresa {
   ]
 })
 export class DashboardComercialComponent {
-  colunasMeta: string[] = ['loja', 'metaFaturamento', 'metaLucro', 'metaMargem'];
+  displayedColumns: string[] = [
+    'loja', 'metaFaturamento', 'faturamentoReal', 'percFaturamento',
+    'projFaturamento', 'metaRestanteFaturamento', 'saldoFaturamento', 'percVarFaturamento',
+    'metaMargem', 'metaLucroTotal', 'lucroReal', 'percLucro',
+    'projLucro', 'metaLucroRestante', 'saldoLucro', 'percVarLucro'
+  ];
 
-  empresas: Empresa[] = [
-    { loja: 'HCAB', metaFaturamento: 4908400, metaLucro: 1423436, metaMargem: 29, faturamentoReal: 4266353, lucroReal: 1178348 },
-    { loja: 'HCVR', metaFaturamento: 2629500, metaLucro: 788850, metaMargem: 30, faturamentoReal: 3206500, lucroReal: 909197 },
-    { loja: 'HCAM', metaFaturamento: 1232700, metaLucro: 357483, metaMargem: 29, faturamentoReal: 998074, lucroReal: 252521 }
+  empresas: EmpresaIndicador[] = [
+    { loja: 'HCAB', metaFaturamento: 4908400, faturamentoReal: 4266353, lucroReal: 1178348, metaMargem: 0.29 },
+    { loja: 'HCVR', metaFaturamento: 2629500, faturamentoReal: 3206500, lucroReal: 909197, metaMargem: 0.30 },
+    { loja: 'HCAM', metaFaturamento: 1232700, faturamentoReal: 998074, lucroReal: 252521, metaMargem: 0.29 }
   ];
 
   totalFaturamento = 0;
@@ -63,14 +68,18 @@ export class DashboardComercialComponent {
     this.totalLucro = 0;
 
     this.empresas.forEach(e => {
-      e.saldoFaturamento = e.faturamentoReal - e.metaFaturamento;
+      e.metaRestanteFaturamento = e.metaFaturamento - e.faturamentoReal;
+      e.projFaturamento = e.faturamentoReal + (e.metaRestanteFaturamento || 0);
       e.percFaturamento = (e.faturamentoReal / e.metaFaturamento) * 100;
+      e.saldoFaturamento = e.faturamentoReal - e.metaFaturamento;
+      e.percVarFaturamento = (e.faturamentoReal / e.metaFaturamento - 1) * 100;
 
-      e.saldoLucro = e.lucroReal - e.metaLucro;
-      e.percLucro = (e.lucroReal / e.metaLucro) * 100;
-
-      e.percMargem = (e.lucroReal / e.faturamentoReal) * 100;
-      e.percMargemVar = e.percMargem - e.metaMargem;
+      e.metaLucroTotal = e.metaFaturamento * e.metaMargem;
+      e.metaLucroRestante = e.metaLucroTotal - e.lucroReal;
+      e.projLucro = e.lucroReal + (e.metaLucroRestante || 0);
+      e.percLucro = (e.lucroReal / e.metaLucroTotal) * 100;
+      e.saldoLucro = e.lucroReal - e.metaLucroTotal;
+      e.percVarLucro = (e.lucroReal / e.metaLucroTotal - 1) * 100;
 
       this.totalFaturamento += e.faturamentoReal;
       this.totalLucro += e.lucroReal;
