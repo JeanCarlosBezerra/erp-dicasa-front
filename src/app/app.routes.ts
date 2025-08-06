@@ -23,7 +23,7 @@ export const routes: Routes = [
       { path: 'financeiro/contas-receber', component: Contasreceber },
 
       // Comercial agora também
-      { path: 'comercial/dashboard',   component: DashboardComercialComponent /* renomeie se for ComercialDashboardComponent */ },
+      { path: 'comercial/dashboard',   component: DashboardComercialComponent },
       { path: 'comercial/colaborador', component: ColaboradorComponent },
 
       {
