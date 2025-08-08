@@ -72,5 +72,24 @@ th.mat-header-cell:last-child {
   }
 }
 
-::ng-deep .mat-mdc-select-value { color: #fff; }         /* valor selecionado */
-::ng-deep .mdc-list-item__primary-text { color: #1f1f1f; } /* itens do dropdown */
+/* Força o fundo sólido e o texto visível no campo selecionado */
+::ng-deep .mat-mdc-select {
+  background-color: #fff !important; /* Fundo sólido */
+  border-radius: 4px;
+}
+
+/* Texto no campo selecionado (trigger) */
+::ng-deep .mat-mdc-select-value {
+  color: #000 !important; /* Texto preto */
+  opacity: 1 !important; /* Remove efeito translúcido */
+}
+
+/* Itens da lista no dropdown */
+::ng-deep .mdc-list-item__primary-text {
+  color: #1f1f1f !important; /* Texto normal */
+  opacity: 1 !important;
+}
+
+::ng-deep .mat-mdc-select {
+  border: 1px solid rgba(0,0,0,0.2);
+}
