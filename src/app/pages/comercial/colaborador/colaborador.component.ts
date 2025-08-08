@@ -19,6 +19,8 @@ import { ColaboradorProdutividade, ColaboradorService } from '../../../services/
 import { NgForm }                          from '@angular/forms';             // para ngModel
 import { ExportService } from '../../../shared/export.service';
 import { MatIconModule } from '@angular/material/icon'; // ✅ IMPORTAR
+import { EmpresaService } from '../../..//services/empresa.service';
+import { Empresa } from '../../../models/empresa.model';
 
 
 
@@ -49,44 +51,49 @@ export class ColaboradorComponent implements OnInit {
   dataSource = new MatTableDataSource<ColaboradorProdutividade>([]);
   
   displayedColumns = [
-    'idVendedor',
-    'nome',
-    'qtdvenda',
-    'faturamento',
-    'lucro',
-    'margem',
-    'devolucoes'
-  ];
+  'idVendedor',
+  'nome',
+  'qtdvenda',
+  'faturamento',
+  'lucro',
+  'margem',
+  'devolucoes'
+];
 
-  dataInicio!    : Date;
-  dataFim!       : Date;
-  empresaFiltro! : number;
+dataInicio!: Date;
+dataFim!: Date;
+empresas: Empresa[] = [];
+empresasSelecionadas: number[] = [];
 
- constructor(
+
+constructor(
   private svc: ColaboradorService,
-  private exportService: ExportService
+  private exportService: ExportService,
+  private empresaService: EmpresaService
 ) {}
 
+ngOnInit() {
+  const hoje = new Date();
+  this.dataInicio = hoje;
+  this.dataFim    = hoje;
 
-  ngOnInit() {
-    const hoje = new Date();
-    this.dataInicio = hoje;
-    this.dataFim    = hoje;
-    this.empresaFiltro = 1;
+  this.empresaService.getEmpresas().subscribe(empresas => {
+    this.empresas = empresas;
+    this.empresasSelecionadas = [empresas[0]?.id]; // valor padrão
     this.carregar();
-  }
+  });
+}
 
   carregar() {
-    const d1 = this.dataInicio.toISOString().slice(0,10);
-    const d2 = this.dataFim   .toISOString().slice(0,10);
-
-    const emp = Number(this.empresaFiltro);
-    console.log('filtrando…', this.empresaFiltro, this.dataInicio, this.dataFim);
-
-    this.svc.produtividade(emp, d1, d2)
-    .subscribe({
-      next: rows => { this.dataSource.data = rows; },
-      error: err => { /* já logado no service */ }
+    const d1 = this.dataInicio.toISOString().slice(0, 10);
+    const d2 = this.dataFim.toISOString().slice(0, 10);
+    const emp = this.empresasSelecionadas; // ✅ Mantenha como number[]
+  
+    console.log('filtrando…', emp, this.dataInicio, this.dataFim);
+  
+    this.svc.produtividade(emp, d1, d2).subscribe({
+      next: rows => this.dataSource.data = rows,
+      error: err => { /* erro já tratado no service */ }
     });
   }
 
@@ -117,10 +124,11 @@ exportarPDF() {
     row.devolucoes
   ]);
 
+    
   this.exportService.exportToPDF(headers, rows, 'produtividade-colaborador', {
     dataInicio: this.dataInicio,
     dataFim: this.dataFim,
-    empresa: this.empresaFiltro
+    empresas: this.empresasSelecionadas.join(', ')
   });
 }
 }

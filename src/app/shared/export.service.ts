@@ -21,7 +21,7 @@ exportToPDF(
   headers: string[],
   rows: any[][],
   filename: string,
-  infoCabecalho: { dataInicio?: Date; dataFim?: Date; empresa?: number } = {}
+  infoCabecalho: Record<string, any> = {}
 ): void {
   const doc = new jsPDF();
 

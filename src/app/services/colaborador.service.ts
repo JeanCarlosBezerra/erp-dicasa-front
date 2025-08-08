@@ -21,16 +21,16 @@ export class ColaboradorService {
   constructor(private http: HttpClient) {}
 
   produtividade(
-    idempresa:  number,
-    dataInicio: string,
-    dataFim:    string,
+   empresas: number[],
+   dataInicio: string,
+   dataFim: string,
   ): Observable<ColaboradorProdutividade[]> {
     const params = new HttpParams()
-      .set('idempresa',  String(idempresa))
+      .set('idempresa',  String(empresas))
       .set('dataInicio', dataInicio)
       .set('dataFim',    dataFim);
 
-    console.log('Angular → chamando API produtividade', { idempresa, dataInicio, dataFim });
+    console.log('Angular → chamando API produtividade', { empresas, dataInicio, dataFim });
 
     return this.http
       .get<ColaboradorProdutividade[]>(`${this.api}/comercial/colaborador/produtividade`, { params })
