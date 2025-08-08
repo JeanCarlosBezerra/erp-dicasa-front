@@ -78,33 +78,32 @@ ngOnInit() {
   this.dataFim    = hoje;
 
   this.empresaService.getEmpresas().subscribe(empresas => {
-    this.empresas = empresas;
-    console.log('Empresas carregadas:', empresas);
+  this.empresas = empresas.map(e => ({
+    id: (e as any).IDEMPRESA ?? e.id,
+    nome: (e as any).NOMEFANTASIA ?? e.nome
+  }));
 
-    // Preenche a seleção com todas as empresas
-    this.empresasSelecionadas = empresas.map(emp => emp.id); 
-
-    this.carregar(); // tenta carregar os dados com empresas selecionadas
-  });
+  this.empresasSelecionadas = this.empresas.map(e => e.id); // seleciona todas por padrão
+  this.carregar();
+});
 }
 
   carregar() {
-
-    if (!this.empresasSelecionadas.length) {
+  if (!this.empresasSelecionadas || this.empresasSelecionadas.length === 0) {
     console.warn('Nenhuma empresa selecionada');
     return;
-    }
-    const d1 = this.dataInicio.toISOString().slice(0, 10);
-    const d2 = this.dataFim.toISOString().slice(0, 10);
-    const emp = this.empresasSelecionadas; // ✅ Mantenha como number[]
-  
-    console.log('filtrando…', emp, this.dataInicio, this.dataFim);
-  
-    this.svc.produtividade(emp, d1, d2).subscribe({
-      next: rows => this.dataSource.data = rows,
-      error: err => { /* erro já tratado no service */ }
-    });
   }
+
+  const d1 = this.dataInicio.toISOString().slice(0, 10);
+  const d2 = this.dataFim.toISOString().slice(0, 10);
+
+  console.log('Empresas selecionadas:', this.empresasSelecionadas); // deve logar [1,2,3]
+
+  this.svc.produtividade(this.empresasSelecionadas, d1, d2).subscribe({
+    next: rows => this.dataSource.data = rows,
+    error: err => console.error('Angular ← erro na API', err)
+  });
+}
 
   exportarExcel() {
   const headers = ['#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG', 'Devol.'];
