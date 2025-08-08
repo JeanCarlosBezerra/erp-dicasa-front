@@ -17,13 +17,14 @@
     </mat-form-field>
 
     <mat-form-field appearance="outline">
-  <mat-label>Empresas</mat-label>
-  <mat-select [(ngModel)]="empresasSelecionadas" multiple>
-    <mat-option *ngFor="let emp of empresas" [value]="emp.id">
-      {{ emp.nome }}
-    </mat-option>
-  </mat-select>
-</mat-form-field>
+    <mat-label>Empresas</mat-label>
+      <mat-select [(ngModel)]="empresasSelecionadas" multiple>
+        <mat-option *ngFor="let emp of empresas" [value]="emp.id">
+          {{ emp.nome }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
 
     <button mat-raised-button color="primary" (click)="carregar()">Filtrar</button>
   </div>

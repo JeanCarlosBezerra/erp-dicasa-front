@@ -78,17 +78,22 @@ ngOnInit() {
   this.dataFim    = hoje;
 
   this.empresaService.getEmpresas().subscribe(empresas => {
-  this.empresas = empresas;
-  console.log('Empresas carregadas:', empresas); // já está aqui
-  if (!empresas.length) {
-    console.error('⚠️ Nenhuma empresa carregada!');
-  }
-  this.empresasSelecionadas = [empresas[0]?.id];  // proteção com ?
-  this.carregar();
-});
+    this.empresas = empresas;
+    console.log('Empresas carregadas:', empresas);
+
+    // Preenche a seleção com todas as empresas
+    this.empresasSelecionadas = empresas.map(emp => emp.id); 
+
+    this.carregar(); // tenta carregar os dados com empresas selecionadas
+  });
 }
 
   carregar() {
+
+    if (!this.empresasSelecionadas.length) {
+    console.warn('Nenhuma empresa selecionada');
+    return;
+    }
     const d1 = this.dataInicio.toISOString().slice(0, 10);
     const d2 = this.dataFim.toISOString().slice(0, 10);
     const emp = this.empresasSelecionadas; // ✅ Mantenha como number[]
