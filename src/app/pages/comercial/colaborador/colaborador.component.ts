@@ -83,7 +83,7 @@ ngOnInit() {
     nome: (e as any).NOMEFANTASIA ?? e.nome
   }));
 
-  this.empresasSelecionadas = this.empresas.map(e => e.id); // seleciona todas por padrão
+  this.empresasSelecionadas = empresas.length ? [empresas[0].id] : [];
   this.carregar();
 });
 }
