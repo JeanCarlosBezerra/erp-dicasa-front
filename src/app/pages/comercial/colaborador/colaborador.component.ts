@@ -88,6 +88,10 @@ ngOnInit() {
 });
 }
 
+onEmpresasChange() {
+  this.carregar();
+}
+
   carregar() {
   if (!this.empresasSelecionadas || this.empresasSelecionadas.length === 0) {
     console.warn('Nenhuma empresa selecionada');
@@ -132,11 +136,16 @@ exportarPDF() {
     row.devolucoes
   ]);
 
-    
+  const empresasSelecionadasNomes = this.empresas
+    .filter(e => this.empresasSelecionadas.includes(e.id))
+    .map(e => `${e.id} - ${e.nome}`)
+    .join(', ');
+
   this.exportService.exportToPDF(headers, rows, 'produtividade-colaborador', {
     dataInicio: this.dataInicio,
     dataFim: this.dataFim,
-    empresas: this.empresasSelecionadas.join(', ')
+    // Troque para 'empresa' se o seu exportService espera esse nome
+    empresas: empresasSelecionadasNomes
   });
 }
 }
