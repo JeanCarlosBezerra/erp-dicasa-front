@@ -79,6 +79,7 @@ ngOnInit() {
 
   this.empresaService.getEmpresas().subscribe(empresas => {
     this.empresas = empresas;
+    console.log('Empresas carregadas:', empresas); // ⚠️ log pra debug
     this.empresasSelecionadas = [empresas[0]?.id]; // valor padrão
     this.carregar();
     console.log('Empresas carregadas:', empresas);
