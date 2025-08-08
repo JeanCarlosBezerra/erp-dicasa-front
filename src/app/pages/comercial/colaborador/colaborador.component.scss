@@ -71,3 +71,6 @@ th.mat-header-cell:last-child {
     }
   }
 }
+
+::ng-deep .mat-mdc-select-value { color: #fff; }         /* valor selecionado */
+::ng-deep .mdc-list-item__primary-text { color: #1f1f1f; } /* itens do dropdown */
