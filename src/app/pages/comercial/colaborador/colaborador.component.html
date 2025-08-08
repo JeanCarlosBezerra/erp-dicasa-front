@@ -16,12 +16,12 @@
       <mat-datepicker #dp2></mat-datepicker>
     </mat-form-field>
 
-    <mat-form-field appearance="outline">
+    <mat-form-field appearance="outline" *ngIf="empresas.length">
       <mat-label>Empresas</mat-label>
-        <mat-select [(ngModel)]="empresasSelecionadas" multiple>
-          <mat-option *ngFor="let empresa of empresas" [value]="empresa.id">
-            {{ empresa.nome }}
-          </mat-option>
+      <mat-select [(ngModel)]="empresasSelecionadas" multiple>
+        <mat-option *ngFor="let empresa of empresas" [value]="empresa.id">
+          {{ empresa.nome }}
+        </mat-option>
       </mat-select>
     </mat-form-field>
 

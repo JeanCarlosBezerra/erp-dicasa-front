@@ -21,25 +21,26 @@ export class ColaboradorService {
   constructor(private http: HttpClient) {}
 
   produtividade(
-   empresas: number[],
-   dataInicio: string,
-   dataFim: string,
+  idempresa: number[], // ✅ array de empresas
+  dataInicio: string,
+  dataFim: string
   ): Observable<ColaboradorProdutividade[]> {
-    const params = new HttpParams()
-      .set('idempresa',  String(empresas))
-      .set('dataInicio', dataInicio)
-      .set('dataFim',    dataFim);
+  let params = new HttpParams()
+    .set('dataInicio', dataInicio)
+    .set('dataFim', dataFim);
 
-    console.log('Angular → chamando API produtividade', { empresas, dataInicio, dataFim });
+  idempresa.forEach(id => {
+    params = params.append('idempresa', String(id)); // ✅ Envia múltiplos params
+  });
 
-    return this.http
-      .get<ColaboradorProdutividade[]>(`${this.api}/comercial/colaborador/produtividade`, { params })
-      .pipe(
-        tap(res => console.log('Angular ← resposta API', res)),
-        catchError(err => {
-          console.error('Angular ← erro na API', err);
-          return throwError(() => err);
-        })
-      );
+  return this.http
+    .get<ColaboradorProdutividade[]>(`${this.api}/comercial/colaborador/produtividade`, { params })
+    .pipe(
+      tap(res => console.log('Angular ← resposta API', res)),
+      catchError(err => {
+        console.error('Angular ← erro na API', err);
+        return throwError(() => err);
+      })
+    );  
   }
 }
