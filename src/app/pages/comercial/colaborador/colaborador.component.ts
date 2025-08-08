@@ -81,6 +81,7 @@ ngOnInit() {
     this.empresas = empresas;
     this.empresasSelecionadas = [empresas[0]?.id]; // valor padrão
     this.carregar();
+    console.log('Empresas carregadas:', empresas);
   });
 }
 
