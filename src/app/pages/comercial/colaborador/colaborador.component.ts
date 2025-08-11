@@ -80,7 +80,7 @@ ngOnInit() {
   this.empresaService.getEmpresas().subscribe(empresas => {
   this.empresas = empresas.map(e => ({
     id: (e as any).IDEMPRESA ?? e.id,
-    nome: (e as any).NOMEFANTASIA ?? e.nome
+    nome: (e as any).EMPALIAS ?? e.nome
   }));
 
   this.empresasSelecionadas = empresas.length ? [empresas[0].id] : [];
