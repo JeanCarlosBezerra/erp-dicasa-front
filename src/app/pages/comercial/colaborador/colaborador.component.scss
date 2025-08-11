@@ -72,6 +72,53 @@ th.mat-header-cell:last-child {
   }
 }
 
+.empresa-field .mat-mdc-select {
+  background: #fff !important;
+  border-radius: 8px;
+}
+
+/* chips (IDs selecionados) no trigger */
+.empresa-field .chip {
+  display: inline-block;
+  padding: 2px 8px;
+  margin-right: 6px;
+  border-radius: 12px;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Painel do dropdown mais largo e legível */
+.empresas-panel .mdc-list {
+  padding: 6px 0;
+  min-width: 420px;
+  max-width: 520px;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.option-id {
+  min-width: 42px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  text-align: center;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.option-name {
+  white-space: normal;
+  line-height: 1.2;
+  color: #1f2937;
+}
+
 /* Força o fundo sólido e o texto visível no campo selecionado */
 ::ng-deep .mat-mdc-select {
   background-color: #fff !important; /* Fundo sólido */
@@ -90,6 +137,6 @@ th.mat-header-cell:last-child {
   opacity: 1 !important;
 }
 
-::ng-deep .mat-mdc-select {
-  border: 1px solid rgba(0,0,0,0.2);
-}
+//::ng-deep .mat-mdc-select {
+//  border: 1px solid rgba(0,0,0,0.2);
+//

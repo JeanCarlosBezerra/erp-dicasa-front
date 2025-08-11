@@ -145,7 +145,7 @@ exportarPDF() {
     dataInicio: this.dataInicio,
     dataFim: this.dataFim,
     // Troque para 'empresa' se o seu exportService espera esse nome
-    empresas: empresasSelecionadasNomes
+    empresa: empresasSelecionadasNomes
   });
 }
 }
