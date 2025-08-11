@@ -1,0 +1,21 @@
+<div class="header">
+  <h2>Indicadores</h2>
+  <div class="actions">
+    <button mat-stroked-button color="primary">
+      <mat-icon>refresh</mat-icon> Atualizar
+    </button>
+  </div>
+</div>
+
+<div class="kpi-grid">
+  <mat-card class="kpi" *ngFor="let k of kpis" appearance="outlined">
+    <div class="kpi-top">
+      <span class="kpi-title">{{ k.title }}</span>
+      <mat-icon class="kpi-trend" [ngClass]="k.trend">{{ iconFor(k.trend) }}</mat-icon>
+    </div>
+
+    <div class="kpi-value">{{ k.value }}</div>
+
+    <div class="kpi-sub" *ngIf="k.subtitle">{{ k.subtitle }}</div>
+  </mat-card>
+</div>

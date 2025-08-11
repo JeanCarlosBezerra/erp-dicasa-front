@@ -7,6 +7,7 @@ import { Contasreceber } from './pages/financeiro/contasreceber/contasreceber.co
 import { HomeComponent } from './pages/home/home.component';
 import { ColaboradorComponent } from './pages/comercial/colaborador/colaborador.component';
 import { DashboardComercialComponent } from './pages/comercial/dashboard/dashboard.component';
+import { IndicadoresComponent } from './pages/financeiro/indicadores/indicadores.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -19,6 +20,7 @@ export const routes: Routes = [
       // Home e Financeiro
       { path: 'home',           component: HomeComponent },
       { path: 'financeiro/dashboard',      component: DashboardComponent },
+      { path: 'financeiro/indicadores',    component: IndicadoresComponent },
       { path: 'financeiro/fluxo-caixa',    component: FluxoCaixaComponent },
       { path: 'financeiro/contas-receber', component: Contasreceber },
 
