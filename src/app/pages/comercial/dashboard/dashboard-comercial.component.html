@@ -42,10 +42,10 @@
       <div class="value">R$ {{ moeda(c.lucro) }}</div>
     </div>
 
-    <div class="metric">
+    <div class="metric" [class.neg]="margemReal(c) < 0">
       <label>% Lucro</label>
-      <div class="value">{{ (margemReal(c) * 100) | number:'1.1-1' }}%</div>
-    </div>
+    <div class="value">{{ (margemReal(c) * 100) | number:'1.1-1' }}%</div>
+</div>
   </div>
 </div>
 
