@@ -77,16 +77,16 @@ export class DashboardComercialComponent implements OnInit {
     ]);
 
     // cria um mapa de empresas por id para pegar o apelido
-    const empMap = new Map<number, EmpresaLite>();
-    (empresas || []).forEach(e => empMap.set(e.id, e));
+    const empMap = new Map<number, { id: number; apelido: string }>();
+    (empresas ?? []).forEach(e => empMap.set(e.id, e));
 
     // enriquece os indicadores com o apelido e **filtra** só quem tem valor
-    this.cards = (indic || [])
-      .map(i => ({
-        ...i,
-        apelido: empMap.get(i.idEmpresa)?.apelido
-      }))
-      .filter(i => (i.faturamento ?? 0) > 0 || (i.lucro ?? 0) > 0);
+    this.cards = (indic ?? [])
+    .map(i => ({
+    ...i,
+    apelido: empMap.get(i.idEmpresa)?.apelido ?? String(i.idEmpresa)
+    }))
+    .filter(i => (i.faturamento ?? 0) > 0 || (i.lucro ?? 0) > 0);
 
     // agora os totais do seu template vão somar certo
   } finally {

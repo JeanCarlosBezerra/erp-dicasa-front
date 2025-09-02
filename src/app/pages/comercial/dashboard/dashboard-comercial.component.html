@@ -25,8 +25,11 @@
 <div class="cards-grid">
   <div class="card" *ngFor="let c of cards">
     <div class="card-head">
-      <mat-icon>blur_on</mat-icon>
-      <span class="apelido">{{ c.apelido || c.idEmpresa }}</span>
+      <mat-icon class="pin">grid_view</mat-icon>
+      <div class="empresa">
+        <div class="apelido">{{ c.apelido }}</div>
+        <div class="sub">ID {{ c.idEmpresa }}</div>
+      </div>
     </div>
 
     <div class="metric">
