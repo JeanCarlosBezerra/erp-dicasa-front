@@ -15,6 +15,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { DashboardComercialService, IndicadorEmpresa } from '../../../services/dashboard-comercial.service';
 import { EmpresaService } from '../../../services/empresa.service';
 
+interface EmpresaLite {
+  id: number;
+  apelido: string; // EMPALIAS / NOMEFANTASIA
+}
+
+interface IndicadorEmpresaComercial {
+  idEmpresa: number;
+  faturamento: number;
+  lucro: number;
+  // % lucro você já calcula no component
+}
+
 @Component({
   selector: 'app-dashboard-comercial',
   templateUrl: './dashboard-comercial.component.html',
@@ -31,12 +43,17 @@ import { EmpresaService } from '../../../services/empresa.service';
     MatIconModule,
   ],
 })
+
+
 export class DashboardComercialComponent implements OnInit {
+  
+  cards: Array<IndicadorEmpresaComercial & { apelido?: string }> = [];
+
   dataInicio = new Date();
   dataFim = new Date();
 
   carregando = false;
-  cards: IndicadorEmpresa[] = [];      // um card por empresa
+  //cards: IndicadorEmpresa[] = [];      // um card por empresa
   metas: Record<number, { metaFat?: number; metaMargem?: number }> = {}; // se quiser manter metas locais
 
   constructor(
@@ -49,37 +66,37 @@ export class DashboardComercialComponent implements OnInit {
     this.buscar();
   }
 
-  toISO(d: Date) {
-    return d.toISOString().slice(0, 10);
+  async buscar() {
+  this.carregando = true;
+
+  try {
+    const [empresas, indic] = await Promise.all([
+      this.empresaSvc.getEmpresas().toPromise(),                // [{id, apelido}, ...]
+      this.dashSvc.indicadores(this.dataISO(this.dataInicio),
+                               this.dataISO(this.dataFim)).toPromise() // [{idEmpresa, faturamento, lucro}, ...]
+    ]);
+
+    // cria um mapa de empresas por id para pegar o apelido
+    const empMap = new Map<number, EmpresaLite>();
+    (empresas || []).forEach(e => empMap.set(e.id, e));
+
+    // enriquece os indicadores com o apelido e **filtra** só quem tem valor
+    this.cards = (indic || [])
+      .map(i => ({
+        ...i,
+        apelido: empMap.get(i.idEmpresa)?.apelido
+      }))
+      .filter(i => (i.faturamento ?? 0) > 0 || (i.lucro ?? 0) > 0);
+
+    // agora os totais do seu template vão somar certo
+  } finally {
+    this.carregando = false;
   }
+}
 
-    async buscar() {
-    try {
-      this.carregando = true;
-      // exemplo: primeiro busca empresas e gera cards vazios
-      const empresas = await this.empresaSvc.getEmpresas().toPromise();
-      // mapeia empresas para ID/apelido, adequar as props conforme retorno da API
-      const map = (empresas || []).map(e => ({ idEmpresa: e.id, apelido: e.apelido }));
-
-      // chama backend de indicadores com as datas
-      const d1 = this.dataInicio.toISOString().slice(0, 10);
-      const d2 = this.dataFim.toISOString().slice(0, 10);
-      const indicadores = await this.dashSvc.indicadores(d1, d2).toPromise();
-
-      // junta as listas por idEmpresa
-      const porId = new Map<number, IndicadorEmpresa>();
-      (indicadores || []).forEach(i => porId.set(i.idEmpresa, i));
-
-      this.cards = map.map(m => ({
-        idEmpresa: m.idEmpresa,
-        apelido  : m.apelido,
-        faturamento: porId.get(m.idEmpresa)?.faturamento ?? 0,
-        lucro      : porId.get(m.idEmpresa)?.lucro ?? 0,
-      }));
-    } finally {
-      this.carregando = false;
-    }
-  }
+private dataISO(d: Date) {
+  return d?.toISOString().slice(0, 10);
+}
 
   // util para formatar moeda (se você ainda não usa pipe currency)
   moeda(v: number | null | undefined): string {
@@ -96,7 +113,7 @@ export class DashboardComercialComponent implements OnInit {
   get faturamentoTotal(): number {
     return this.cards.reduce((s, c) => s + (c.faturamento || 0), 0);
   }
-  
+
   get lucroTotal(): number {
     return this.cards.reduce((s, c) => s + (c.lucro || 0), 0);
   }
