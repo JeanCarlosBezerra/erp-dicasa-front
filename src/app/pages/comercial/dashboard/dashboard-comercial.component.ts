@@ -75,16 +75,22 @@ export class DashboardComercialComponent implements OnInit {
       this.dashSvc.indicadores(this.dataISO(this.dataInicio),
                                this.dataISO(this.dataFim)).toPromise() // [{idEmpresa, faturamento, lucro}, ...]
     ]);
+    
 
     // cria um mapa de empresas por id para pegar o apelido
     const empMap = new Map<number, { id: number; apelido: string }>();
-    (empresas ?? []).forEach(e => empMap.set(e.id, e));
+    (empresas as any[] ?? []).forEach((e: any) => {
+    const id = e.id ?? e.IDEMPRESA;
+    const apelido = e.apelido ?? e.EMPALIAS ?? e.NOMEFANTASIA ?? String(id);
+    empMap.set(id, { id, apelido });
+    });
+
 
     // enriquece os indicadores com o apelido e **filtra** só quem tem valor
     this.cards = (indic ?? [])
     .map(i => ({
-    ...i,
-    apelido: empMap.get(i.idEmpresa)?.apelido ?? String(i.idEmpresa)
+      ...i,
+      apelido: empMap.get(i.idEmpresa)?.apelido ?? String(i.idEmpresa),
     }))
     .filter(i => (i.faturamento ?? 0) > 0 || (i.lucro ?? 0) > 0);
 
