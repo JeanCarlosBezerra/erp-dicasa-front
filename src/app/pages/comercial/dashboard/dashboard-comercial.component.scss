@@ -1,0 +1,43 @@
+/* src/app/modules/financeiro/pages/dashboard-invest/dashboard-invest.component.scss */
+.page-header {
+  display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  .filters { display:flex; gap:12px; align-items:center; }
+  h2 { margin:0 12px 0 0; }
+}
+
+.cards-grid {
+  display:grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap:16px; margin-top:16px;
+}
+
+.card {
+  background:#fff;
+  border-radius:12px;
+  box-shadow:0 4px 16px rgba(0,0,0,.06);
+  padding:16px; display:flex; flex-direction:column; gap:12px;
+
+  .card-head {
+    display:flex; align-items:center; gap:8px; font-weight:600;
+    .apelido { font-size:16px; }
+    mat-icon { font-size:18px; width:18px; height:18px; }
+  }
+
+  .metric {
+    label { font-size:12px; color:#718096; }
+    .value { font-size:18px; font-weight:600; }
+  }
+}
+
+.totais {
+  margin:20px 0; display:flex; gap:16px; flex-wrap:wrap;
+
+  .total-card {
+    flex:1; min-width:280px; border-radius:12px; padding:18px;
+    color:#fff; display:flex; flex-direction:column; gap:6px;
+    .label { opacity:.9; }
+    .big { font-size:22px; font-weight:700; }
+    &.green { background:linear-gradient(135deg,#2ecc71,#27ae60); }
+    &.blue  { background:linear-gradient(135deg,#3498db,#2980b9); }
+  }
+}

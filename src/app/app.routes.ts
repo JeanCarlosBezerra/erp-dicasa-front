@@ -6,7 +6,7 @@ import { FluxoCaixaComponent } from './pages/financeiro/fluxocaixa/fluxocaixa.co
 import { Contasreceber } from './pages/financeiro/contasreceber/contasreceber.component';
 import { HomeComponent } from './pages/home/home.component';
 import { ColaboradorComponent } from './pages/comercial/colaborador/colaborador.component';
-import { DashboardComercialComponent } from './pages/comercial/dashboard/dashboard.component';
+import { DashboardComercialComponent } from './pages/comercial/dashboard/dashboard-comercial.component';
 import { IndicadoresComponent } from './pages/financeiro/indicadores/indicadores.component';
 
 export const routes: Routes = [

@@ -19,7 +19,7 @@ import { ColaboradorProdutividade, ColaboradorService } from '../../../services/
 import { NgForm }                          from '@angular/forms';             // para ngModel
 import { ExportService } from '../../../shared/export.service';
 import { MatIconModule } from '@angular/material/icon'; // ✅ IMPORTAR
-import { EmpresaService } from '../../..//services/empresa.service';
+import { EmpresaService } from '../../../services/empresa.service';
 import { Empresa } from '../../../models/empresa.model';
 
 
@@ -80,7 +80,8 @@ ngOnInit() {
   this.empresaService.getEmpresas().subscribe(empresas => {
   this.empresas = empresas.map(e => ({
     id: (e as any).IDEMPRESA ?? e.id,
-    nome: (e as any).EMPALIAS ?? e.nome
+    nome: (e as any).EMPALIAS ?? e.nome,
+    apelido: (e as any).APELIDO ?? e.apelido
   }));
 
   this.empresasSelecionadas = empresas.length ? [empresas[0].id] : [];

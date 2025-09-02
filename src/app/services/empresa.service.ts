@@ -10,6 +10,7 @@ import { environment } from '../../environments/environment'; // ← importa aqu
 export class EmpresaService {
   private readonly url = `${environment.apiUrl}/empresas`; // ← usa o IP fixo do environment.ts
 
+
   constructor(private http: HttpClient) {}
 
   getEmpresas(): Observable<Empresa[]> {
