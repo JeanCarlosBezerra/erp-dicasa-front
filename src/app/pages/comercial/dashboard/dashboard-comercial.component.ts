@@ -76,7 +76,7 @@ export class DashboardComercialComponent implements OnInit {
                                this.dataISO(this.dataFim)).toPromise() // [{idEmpresa, faturamento, lucro}, ...]
     ]);
     
-
+    
     // cria um mapa de empresas por id para pegar o apelido
     const empMap = new Map<number, { id: number; apelido: string }>();
     (empresas as any[] ?? []).forEach((e: any) => {
@@ -85,7 +85,7 @@ export class DashboardComercialComponent implements OnInit {
     empMap.set(id, { id, apelido });
     });
 
-
+    console.log('empresas =>', empresas); // veja se vem IDEMPRESA/EMPALIAS
     // enriquece os indicadores com o apelido e **filtra** só quem tem valor
     this.cards = (indic ?? [])
     .map(i => ({
