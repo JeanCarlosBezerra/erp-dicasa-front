@@ -29,23 +29,20 @@
       <div class="apelido">{{ c.apelido }}</div>
     </div>
 
-    <!-- Debug rápido (remover depois) -->
-    <pre style="font-size:11px; opacity:.6; margin:4px 0 0; white-space:pre-wrap;">
-{{ c | json }}
-    </pre>
-
     <div class="metric">
       <label>Faturamento Real</label>
       <div class="value">R$ {{ moeda(c.faturamento) }}</div>
     </div>
+
     <div class="metric">
       <label>Lucro Real</label>
       <div class="value">R$ {{ moeda(c.lucro) }}</div>
     </div>
+
     <div class="metric" [class.neg]="margemReal(c) < 0">
       <label>% Lucro</label>
-      <div class="value">{{ (margemReal(c) * 100) | number:'1.1-1' }}%</div>
-    </div>
+    <div class="value">{{ (margemReal(c) * 100) | number:'1.1-1' }}%</div>
+</div>
   </div>
 </div>
 
