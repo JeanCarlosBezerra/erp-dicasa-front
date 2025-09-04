@@ -21,12 +21,13 @@ interface EmpresaLite {
   apelido: string; // EMPALIAS / NOMEFANTASIA
 }
 
-interface IndicadorEmpresaComercial {
-  idEmpresa: number;
+// troque por um tipo "Card" que aceita null no id e tem apelido
+type IndicadorCard = {
+  idEmpresa: number | null;   // 👈 pode vir null
   faturamento: number;
   lucro: number;
-  // % lucro você já calcula no component
-}
+  apelido: string;            // 👈 string garantida
+};
 
 @Component({
   selector: 'app-dashboard-comercial',
@@ -48,7 +49,7 @@ interface IndicadorEmpresaComercial {
 
 export class DashboardComercialComponent implements OnInit {
   
-  cards: Array<IndicadorEmpresaComercial & { apelido?: string }> = [];
+  cards: IndicadorCard[] = [];
 
   dataInicio = new Date();
   dataFim = new Date();
@@ -94,16 +95,32 @@ async buscar() {
     // monta cards tipados e loga cada um
     this.cards = (indic ?? [])
       .map((i: any) => {
-        const idEmp       = Number(i?.idEmpresa ?? i?.IDEMPRESA);
-        const faturamento = Number(i?.faturamento ?? i?.FATURAMENTO) || 0;
-        const lucro       = Number(i?.lucro ?? i?.LUCRO) || 0;
-        const apelido     = empMap.get(idEmp) ?? String(idEmp);
+    // Pega todas as variações possíveis de nome:
+    const idRaw =
+      i?.idEmpresa ??
+      i?.IDEMPRESA ??
+      i?.idempresa ??
+      i?.empresa ??
+      i?.ID_EMPRESA;
 
-        const card = { idEmpresa: idEmp, faturamento, lucro, apelido };
-        console.log('[CARD]', card);                                    // ⬅️ log D
-        return card;
-      })
-      .filter(c => c.faturamento > 0 || c.lucro > 0);
+    const idEmp = (idRaw === null || idRaw === undefined || idRaw === '')
+      ? undefined
+      : Number(idRaw);
+
+    const faturamento = Number(i?.faturamento ?? i?.FATURAMENTO) || 0;
+    const lucro       = Number(i?.lucro ?? i?.LUCRO) || 0;
+
+    // Se não tem id, não tenta achar apelido; exibe traço
+    const apelido = (idEmp !== undefined && !Number.isNaN(idEmp))
+      ? (empMap.get(idEmp) ?? String(idEmp))
+      : '—';
+
+    const card = { idEmpresa: idEmp ?? null, faturamento, lucro, apelido };
+    console.log('[CARD]', card);
+    return card;
+  })
+  // mantém a filtragem por valor
+  .filter(c => c.faturamento > 0 || c.lucro > 0);
 
     console.log('[CARDS][FINAL]', this.cards);                          // ⬅️ log E
   } catch (err) {
@@ -121,7 +138,7 @@ async buscar() {
     return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  margemReal(c: IndicadorEmpresaComercial) {
+  margemReal(c: IndicadorCard ) {
     const fat = c.faturamento || 0;
     return fat ? (c.lucro || 0) / fat : 0;
   }
