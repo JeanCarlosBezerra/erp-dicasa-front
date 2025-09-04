@@ -67,32 +67,30 @@ export class DashboardComercialComponent implements OnInit {
     this.buscar();
   }
 
-  async buscar() {
+async buscar() {
     this.carregando = true;
     try {
-      const [empresas, indic] = await firstValueFrom(
-        combineLatest([
-          this.empresaSvc.getEmpresas(), // EmpresaLite[]
-          this.dashSvc.indicadores(this.dataISO(this.dataInicio), this.dataISO(this.dataFim)),
-        ])
-      );
+      const empresas = await firstValueFrom(this.empresaSvc.getEmpresas()); // EmpresaLite[]
+      const indic    = await firstValueFrom(
+        this.dashSvc.indicadores(this.dataISO(this.dataInicio), this.dataISO(this.dataFim))
+      ); // { idEmpresa, faturamento, lucro }[]
 
-      // Mapa id -> apelido
+      // mapa id -> apelido
       const empMap = new Map<number, string>();
-      (empresas ?? []).forEach((e: EmpresaLite) => {
-        empMap.set(Number(e.id), e.apelido);
-      });
+      empresas.forEach(e => empMap.set(e.id, e.apelido));
 
+      // monta os cards, garantindo tipos numéricos e apelido string
       this.cards = (indic ?? [])
         .map(i => {
-          const id = Number((i as any).idEmpresa);
-          const fat = Number((i as any).faturamento ?? 0);
-          const luc = Number((i as any).lucro ?? 0);
-          const apelido = empMap.get(id) ?? String(id);
-          return { idEmpresa: id, faturamento: fat, lucro: luc, apelido };
+          const idEmp = Number((i as any).idEmpresa);
+          return {
+            idEmpresa   : idEmp,
+            faturamento : Number((i as any).faturamento) || 0,
+            lucro       : Number((i as any).lucro) || 0,
+            apelido     : empMap.get(idEmp) ?? String(idEmp),
+          };
         })
-        // só mostra quem tem algum valor
-        .filter(x => x.faturamento > 0 || x.lucro > 0);
+        .filter(c => c.faturamento > 0 || c.lucro > 0);
     } finally {
       this.carregando = false;
     }
