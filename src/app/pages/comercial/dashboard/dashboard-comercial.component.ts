@@ -10,6 +10,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { firstValueFrom, combineLatest } from 'rxjs';
 
 // service que você criou para chamar o backend
 import { DashboardComercialService, IndicadorEmpresa } from '../../../services/dashboard-comercial.service';
@@ -67,61 +68,52 @@ export class DashboardComercialComponent implements OnInit {
   }
 
   async buscar() {
-  this.carregando = true;
+    this.carregando = true;
+    try {
+      const [empresas, indic] = await firstValueFrom(
+        combineLatest([
+          this.empresaSvc.getEmpresas(), // EmpresaLite[]
+          this.dashSvc.indicadores(this.dataISO(this.dataInicio), this.dataISO(this.dataFim)),
+        ])
+      );
 
-  try {
-    const [empresas, indic] = await Promise.all([
-      this.empresaSvc.getEmpresas().toPromise(),                // [{id, apelido}, ...]
-      this.dashSvc.indicadores(this.dataISO(this.dataInicio),
-                               this.dataISO(this.dataFim)).toPromise() // [{idEmpresa, faturamento, lucro}, ...]
-    ]);
-    
-    
-    // cria um mapa de empresas por id para pegar o apelido
-    const empMap = new Map<number, { id: number; apelido: string }>();
-    (empresas as any[] ?? []).forEach((e: any) => {
-    const id = e.id ?? e.IDEMPRESA;
-    const apelido = e.apelido ?? e.EMPALIAS ?? e.NOMEFANTASIA ?? String(id);
-    empMap.set(id, { id, apelido });
-    });
+      // Mapa id -> apelido
+      const empMap = new Map<number, string>();
+      (empresas ?? []).forEach((e: EmpresaLite) => {
+        empMap.set(Number(e.id), e.apelido);
+      });
 
-    console.log('empresas =>', empresas); // veja se vem IDEMPRESA/EMPALIAS
-    // enriquece os indicadores com o apelido e **filtra** só quem tem valor
-    this.cards = (indic ?? [])
-    .map(i => ({
-      ...i,
-      apelido: empMap.get(i.idEmpresa)?.apelido ?? String(i.idEmpresa),
-    }))
-    .filter(i => (i.faturamento ?? 0) > 0 || (i.lucro ?? 0) > 0);
-
-    // agora os totais do seu template vão somar certo
-  } finally {
-    this.carregando = false;
+      this.cards = (indic ?? [])
+        .map(i => {
+          const id = Number((i as any).idEmpresa);
+          const fat = Number((i as any).faturamento ?? 0);
+          const luc = Number((i as any).lucro ?? 0);
+          const apelido = empMap.get(id) ?? String(id);
+          return { idEmpresa: id, faturamento: fat, lucro: luc, apelido };
+        })
+        // só mostra quem tem algum valor
+        .filter(x => x.faturamento > 0 || x.lucro > 0);
+    } finally {
+      this.carregando = false;
+    }
   }
-}
 
-private dataISO(d: Date) {
-  return d?.toISOString().slice(0, 10);
-}
+ private dataISO(d: Date) { return d?.toISOString().slice(0, 10); }
 
-  // util para formatar moeda (se você ainda não usa pipe currency)
-  moeda(v: number | null | undefined): string {
+  moeda(v?: number | null) {
     const n = Number(v || 0);
     return n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
-  margemReal(c: IndicadorEmpresa): number {
+  margemReal(c: IndicadorEmpresaComercial) {
     const fat = c.faturamento || 0;
-    if (!fat) return 0;
-    return (c.lucro || 0) / fat;
+    return fat ? (c.lucro || 0) / fat : 0;
   }
 
-  get faturamentoTotal(): number {
+  get faturamentoTotal() {
     return this.cards.reduce((s, c) => s + (c.faturamento || 0), 0);
   }
-
-  get lucroTotal(): number {
+  get lucroTotal() {
     return this.cards.reduce((s, c) => s + (c.lucro || 0), 0);
   }
 }
-

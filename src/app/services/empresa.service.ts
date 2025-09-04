@@ -26,10 +26,16 @@ export class EmpresaService {
   getEmpresas(): Observable<EmpresaLite[]> {
     return this.http.get<EmpresaRaw[]>(this.url).pipe(
       map(rows =>
-        (rows ?? []).map(r => ({
-          id: r.IDEMPRESA,
-          apelido: r.EMPALIAS ?? r.NOMEFANTASIA ?? String(r.IDEMPRESA),
-        }))
+        (rows ?? []).map(r => {
+          const id = Number(r.IDEMPRESA);
+          // pega EMPALIAS/NOMEFANTASIA, remove espaços e trata a string "undefined"
+          const raw =
+            (r.EMPALIAS ?? r.NOMEFANTASIA ?? '').toString().trim();
+          const apelido =
+            raw && raw.toLowerCase() !== 'undefined' ? raw : String(id);
+
+          return { id, apelido } as EmpresaLite;
+        })
       )
     );
   }

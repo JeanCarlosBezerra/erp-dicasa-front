@@ -35,6 +35,7 @@
     <!-- Opções com ID destacado + nome ao lado -->
     <mat-option *ngFor="let e of empresas" [value]="e.id">
       <div class="option-row">
+        <span class="option-id">{{ e.id }}</span>
         <span class="option-name">{{ e.apelido }}</span>
       </div>
     </mat-option>
