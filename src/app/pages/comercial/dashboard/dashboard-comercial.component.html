@@ -1,4 +1,27 @@
 <!-- src/app/pages/comercial/dashboard/dashboard-comercial.component.html -->
+<div class="page-header">
+  <h2>Metas por Empresa</h2>
+
+  <div class="filters">
+    <mat-form-field appearance="fill">
+      <mat-label>Data Início</mat-label>
+      <input matInput [matDatepicker]="dp1" [(ngModel)]="dataInicio" />
+      <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
+      <mat-datepicker #dp1></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Data Fim</mat-label>
+      <input matInput [matDatepicker]="dp2" [(ngModel)]="dataFim" />
+      <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
+      <mat-datepicker #dp2></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="buscar()" [disabled]="carregando">
+      {{ carregando ? 'Carregando…' : 'Calcular ' }}
+    </button>
+  </div>
+</div>
 
 <div class="cards-grid">
   <div class="card" *ngFor="let c of cards">
