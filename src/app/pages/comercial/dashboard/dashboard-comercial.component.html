@@ -1,26 +1,4 @@
-<div class="page-header">
-  <h2>Metas por Empresa</h2>
-
-  <div class="filters">
-    <mat-form-field appearance="fill">
-      <mat-label>Data Início</mat-label>
-      <input matInput [matDatepicker]="dp1" [(ngModel)]="dataInicio" />
-      <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
-      <mat-datepicker #dp1></mat-datepicker>
-    </mat-form-field>
-
-    <mat-form-field appearance="fill">
-      <mat-label>Data Fim</mat-label>
-      <input matInput [matDatepicker]="dp2" [(ngModel)]="dataFim" />
-      <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
-      <mat-datepicker #dp2></mat-datepicker>
-    </mat-form-field>
-
-    <button mat-raised-button color="primary" (click)="buscar()" [disabled]="carregando">
-      {{ carregando ? 'Carregando…' : 'Calcular ' }}
-    </button>
-  </div>
-</div>
+<!-- src/app/pages/comercial/dashboard/dashboard-comercial.component.html -->
 
 <div class="cards-grid">
   <div class="card" *ngFor="let c of cards">
@@ -29,6 +7,37 @@
       <div class="apelido">{{ c.apelido }}</div>
     </div>
 
+    <!-- EDITÁVEIS: Meta Faturamento e Meta Margem (%) -->
+    <div class="metric">
+      <label>Meta Faturamento</label>
+      <div class="value">
+        <input
+          type="number"
+          min="0"
+          step="1"
+          [(ngModel)]="metas[c.idEmpresa || -1].metaFat"
+          (ngModelChange)="onChangeMeta(c)"
+          style="width: 160px; text-align: right;"
+        />
+      </div>
+    </div>
+
+    <div class="metric">
+      <label>Meta Margem (%)</label>
+      <div class="value">
+        <input
+          type="number"
+          min="0"
+          max="100"
+          step="0.1"
+          [ngModel]="(metas[c.idEmpresa || -1]?.metaMargem || 0) * 100"
+          (ngModelChange)="metas[c.idEmpresa || -1].metaMargem = ($event ?? 0)/100; onChangeMeta(c)"
+          style="width: 80px; text-align: right;"
+        />
+      </div>
+    </div>
+
+    <!-- REAIS (do banco) -->
     <div class="metric">
       <label>Faturamento Real</label>
       <div class="value">R$ {{ moeda(c.faturamento) }}</div>
@@ -39,26 +48,73 @@
       <div class="value">R$ {{ moeda(c.lucro) }}</div>
     </div>
 
-    <div class="metric" [class.neg]="margemReal(c) < 0">
+    <!-- % margem real -->
+    <div class="metric">
       <label>% Lucro</label>
-    <div class="value">{{ (margemReal(c) * 100) | number:'1.1-1' }}%</div>
-</div>
+      <div class="value">{{ pct(margemReal(c) * 100) }}</div>
+    </div>
+
+    <!-- BLOCO ANALÍTICO (derivados da meta) -->
+    <div class="panel">
+      <div class="row">
+        <span>% Faturamento:</span>
+        <strong [class.pos]="percFaturamento(c)>=100" [class.neg]="percFaturamento(c)<100">
+          {{ pct(percFaturamento(c)) }}
+        </strong>
+      </div>
+
+      <div class="row">
+        <span>Saldo Faturamento:</span>
+        <strong [class.pos]="saldoFaturamento(c)>=0" [class.neg]="saldoFaturamento(c)<0">
+          R$ {{ moeda(saldoFaturamento(c)) }}
+        </strong>
+      </div>
+
+      <div class="row">
+        <span>Variação:</span>
+        <strong [class.pos]="variacaoFaturamento(c)>=0" [class.neg]="variacaoFaturamento(c)<0">
+          {{ signo(variacaoFaturamento(c)) }}{{ pct(variacaoFaturamento(c)) }}
+        </strong>
+      </div>
+
+      <div class="row">
+        <span>% Lucro (vs meta):</span>
+        <strong [class.pos]="percLucro(c)>=100" [class.neg]="percLucro(c)<100">
+          {{ pct(percLucro(c)) }}
+        </strong>
+      </div>
+
+      <div class="row">
+        <span>Saldo Lucro:</span>
+        <strong [class.pos]="saldoLucro(c)>=0" [class.neg]="saldoLucro(c)<0">
+          R$ {{ moeda(saldoLucro(c)) }}
+        </strong>
+      </div>
+
+      <div class="row">
+        <span>Margem Real:</span>
+        <strong>{{ pct(margemReal(c)*100) }}</strong>
+      </div>
+
+      <div class="row">
+        <span>Diferença Margem:</span>
+        <strong [class.pos]="margemVar(c)>=0" [class.neg]="margemVar(c)<0">
+          {{ signo(margemVar(c)*100) }}{{ pct(margemVar(c)*100) }}
+        </strong>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- Totais -->
+<!-- Totais (os mesmos que você já tinha) -->
 <div class="totais">
   <div class="total-card green">
     <div class="label">Faturamento Total</div>
-    <div class="big">
-      R$ {{ moeda(faturamentoTotal) }}
-    </div>
+    <div class="big">R$ {{ moeda(faturamentoTotal) }}</div>
   </div>
 
   <div class="total-card blue">
     <div class="label">Lucro Total</div>
-    <div class="big">
-      R$ {{ moeda(lucroTotal) }}
-    </div>
+    <div class="big">R$ {{ moeda(lucroTotal) }}</div>
   </div>
 </div>
