@@ -13,7 +13,6 @@ interface EmpresaRaw {
 
 export interface EmpresaLite {
   id: number;
-  nome: string;
   apelido: string;
 }
 
@@ -22,16 +21,16 @@ export interface EmpresaLite {
 })
 export class EmpresaService {
   private readonly url = `${environment.apiUrl}/empresas`; // ← usa o IP fixo do environment.ts
-
-
   constructor(private http: HttpClient) {}
 
-  getEmpresas() {
-  return this.http.get<EmpresaRaw[]>(this.url).pipe(
-    map(list => (list ?? []).map(r => ({
-      id: r.IDEMPRESA,
-      apelido: r.EMPALIAS || r.NOMEFANTASIA || String(r.IDEMPRESA)
-    } as EmpresaLite)))
-  );
-}
+  getEmpresas(): Observable<EmpresaLite[]> {
+    return this.http.get<EmpresaRaw[]>(this.url).pipe(
+      map(rows =>
+        (rows ?? []).map(r => ({
+          id: r.IDEMPRESA,
+          apelido: r.EMPALIAS ?? r.NOMEFANTASIA ?? String(r.IDEMPRESA),
+        }))
+      )
+    );
+  }
 }
