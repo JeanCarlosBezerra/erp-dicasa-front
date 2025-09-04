@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, map, tap } from 'rxjs';        // ⬅️  tap aqui
 import { environment } from '../../environments/environment'; // ← importa aqui
 
 interface EmpresaRaw {
@@ -24,16 +23,24 @@ export class EmpresaService {
 
   getEmpresas(): Observable<EmpresaLite[]> {
     return this.http.get<any[]>(this.url).pipe(
+      tap(raw => console.log('[EMPRESAS][RAW]', raw)),                  // ⬅️ log 1
+
       map(rows => (rows ?? []).map(r => {
-        // id sempre number
-        const id = Number(r.IDEMPRESA ?? r.id);
+        const id = Number(r?.IDEMPRESA ?? r?.id);
+        // Pega EMPALIAS / NOMEFANTASIA e força STRING
+        let rawApelido = (r?.EMPALIAS ?? r?.NOMEFANTASIA ?? '').toString().trim();
 
-        // apelido sempre string (EMPALIAS > NOMEFANTASIA > id)
-        const raw = (r.EMPALIAS ?? r.NOMEFANTASIA ?? '').toString().trim();
-        const apelido = raw && raw.toLowerCase() !== 'undefined' ? raw : String(id);
+        // trata casos "undefined", null, string vazia
+        if (!rawApelido || /^(undefined|null)$/i.test(rawApelido)) {
+          rawApelido = String(id);
+        }
 
-        return { id, apelido } as EmpresaLite;
-      }))
+        const item = { id, apelido: rawApelido } as EmpresaLite;
+        console.log('[EMPRESAS][MAP]', item);                           // ⬅️ log 2
+        return item;
+      })),
+
+      tap(final => console.log('[EMPRESAS][FINAL]', final))             // ⬅️ log 3
     );
   }
 }

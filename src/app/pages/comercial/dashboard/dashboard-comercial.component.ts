@@ -68,33 +68,51 @@ export class DashboardComercialComponent implements OnInit {
   }
 
 async buscar() {
-    this.carregando = true;
-    try {
-      const empresas = await firstValueFrom(this.empresaSvc.getEmpresas()); // EmpresaLite[]
-      const indic    = await firstValueFrom(
-        this.dashSvc.indicadores(this.dataISO(this.dataInicio), this.dataISO(this.dataFim))
-      ); // { idEmpresa, faturamento, lucro }[]
+  this.carregando = true;
+  try {
+    console.log('--- BUSCAR INÍCIO ---',
+      this.dataISO(this.dataInicio), this.dataISO(this.dataFim));
 
-      // mapa id -> apelido
-      const empMap = new Map<number, string>();
-      empresas.forEach(e => empMap.set(e.id, e.apelido));
+    const empresas = await firstValueFrom(this.empresaSvc.getEmpresas());
+    console.log('[BUSCAR] empresas (lite):', empresas);                 // ⬅️ log A
 
-      // monta os cards, garantindo tipos numéricos e apelido string
-      this.cards = (indic ?? [])
-        .map(i => {
-          const idEmp = Number((i as any).idEmpresa);
-          return {
-            idEmpresa   : idEmp,
-            faturamento : Number((i as any).faturamento) || 0,
-            lucro       : Number((i as any).lucro) || 0,
-            apelido     : empMap.get(idEmp) ?? String(idEmp),
-          };
-        })
-        .filter(c => c.faturamento > 0 || c.lucro > 0);
-    } finally {
-      this.carregando = false;
+    const indic = await firstValueFrom(
+      this.dashSvc.indicadores(
+        this.dataISO(this.dataInicio),
+        this.dataISO(this.dataFim)
+      )
+    );
+    console.log('[BUSCAR] indicadores:', indic);                        // ⬅️ log B
+
+    // mapa id -> apelido (string!)
+    const empMap = new Map<number, string>();
+    for (const e of (empresas ?? [])) {
+      empMap.set(Number(e.id), String(e.apelido));
     }
+    console.log('[BUSCAR] empMap:', Array.from(empMap.entries()));      // ⬅️ log C
+
+    // monta cards tipados e loga cada um
+    this.cards = (indic ?? [])
+      .map((i: any) => {
+        const idEmp       = Number(i?.idEmpresa ?? i?.IDEMPRESA);
+        const faturamento = Number(i?.faturamento ?? i?.FATURAMENTO) || 0;
+        const lucro       = Number(i?.lucro ?? i?.LUCRO) || 0;
+        const apelido     = empMap.get(idEmp) ?? String(idEmp);
+
+        const card = { idEmpresa: idEmp, faturamento, lucro, apelido };
+        console.log('[CARD]', card);                                    // ⬅️ log D
+        return card;
+      })
+      .filter(c => c.faturamento > 0 || c.lucro > 0);
+
+    console.log('[CARDS][FINAL]', this.cards);                          // ⬅️ log E
+  } catch (err) {
+    console.error('BUSCAR ERRO', err);
+  } finally {
+    this.carregando = false;
   }
+}
+  
 
  private dataISO(d: Date) { return d?.toISOString().slice(0, 10); }
 
