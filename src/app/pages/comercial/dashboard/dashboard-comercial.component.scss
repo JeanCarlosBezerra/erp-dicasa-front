@@ -4,6 +4,12 @@
   gap: 22px;
 }
 
+/* centraliza somente os inputs de meta */
+.card .compact .mat-mdc-input-element {
+  text-align: center !important;
+  font-weight: 600;
+}
+
 /* inputs compactos do card */
 .compact {
   width: 160px;
@@ -22,12 +28,6 @@
     padding-top: 6px !important;
     padding-bottom: 6px !important;
   }
-}
-
-/* centraliza somente os inputs de meta */
-.card .compact .mat-mdc-input-element {
-  text-align: center !important;
-  font-weight: 600;
 }
 
 .page-header {
