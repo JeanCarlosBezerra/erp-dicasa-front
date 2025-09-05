@@ -29,6 +29,12 @@ type IndicadorCard = {
   apelido: string;            // 👈 string garantida
 };
 
+type IdEmpresa = number;
+interface MetaValores {
+  metaFat: number;      // sempre número
+  metaMargem: number;   // 0.30 = 30%
+}
+
 type Metas = Record<number, { metaFat: number; metaMargem: number }>;
 
 @Component({
@@ -57,7 +63,8 @@ export class DashboardComercialComponent implements OnInit {
   carregando = false;
 
   /** metas locais, editáveis (salvas em localStorage) */
-  metas: Metas = {};
+  metas: Record<IdEmpresa, MetaValores> = {};
+  
 
   /** totais (dependem das metas e dos dados reais) */
   get faturamentoTotal(): number {
@@ -90,6 +97,13 @@ export class DashboardComercialComponent implements OnInit {
   private dataISO(d: Date) {
     return d?.toISOString().slice(0, 10);
   }
+
+  private ensureMeta(id: number): MetaValores {
+  if (!this.metas[id]) {
+    this.metas[id] = { metaFat: 0, metaMargem: 0 };
+  }
+  return this.metas[id];
+}
 
   moeda(v: number | null | undefined): string {
     const n = Number(v || 0);
@@ -200,6 +214,40 @@ export class DashboardComercialComponent implements OnInit {
     slot.metaMargem = Number(slot.metaMargem) || 0;
     this.metas[c.idEmpresa] = slot;
     this.salvarMetasLocal();
+  }
+
+  // helpers só para leitura no template
+  meta(id: number): MetaValores {
+    return this.metas[id] ?? { metaFat: 0, metaMargem: 0 };
+  }
+
+  // Helper para garantir objeto sempre existente
+  private getMeta(id: IdEmpresa): MetaValores {
+    if (!this.metas[id]) {
+      this.metas[id] = { metaFat: 0, metaMargem: 0 };
+    }
+    return this.metas[id];
+  }
+  
+
+// setters usados pelo template (coerção p/ number)
+setMetaFat(id: IdEmpresa, valor: number | string | null): void {
+  const n = Number(valor ?? 0);
+  this.getMeta(id).metaFat = isNaN(n) ? 0 : n;
+  this.onChangeMeta({ idEmpresa: id } as any); // mantém seu recálculo
+}
+
+setMetaMargem(id: IdEmpresa, valorPercent: number | string | null): void {
+  const p = Number(valorPercent ?? 0);     // vem 0..100 do input
+  const frac = isNaN(p) ? 0 : p / 100;     // guarda como 0..1
+  this.getMeta(id).metaMargem = frac;
+  this.onChangeMeta({ idEmpresa: id } as any);
+}
+  // Cores rápidas (−10% vermelho, entre −10 e 0 amarelo, ≥0 verde)
+  corNum(n: number) {
+    if (n >= 0) return 'ok';
+    if (n > -10) return 'warn';
+    return 'bad';
   }
 
   // helpers de exibição
