@@ -1,16 +1,15 @@
-<!-- src/app/pages/comercial/dashboard/dashboard-comercial.component.html -->
 <div class="page-header">
   <h2>Metas por Empresa</h2>
 
   <div class="filters">
-    <mat-form-field appearance="fill">
+    <mat-form-field class="date" appearance="fill">
       <mat-label>Data Início</mat-label>
       <input matInput [matDatepicker]="dp1" [(ngModel)]="dataInicio" />
       <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
       <mat-datepicker #dp1></mat-datepicker>
     </mat-form-field>
 
-    <mat-form-field appearance="fill">
+    <mat-form-field class="date" appearance="fill">
       <mat-label>Data Fim</mat-label>
       <input matInput [matDatepicker]="dp2" [(ngModel)]="dataFim" />
       <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
@@ -18,7 +17,7 @@
     </mat-form-field>
 
     <button mat-raised-button color="primary" (click)="buscar()" [disabled]="carregando">
-      {{ carregando ? 'Carregando…' : 'Calcular ' }}
+      {{ carregando ? 'Carregando…' : 'Calcular' }}
     </button>
   </div>
 </div>
@@ -35,15 +34,16 @@
 <!-- Meta Faturamento -->
 <!-- Meta Faturamento -->
 <!-- Meta Faturamento -->
+<!-- Meta Faturamento -->
 <mat-form-field appearance="outline" class="compact">
   <mat-label>Meta Faturamento</mat-label>
+  <span matPrefix>R$&nbsp;</span>
   <input
     matInput
     type="number"
     [ngModel]="meta(c.idEmpresa ?? -1).metaFat"
     (ngModelChange)="setMetaFat(c.idEmpresa ?? -1, $event)"
   />
-  <span matSuffix>R$</span>
 </mat-form-field>
 
 <!-- Meta Margem (%) -->
