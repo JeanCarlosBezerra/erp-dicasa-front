@@ -4,6 +4,25 @@
   gap: 22px;
 }
 
+/* inputs compactos do card */
+.compact {
+  width: 160px;
+  margin-right: 12px;
+
+  /* Material tokens */
+  --mdc-outlined-text-field-container-shape: 8px;
+  --mdc-outlined-text-field-outline-width: 1px;
+
+  input {
+    text-align: center;            // centraliza os valores nestes campos
+    font-weight: 600;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+}
 
 /* centraliza somente os inputs de meta */
 .card .compact .mat-mdc-input-element {
@@ -32,27 +51,6 @@
 
   .filters button {
     height: 40px;            /* mesma “altura visual” dos fields */
-  }
-}
-
-
-/* inputs compactos do card */
-.compact {
-  width: 160px;
-  margin-right: 12px;
-
-  /* Material tokens */
-  --mdc-outlined-text-field-container-shape: 8px;
-  --mdc-outlined-text-field-outline-width: 1px;
-
-  input {
-    text-align: center;            // centraliza os valores nestes campos
-    font-weight: 600;
-  }
-
-  .mat-mdc-form-field-infix {
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
   }
 }
 
@@ -120,10 +118,6 @@
   }
 }
 
-.compact {
-  width: 220px;
-  margin-right: 8px;
-}
 ::ng-deep .mat-mdc-form-field-infix {
   padding-top: 6px !important;
   padding-bottom: 6px !important;
@@ -155,19 +149,6 @@
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
-  }
-}
-/* Inputs mais compactos e alinhados */
-.compact {
-  width: 140px;
-  margin-right: 12px;
-
-  /* Material v15+ tokens */
-  --mdc-outlined-text-field-container-shape: 8px;
-  --mdc-outlined-text-field-outline-width: 1px;
-
-  input {
-    text-align: right;
   }
 }
 

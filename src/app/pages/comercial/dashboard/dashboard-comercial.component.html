@@ -23,7 +23,7 @@
 </div>
 
 <div class="cards-grid">
-  <div class="card" *ngFor="let c of cards">
+  <div class="card" *ngFor="let c of cards; trackBy: trackById">
     <div class="card-head">
       <mat-icon class="pin">grid_view</mat-icon>
       <div class="apelido">{{ c.apelido }}</div>

@@ -11,6 +11,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { firstValueFrom, combineLatest } from 'rxjs';
+import { ChangeDetectorRef } from '@angular/core';
 
 // service que você criou para chamar o backend
 import { DashboardComercialService, IndicadorEmpresa } from '../../../services/dashboard-comercial.service';
@@ -56,6 +57,12 @@ type Metas = Record<number, { metaFat: number; metaMargem: number }>;
 
 
 export class DashboardComercialComponent implements OnInit {
+
+   constructor(
+    private dashSvc: DashboardComercialService,
+    private empresaSvc: EmpresaService,
+    private cdr: ChangeDetectorRef
+  ) {}
   
   cards: IndicadorCard[] = [];
   dataInicio = new Date();
@@ -74,10 +81,10 @@ export class DashboardComercialComponent implements OnInit {
     return this.cards.reduce((s, c) => s + (c.lucro || 0), 0);
   }
 
-  constructor(
-    private dashSvc: DashboardComercialService,
-    private empresaSvc: EmpresaService
-  ) {}
+   // ajuda o *ngFor a não “chacoalhar” os cards
+  trackById(_i: number, c: IndicadorCard) {
+    return c.idEmpresa ?? c.apelido;
+  }
 
   ngOnInit(): void {
     this.carregarMetasLocal();
@@ -119,10 +126,13 @@ export class DashboardComercialComponent implements OnInit {
   // ========= BUSCA =========
   async buscar() {
     this.carregando = true;
+    this.cdr.markForCheck();
     try {
       const [empresas, indic] = await Promise.all([
-        this.empresaSvc.getEmpresas().toPromise(),
-        this.dashSvc.indicadores(this.dataISO(this.dataInicio), this.dataISO(this.dataFim)).toPromise()
+        firstValueFrom(this.empresaSvc.getEmpresas()),
+        firstValueFrom(
+          this.dashSvc.indicadores(this.dataISO(this.dataInicio), this.dataISO(this.dataFim))
+        )
       ]);
 
       const empMap = new Map<number, string>();
@@ -157,6 +167,7 @@ export class DashboardComercialComponent implements OnInit {
       this.salvarMetasLocal();
     } finally {
       this.carregando = false;
+      this.cdr.detectChanges();
     }
   }
 
