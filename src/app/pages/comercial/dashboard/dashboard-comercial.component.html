@@ -2,16 +2,16 @@
   <h2>Metas por Empresa</h2>
 
   <div class="filters">
-    <mat-form-field class="date" appearance="fill">
+    <mat-form-field class="date" appearance="outline" floatLabel="always">
       <mat-label>Data Início</mat-label>
-      <input matInput [matDatepicker]="dp1" [(ngModel)]="dataInicio" />
+      <input matInput [matDatepicker]="dp1" [(ngModel)]="dataInicio">
       <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
       <mat-datepicker #dp1></mat-datepicker>
     </mat-form-field>
 
-    <mat-form-field class="date" appearance="fill">
+    <mat-form-field class="date" appearance="outline" floatLabel="always">
       <mat-label>Data Fim</mat-label>
-      <input matInput [matDatepicker]="dp2" [(ngModel)]="dataFim" />
+      <input matInput [matDatepicker]="dp2" [(ngModel)]="dataFim">
       <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
       <mat-datepicker #dp2></mat-datepicker>
     </mat-form-field>
@@ -81,53 +81,53 @@
 
     <!-- BLOCO ANALÍTICO (derivados da meta) -->
     <div class="panel">
-      <div class="row">
-        <span>% Faturamento:</span>
-        <strong [class.pos]="percFaturamento(c)>=100" [class.neg]="percFaturamento(c)<100">
-          {{ pct(percFaturamento(c)) }}
-        </strong>
-      </div>
+  <div class="row">
+    <span>% Faturamento:</span>
+    <strong [ngClass]="corNum(percFaturamento(c) - 100)">
+      {{ pct(percFaturamento(c)) }}
+    </strong>
+  </div>
 
-      <div class="row">
-        <span>Saldo Faturamento:</span>
-        <strong [class.pos]="saldoFaturamento(c)>=0" [class.neg]="saldoFaturamento(c)<0">
-          R$ {{ moeda(saldoFaturamento(c)) }}
-        </strong>
-      </div>
+  <div class="row">
+    <span>Saldo Faturamento:</span>
+    <strong [ngClass]="corNum(saldoFaturamento(c))">
+      R$ {{ moeda(saldoFaturamento(c)) }}
+    </strong>
+  </div>
 
-      <div class="row">
-        <span>Variação:</span>
-        <strong [class.pos]="variacaoFaturamento(c)>=0" [class.neg]="variacaoFaturamento(c)<0">
-          {{ signo(variacaoFaturamento(c)) }}{{ pct(variacaoFaturamento(c)) }}
-        </strong>
-      </div>
+  <div class="row">
+    <span>Variação:</span>
+    <strong [ngClass]="corNum(variacaoFaturamento(c))">
+      {{ signo(variacaoFaturamento(c)) }}{{ pct(variacaoFaturamento(c)) }}
+    </strong>
+  </div>
 
-      <div class="row">
-        <span>% Lucro (vs meta):</span>
-        <strong [class.pos]="percLucro(c)>=100" [class.neg]="percLucro(c)<100">
-          {{ pct(percLucro(c)) }}
-        </strong>
-      </div>
+  <div class="row">
+    <span>% Lucro (vs meta):</span>
+    <strong [ngClass]="corNum(percLucro(c) - 100)">
+      {{ pct(percLucro(c)) }}
+    </strong>
+  </div>
 
-      <div class="row">
-        <span>Saldo Lucro:</span>
-        <strong [class.pos]="saldoLucro(c)>=0" [class.neg]="saldoLucro(c)<0">
-          R$ {{ moeda(saldoLucro(c)) }}
-        </strong>
-      </div>
+  <div class="row">
+    <span>Saldo Lucro:</span>
+    <strong [ngClass]="corNum(saldoLucro(c))">
+      R$ {{ moeda(saldoLucro(c)) }}
+    </strong>
+  </div>
 
-      <div class="row">
-        <span>Margem Real:</span>
-        <strong>{{ pct(margemReal(c)*100) }}</strong>
-      </div>
+  <div class="row">
+    <span>Margem Real:</span>
+    <strong>{{ pct(margemReal(c) * 100) }}</strong>
+  </div>
 
-      <div class="row">
-        <span>Diferença Margem:</span>
-        <strong [class.pos]="margemVar(c)>=0" [class.neg]="margemVar(c)<0">
-          {{ signo(margemVar(c)*100) }}{{ pct(margemVar(c)*100) }}
-        </strong>
-      </div>
-    </div>
+  <div class="row">
+    <span>Diferença Margem:</span>
+    <strong [ngClass]="corNum(margemVar(c) * 100)">
+      {{ signo(margemVar(c) * 100) }}{{ pct(margemVar(c) * 100) }}
+    </strong>
+  </div>
+</div>
   </div>
 </div>
 

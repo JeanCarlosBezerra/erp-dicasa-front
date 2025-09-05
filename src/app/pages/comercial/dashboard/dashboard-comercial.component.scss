@@ -4,32 +4,37 @@
   gap: 22px;
 }
 
+
+/* centraliza somente os inputs de meta */
+.card .compact .mat-mdc-input-element {
+  text-align: center !important;
+  font-weight: 600;
+}
+
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
 
-  h2 {
-    margin: 0;
-    font-weight: 700;
-  }
+  h2 { margin: 0; font-weight: 700; }
 
   .filters {
     display: flex;
-    align-items: flex-end;   // alinha pela base
+    align-items: flex-end;   /* alinha pela base */
     gap: 12px;
     flex-wrap: wrap;
   }
 
   .filters .date {
-    width: 190px;            // largura consistente
+    width: 200px;            /* largura consistente */
   }
 
   .filters button {
-    height: 40px;            // casa com a altura do mat-field
+    height: 40px;            /* mesma “altura visual” dos fields */
   }
 }
+
 
 /* inputs compactos do card */
 .compact {
