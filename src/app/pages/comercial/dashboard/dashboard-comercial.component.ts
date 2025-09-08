@@ -38,6 +38,8 @@ interface MetaValores {
 
 type Metas = Record<number, { metaFat: number; metaMargem: number }>;
 
+type MetaGeral = { metaFat: number; metaLucro: number };
+
 @Component({
   selector: 'app-dashboard-comercial',
   templateUrl: './dashboard-comercial.component.html',
@@ -72,6 +74,7 @@ export class DashboardComercialComponent implements OnInit {
   /** metas locais, editáveis (salvas em localStorage) */
   metas: Record<IdEmpresa, MetaValores> = {};
   
+  metaGeral: MetaGeral = { metaFat: 0, metaLucro: 0 };
 
   /** totais (dependem das metas e dos dados reais) */
   get faturamentoTotal(): number {
@@ -88,6 +91,7 @@ export class DashboardComercialComponent implements OnInit {
 
   ngOnInit(): void {
     this.carregarMetasLocal();
+    this.carregarMetaGeralLocal();   // 👈
     this.buscar();
   }
 
@@ -99,6 +103,16 @@ export class DashboardComercialComponent implements OnInit {
   }
   private salvarMetasLocal() {
     localStorage.setItem('dash_metas', JSON.stringify(this.metas));
+  }
+
+  private carregarMetaGeralLocal() {
+  try {
+    const raw = localStorage.getItem('dash_meta_geral');
+    if (raw) this.metaGeral = JSON.parse(raw) as MetaGeral;
+  } catch {}
+  }
+  private salvarMetaGeralLocal() {
+    localStorage.setItem('dash_meta_geral', JSON.stringify(this.metaGeral));
   }
 
   private dataISO(d: Date) {
@@ -214,9 +228,31 @@ export class DashboardComercialComponent implements OnInit {
     const meta = this.metaFatTotal;
     return meta ? (this.faturamentoTotal / meta) * 100 : 0;
   }
+  get metaLucroTotalCards(): number { // soma das metas de lucro dos cards (informativo)
+  return this.cards.reduce((s,c) => {
+    const m = this.meta(c.idEmpresa ?? -1);
+    return s + (m.metaFat * m.metaMargem || 0);
+  }, 0);
+}
   get percLucroGeral(): number {
     const meta = this.metaLucroTotalGeral;
     return meta ? (this.lucroTotal / meta) * 100 : 0;
+  }
+
+  onMetaGeralFatInput(raw: string) {
+  this.metaGeral.metaFat = this.unformatMoney(raw);
+  }
+  onMetaGeralFatBlur() {
+    this.metaGeral.metaFat = Math.round(this.metaGeral.metaFat || 0);
+    this.salvarMetaGeralLocal();
+  }
+  
+  onMetaGeralLucroInput(raw: string) {
+    this.metaGeral.metaLucro = this.unformatMoney(raw);
+  }
+  onMetaGeralLucroBlur() {
+    this.metaGeral.metaLucro = Math.round(this.metaGeral.metaLucro || 0);
+    this.salvarMetaGeralLocal();
   }
 
   /** Ex.: 12.3 mil, 4.5 mi, 980  */

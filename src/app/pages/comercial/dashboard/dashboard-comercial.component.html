@@ -22,11 +22,13 @@
   </div>
 </div>
 
+<!-- ===== CARD GERAL (EMPRESA) ===== -->
 <div class="summary-row">
   <div class="summary-card">
     <div class="summary-title">Empresa (Geral)</div>
 
     <div class="summary-grid">
+      <!-- Reais somados -->
       <div>
         <div class="kpi-label">Faturamento Real</div>
         <div class="kpi-value">R$ {{ moeda(faturamentoTotal) }}</div>
@@ -35,20 +37,40 @@
         <div class="kpi-label">Lucro Real</div>
         <div class="kpi-value">R$ {{ moeda(lucroTotal) }}</div>
       </div>
-      <div>
-        <div class="kpi-label">Meta Faturamento</div>
-        <div class="kpi-value">R$ {{ moeda(metaFatTotal) }}</div>
-      </div>
+
+      <!-- Meta Faturamento (editável com máscara) -->
+      <mat-form-field appearance="outline" class="compact">
+        <mat-label>Meta Faturamento</mat-label>
+        <input
+          matInput type="text"
+          [value]="formatMoney(metaGeral.metaFat)"
+          (focus)="selectAll($event)"
+          (input)="onMetaGeralFatInput($any($event.target).value)"
+          (blur)="onMetaGeralFatBlur()"
+        />
+        <span matSuffix>R$</span>
+      </mat-form-field>
+
       <div>
         <div class="kpi-label">% Fat. (vs meta)</div>
         <div class="kpi-value" [class.pos]="percFatGeral>=100" [class.neg]="percFatGeral<100">
           {{ pct(percFatGeral) }}
         </div>
       </div>
-      <div>
-        <div class="kpi-label">Meta Lucro</div>
-        <div class="kpi-value">R$ {{ moeda(metaLucroTotalGeral) }}</div>
-      </div>
+
+      <!-- Meta Lucro (editável com máscara) -->
+      <mat-form-field appearance="outline" class="compact">
+        <mat-label>Meta Lucro</mat-label>
+        <input
+          matInput type="text"
+          [value]="formatMoney(metaGeral.metaLucro)"
+          (focus)="selectAll($event)"
+          (input)="onMetaGeralLucroInput($any($event.target).value)"
+          (blur)="onMetaGeralLucroBlur()"
+        />
+        <span matSuffix>R$</span>
+      </mat-form-field>
+
       <div>
         <div class="kpi-label">% Lucro (vs meta)</div>
         <div class="kpi-value" [class.pos]="percLucroGeral>=100" [class.neg]="percLucroGeral<100">
