@@ -171,6 +171,63 @@ export class DashboardComercialComponent implements OnInit {
     }
   }
 
+  /** Seleciona tudo ao focar (qualquer input) */
+  selectAll(ev: FocusEvent) {
+    const el = ev.target as HTMLInputElement;
+    setTimeout(() => el.select(), 0);
+  }
+
+  /** Formata inteiro em pt-BR (sem centavos) */
+  formatMoney(v: number): string {
+    const n = Math.round(Number(v || 0));
+    return n.toLocaleString('pt-BR');
+  }
+
+  /** Remove tudo que não for dígito (valor inteiro em reais) */
+  unformatMoney(s: string): number {
+    const onlyDigits = (s || '').replace(/\D+/g, '');
+    return Number(onlyDigits || 0);
+  }
+
+  /** Enquanto digita, mantém o número no estado e devolve formatado */
+  onMetaFatInput(id: number, raw: string) {
+    const n = this.unformatMoney(raw);
+    this.getMeta(id).metaFat = n;
+    // nada a retornar: o [value] se atualiza pela mudança do estado
+  }
+
+  /** Ao sair do campo (blur), força o formato bonito */
+  onMetaFatBlur(id: number) {
+    // forçar detecção: trocar o objeto para o [value] renderizar
+    const m = this.getMeta(id);
+    this.metas[id] = { ...m, metaFat: Math.round(m.metaFat || 0) };
+    this.onChangeMeta({ idEmpresa: id } as any);
+  }
+
+  get metaFatTotal(): number {
+    return this.cards.reduce((s,c) => s + (this.meta(c.idEmpresa ?? -1).metaFat || 0), 0);
+  }
+  get metaLucroTotalGeral(): number {
+    return this.cards.reduce((s,c) => s + (this.meta(c.idEmpresa ?? -1).metaFat * this.meta(c.idEmpresa ?? -1).metaMargem || 0), 0);
+  }
+  get percFatGeral(): number {
+    const meta = this.metaFatTotal;
+    return meta ? (this.faturamentoTotal / meta) * 100 : 0;
+  }
+  get percLucroGeral(): number {
+    const meta = this.metaLucroTotalGeral;
+    return meta ? (this.lucroTotal / meta) * 100 : 0;
+  }
+
+  /** Ex.: 12.3 mil, 4.5 mi, 980  */
+  short(n: number): string {
+    return Intl.NumberFormat('pt-BR', { notation: 'compact', maximumFractionDigits: 1 }).format(n || 0);
+  }
+
+  /** Exibe moeda curta: R$ 12,3 mi */
+  shortMoney(n: number): string {
+    return 'R$ ' + this.short(n);
+  }
   // ========= CÁLCULOS A PARTIR DAS METAS =========
   metaFat(c: IndicadorCard): number {
     const id = c.idEmpresa ?? -1;

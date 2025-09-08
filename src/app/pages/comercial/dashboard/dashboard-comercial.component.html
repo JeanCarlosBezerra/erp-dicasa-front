@@ -22,6 +22,43 @@
   </div>
 </div>
 
+<div class="summary-row">
+  <div class="summary-card">
+    <div class="summary-title">Empresa (Geral)</div>
+
+    <div class="summary-grid">
+      <div>
+        <div class="kpi-label">Faturamento Real</div>
+        <div class="kpi-value">R$ {{ moeda(faturamentoTotal) }}</div>
+      </div>
+      <div>
+        <div class="kpi-label">Lucro Real</div>
+        <div class="kpi-value">R$ {{ moeda(lucroTotal) }}</div>
+      </div>
+      <div>
+        <div class="kpi-label">Meta Faturamento</div>
+        <div class="kpi-value">R$ {{ moeda(metaFatTotal) }}</div>
+      </div>
+      <div>
+        <div class="kpi-label">% Fat. (vs meta)</div>
+        <div class="kpi-value" [class.pos]="percFatGeral>=100" [class.neg]="percFatGeral<100">
+          {{ pct(percFatGeral) }}
+        </div>
+      </div>
+      <div>
+        <div class="kpi-label">Meta Lucro</div>
+        <div class="kpi-value">R$ {{ moeda(metaLucroTotalGeral) }}</div>
+      </div>
+      <div>
+        <div class="kpi-label">% Lucro (vs meta)</div>
+        <div class="kpi-value" [class.pos]="percLucroGeral>=100" [class.neg]="percLucroGeral<100">
+          {{ pct(percLucroGeral) }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="cards-grid">
   <div class="card" *ngFor="let c of cards; trackBy: trackById">
     <div class="card-head">
@@ -30,20 +67,19 @@
     </div>
 
     <!-- EDITÁVEIS: Meta Faturamento e Meta Margem (%) -->
-    <!-- Meta Faturamento -->
-<!-- Meta Faturamento -->
-<!-- Meta Faturamento -->
-<!-- Meta Faturamento -->
-<!-- Meta Faturamento -->
+
+<!-- Meta Faturamento (com máscara leve) -->
 <mat-form-field appearance="outline" class="compact">
   <mat-label>Meta Faturamento</mat-label>
-  <span matPrefix>R$&nbsp;</span>
   <input
     matInput
-    type="number"
-    [ngModel]="meta(c.idEmpresa ?? -1).metaFat"
-    (ngModelChange)="setMetaFat(c.idEmpresa ?? -1, $event)"
+    type="text"
+    [value]="formatMoney(meta(c.idEmpresa ?? -1).metaFat)"
+    (focus)="selectAll($event)"
+    (input)="onMetaFatInput(c.idEmpresa ?? -1, $any($event.target).value)"
+    (blur)="onMetaFatBlur(c.idEmpresa ?? -1)"
   />
+  <span matSuffix>R$</span>
 </mat-form-field>
 
 <!-- Meta Margem (%) -->
