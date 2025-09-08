@@ -28,7 +28,7 @@
     <div class="summary-title">Empresa (Geral)</div>
 
     <div class="summary-grid">
-      <!-- Reais somados -->
+      <!-- Faturamento/Lucro reais (totais) -->
       <div>
         <div class="kpi-label">Faturamento Real</div>
         <div class="kpi-value">R$ {{ moeda(faturamentoTotal) }}</div>
@@ -38,43 +38,80 @@
         <div class="kpi-value">R$ {{ moeda(lucroTotal) }}</div>
       </div>
 
-      <!-- Meta Faturamento (editável com máscara) -->
+      <!-- Meta Faturamento (igual aos cards, com máscara) -->
       <mat-form-field appearance="outline" class="compact">
         <mat-label>Meta Faturamento</mat-label>
         <input
-          matInput type="text"
-          [value]="formatMoney(metaGeral.metaFat)"
+          matInput
+          type="text"
+          [value]="formatMoney(meta(-1).metaFat)"
           (focus)="selectAll($event)"
-          (input)="onMetaGeralFatInput($any($event.target).value)"
-          (blur)="onMetaGeralFatBlur()"
+          (input)="onMetaFatInput(-1, $any($event.target).value)"
+          (blur)="onMetaFatBlur(-1)"
         />
         <span matSuffix>R$</span>
       </mat-form-field>
 
-      <div>
-        <div class="kpi-label">% Fat. (vs meta)</div>
-        <div class="kpi-value" [class.pos]="percFatGeral>=100" [class.neg]="percFatGeral<100">
-          {{ pct(percFatGeral) }}
-        </div>
-      </div>
-
-      <!-- Meta Lucro (editável com máscara) -->
+      <!-- Meta Margem (%) (igual aos cards) -->
       <mat-form-field appearance="outline" class="compact">
-        <mat-label>Meta Lucro</mat-label>
+        <mat-label>Meta Margem (%)</mat-label>
         <input
-          matInput type="text"
-          [value]="formatMoney(metaGeral.metaLucro)"
-          (focus)="selectAll($event)"
-          (input)="onMetaGeralLucroInput($any($event.target).value)"
-          (blur)="onMetaGeralLucroBlur()"
+          matInput
+          type="number"
+          min="0" max="100" step="0.1"
+          [ngModel]="meta(-1).metaMargem * 100"
+          (ngModelChange)="setMetaMargem(-1, $event)"
         />
-        <span matSuffix>R$</span>
+        <span matSuffix>%</span>
       </mat-form-field>
 
-      <div>
-        <div class="kpi-label">% Lucro (vs meta)</div>
-        <div class="kpi-value" [class.pos]="percLucroGeral>=100" [class.neg]="percLucroGeral<100">
-          {{ pct(percLucroGeral) }}
+      <!-- KPIs do Geral, reaproveitando as MESMAS funções passando cardGeral -->
+      <div class="kpi-block">
+        <div class="row">
+          <span>% Faturamento:</span>
+          <strong [ngClass]="corNum(percFaturamento(cardGeral) - 100)">
+            {{ pct(percFaturamento(cardGeral)) }}
+          </strong>
+        </div>
+
+        <div class="row">
+          <span>Saldo Faturamento:</span>
+          <strong [ngClass]="corNum(saldoFaturamento(cardGeral))">
+            R$ {{ moeda(saldoFaturamento(cardGeral)) }}
+          </strong>
+        </div>
+
+        <div class="row">
+          <span>Variação:</span>
+          <strong [ngClass]="corNum(variacaoFaturamento(cardGeral))">
+            {{ signo(variacaoFaturamento(cardGeral)) }}{{ pct(variacaoFaturamento(cardGeral)) }}
+          </strong>
+        </div>
+
+        <div class="row">
+          <span>% Lucro (vs meta):</span>
+          <strong [ngClass]="corNum(percLucro(cardGeral) - 100)">
+            {{ pct(percLucro(cardGeral)) }}
+          </strong>
+        </div>
+
+        <div class="row">
+          <span>Saldo Lucro:</span>
+          <strong [ngClass]="corNum(saldoLucro(cardGeral))">
+            R$ {{ moeda(saldoLucro(cardGeral)) }}
+          </strong>
+        </div>
+
+        <div class="row">
+          <span>Margem Real:</span>
+          <strong>{{ pct(margemReal(cardGeral) * 100) }}</strong>
+        </div>
+
+        <div class="row">
+          <span>Diferença Margem:</span>
+          <strong [ngClass]="corNum(margemVar(cardGeral) * 100)">
+            {{ signo(margemVar(cardGeral) * 100) }}{{ pct(margemVar(cardGeral) * 100) }}
+          </strong>
         </div>
       </div>
     </div>

@@ -37,7 +37,7 @@ interface MetaValores {
 }
 
 type Metas = Record<number, { metaFat: number; metaMargem: number }>;
-
+const GENERAL_ID = -1;  // id especial para o “Empresa (Geral)”
 type MetaGeral = { metaFat: number; metaLucro: number };
 
 @Component({
@@ -76,6 +76,14 @@ export class DashboardComercialComponent implements OnInit {
   
   metaGeral: MetaGeral = { metaFat: 0, metaLucro: 0 };
 
+  get cardGeral(): { idEmpresa: number, apelido: string, faturamento: number, lucro: number } {
+  return {
+    idEmpresa: GENERAL_ID,
+    apelido: 'Empresa (Geral)',
+    faturamento: this.faturamentoTotal,
+    lucro: this.lucroTotal
+  };
+ }
   /** totais (dependem das metas e dos dados reais) */
   get faturamentoTotal(): number {
     return this.cards.reduce((s, c) => s + (c.faturamento || 0), 0);
@@ -246,7 +254,7 @@ export class DashboardComercialComponent implements OnInit {
     this.metaGeral.metaFat = Math.round(this.metaGeral.metaFat || 0);
     this.salvarMetaGeralLocal();
   }
-  
+
   onMetaGeralLucroInput(raw: string) {
     this.metaGeral.metaLucro = this.unformatMoney(raw);
   }
@@ -308,6 +316,8 @@ export class DashboardComercialComponent implements OnInit {
   margemVar(c: IndicadorCard): number {
     return this.margemReal(c) - this.metaMargem(c);
   }
+
+  
 
   // quando usuário edita campos
   onChangeMeta(c: IndicadorCard) {
