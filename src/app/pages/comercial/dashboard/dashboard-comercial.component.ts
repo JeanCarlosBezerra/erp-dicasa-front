@@ -95,6 +95,13 @@ export class DashboardComercialComponent implements OnInit {
     return this.cards.reduce((s, c) => s + (c.lucro || 0), 0);
   }
 
+  onMetaGeralMargemBlur(): void {
+  // não arredonda, só garante o clamp e salva
+  const pct = this.metaGeral.metaMargemPct;
+  this.metaGeral.metaMargemPct = isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
+  this.salvarMetaGeralLocal();
+}
+
    // ajuda o *ngFor a não “chacoalhar” os cards
   trackById(_i: number, c: IndicadorCard) {
     return c.idEmpresa ?? c.apelido;
@@ -221,6 +228,7 @@ onMetaGeralFatInput(value: string) {
 }
 onMetaGeralFatBlur() {
   this.metaGeral.metaFat = this.round(this.metaGeral.metaFat, 2);
+  this.salvarMetaGeralLocal(); // <- acrescentar esta linha
 }
 
 onMetaGeralMargemInput(value: number | string | null) {
@@ -333,6 +341,20 @@ get percLucroGeral(): number {
     return this.margemReal(c) - this.metaMargem(c);
   }
 
+  get margemRealGeralPct(): number {
+  const fat = this.faturamentoTotal || 0;
+  return fat ? (this.lucroTotal / fat) * 100 : 0;
+}
+
+  get saldoLucroGeral(): number {
+  const metaL = (this.metaGeral.metaFat || 0) * ((this.metaGeral.metaMargemPct || 0) / 100);
+  return this.lucroTotal - metaL;
+}
+
+  get diffMargemGeral(): number {
+  return this.margemRealGeralPct - (this.metaGeral.metaMargemPct || 0);
+}
+
   
 
   // quando usuário edita campos
@@ -367,10 +389,16 @@ setMetaFat(id: IdEmpresa, valor: number | string | null): void {
   this.onChangeMeta({ idEmpresa: id } as any); // mantém seu recálculo
 }
 
+pctInput(frac: number): string {
+  const pct = (Number(frac) || 0) * 100;
+  return pct.toLocaleString('pt-BR', { useGrouping: false, maximumFractionDigits: 6 });
+}
+
 setMetaMargem(id: number, valorPercent: number | string | null): void {
-  const pct = Number(String(valorPercent ?? '').replace(',', '.'));
-  const clean = isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
-  this.getMeta(id).metaMargem = clean / 100; // guarda em fração (0..1)
+  const s = String(valorPercent ?? '').trim().replace(',', '.');
+  const n = Number(s);
+  const clean = isFinite(n) ? Math.max(0, Math.min(100, n)) : 0;
+  this.getMeta(id).metaMargem = clean / 100;
   this.onChangeMeta({ idEmpresa: id } as any);
 }
   // Cores rápidas (−10% vermelho, entre −10 e 0 amarelo, ≥0 verde)

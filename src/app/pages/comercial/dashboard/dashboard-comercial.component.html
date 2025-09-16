@@ -50,18 +50,20 @@
         <span matSuffix>R$</span>
       </mat-form-field>
 
-<mat-form-field appearance="outline" class="compact">
+    <!-- Meta Margem (%) – aceita vírgula -->
+    <mat-form-field appearance="outline" class="compact">
   <mat-label>Meta Margem (%)</mat-label>
   <input
     matInput
-    type="number"
-    min="0" max="100" step="any"
-    [ngModel]="metaGeral.metaMargemPct"
-    (ngModelChange)="onMetaGeralMargemInput($event)"
+    type="text"
+    inputmode="decimal"
+    [value]="(metaGeral.metaMargemPct || 0).toLocaleString('pt-BR', { useGrouping: false, maximumFractionDigits: 6 })"
+    (focus)="selectAll($event)"
+    (input)="onMetaGeralMargemInput($any($event.target).value)"
+    (blur)="onMetaGeralMargemBlur()"
   />
   <span matSuffix>%</span>
 </mat-form-field>
-
       <!-- KPIs gerais -->
       <div class="kpi">
         <div class="kpi-label">% Faturamento</div>
@@ -90,6 +92,27 @@
           {{ pct(percLucroGeral) }}
         </div>
       </div>
+      <div class="kpi">
+      <div class="kpi-label">Saldo Lucro</div>
+      <div class="kpi-value" [ngClass]="corNum(saldoLucroGeral)">
+        R$ {{ moeda(saldoLucroGeral) }}
+      </div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-label">Margem Real</div>
+        <div class="kpi-value">
+          {{ pct(margemRealGeralPct) }}
+        </div>
+      </div>
+
+      <div class="kpi">
+        <div class="kpi-label">Diferença Margem</div>
+        <div class="kpi-value" [ngClass]="corNum(diffMargemGeral)">
+          {{ signo(diffMargemGeral) }}{{ pct(diffMargemGeral) }}
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
