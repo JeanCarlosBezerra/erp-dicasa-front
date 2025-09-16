@@ -1,296 +1,101 @@
-:host {
-  display: block;
-}
+:host { display: block; }
 
-/* libera scroll da página só neste componente */
+/* ===== SCROLL DA PÁGINA ===== */
 .dash-scroll {
-  min-height: 100dvh;       /* cobre a viewport inteira */
-  overflow: auto;           /* permite rolar */
-  padding-bottom: 48px;     /* respiro no fim */
+  min-height: 100dvh;
+  overflow-y: auto;       /* rola vertical */
+  overflow-x: hidden;
+  padding-bottom: 32px;
 }
 
-.cards-grid {
-  height: auto;             /* evita alturas fixas */
-  overflow: visible;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
-  align-content: start;
-}
-
-@media (max-width: 1700px) { .cards-grid { grid-template-columns: repeat(5, minmax(260px, 1fr)); } }
-@media (max-width: 1500px) { .cards-grid { grid-template-columns: repeat(4, minmax(260px, 1fr)); } }
-@media (max-width: 1250px) { .cards-grid { grid-template-columns: repeat(3, minmax(260px, 1fr)); } }
-@media (max-width: 980px)  { .cards-grid { grid-template-columns: repeat(2, minmax(260px, 1fr)); } }
-@media (max-width: 640px)  { .cards-grid { grid-template-columns: 1fr; } }
-
-/* centraliza somente os inputs de meta */
-.card .compact .mat-mdc-input-element {
-  text-align: center !important;
-  font-weight: 600;
-}
-
-
-.card-head .pin { font-size: 20px; padding: 5px; }
-.card .metric label { font-size: 11px; }
-.card .metric .value { font-weight: 700; font-size: 14px; }
-
-/* inputs compactos do card */
-.compact {
-  width: 150px;
-  margin-right: 10px;
-  --mdc-outlined-text-field-container-shape: 8px;
-  --mdc-outlined-text-field-outline-width: 1px;
-
-  input { text-align: right; }
-
-  .mat-mdc-form-field-infix {
-    padding-top: 6px !important;
-    padding-bottom: 6px !important;
-  }
-}
-
+/* ===== CABEÇALHO ===== */
 .page-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   margin-bottom: 12px;
 
   h2 { margin: 0; font-weight: 700; }
 
   .filters {
     display: flex;
-    align-items: flex-end;   /* alinha pela base */
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-
-  .filters .date {
-    width: 200px;            /* largura consistente */
-  }
-
-  .filters button {
-    height: 40px;            /* mesma “altura visual” dos fields */
-  }
-}
-
-.page-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-
-  .filters {
-    display: flex;
-    align-items: flex-end;       /* alinha botão com os campos */
+    align-items: flex-end;
     gap: 14px;
-
-    .date {
-      width: 220px;
-    }
+    .date { width: 220px; }
+    button { height: 40px; }
   }
 }
 
-/* Card geral (linha) */
-.summary-row {
-  margin-bottom: 16px;
+/* >>> REMOVA o global abaixo se existir:
+   ::ng-deep .mat-mdc-form-field-infix { padding-top:6px; padding-bottom:6px; }
+   Ele que cortava "Data Início".
+*/
 
-  .summary-card {
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 8px 22px rgba(0,0,0,.06);
-    padding: 16px 18px;
+/* compacta APENAS inputs com a classe .compact */
+.compact .mat-mdc-text-field-wrapper { padding: 0 8px; }
+.compact .mat-mdc-form-field-infix   { padding: 0 !important; }
+.compact .mat-mdc-form-field-subscript-wrapper { display: none; }
+.compact input[matInput] { height: 36px; line-height: 36px; text-align: right; }
 
-    .summary-title {
-      font-weight: 700;
-      margin-bottom: 8px;
-    }
-
-    .summary-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(180px, 1fr));
-      gap: 16px 22px;
-      align-items: end;
-
-      .sum-box .kpi-value { font-weight: 700; }
-
-      .kpi .kpi-value { font-weight: 700; }
-    }
-
-    @media (max-width: 1200px) {
-      .summary-grid {
-        grid-template-columns: repeat(2, minmax(180px, 1fr));
-      }
-    }
-  }
-}
-
-/* Inputs compactos */
-.compact {
-  width: 180px;
-  --mdc-outlined-text-field-container-shape: 8px;
-
-  input { text-align: right; }
-}
-
-/* Cores rápidas */
-.ok   { color: #0c7a43; font-weight: 600; }
-.warn { color: #b96e00; font-weight: 600; }
-.bad  { color: #cc2e2e; font-weight: 600; }
-
-.pos { color: #0c7a43; }
-.neg { color: #cc2e2e; }
-
-.card {
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 8px 22px rgba(0,0,0,.06);
-  padding: 18px 18px 14px;
-  transition: transform .12s ease, box-shadow .12s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(0,0,0,.10);
-  }
-
-  .card-head {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
-
-    .pin {
-      font-variation-settings: 'FILL' 1;
-      background: #eef4ff;
-      color: #2f5aff;
-      border-radius: 8px;
-      padding: 6px;
-      font-size: 22px;
-    }
-
-    .empresa {
-      display: flex;
-      flex-direction: column;
-
-      .apelido {
-        font-weight: 700;
-        letter-spacing: .2px;
-        color: #1b2733;
-      }
-
-      .sub {
-        font-size: 12px;
-        color: #7b8a98;
-        margin-top: 2px;
-      }
-    }
-  }
-
-  .metric {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: end;
-    padding: 8px 0;
-
-    label {
-      color: #6a7785;
-      font-size: 12px;
-    }
-
-    .value {
-      font-weight: 700;
-      color: #17212a;
-    }
-  }
-}
-
-/* ===== RESUMO GERAL ===== */
-.summary-row {
-  margin: 6px 0 12px;
-  display: flex;
-}
+/* ===== CARD GERAL MAIS ENXUTO ===== */
+.summary-row { margin: 8px 0 12px; display: flex; }
 .summary-card {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,.06);
-  padding: 12px 16px;        /* era ~24px */
+  padding: 10px 14px;          /* ↓ menor */
   width: 100%;
 }
-.summary-title {
-  font-weight: 800; letter-spacing: .2px; margin-bottom: 8px; color:#1b2733;
-  margin-bottom: 8px;
-}
+.summary-title { font-weight: 800; letter-spacing: .2px; color:#1b2733; margin-bottom: 6px; }
+
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 8px 16px;             /* menos espaço vertical */
+  grid-template-columns: repeat(6, minmax(160px, 1fr)); /* mais colunas => menos altura */
+  column-gap: 14px;
+  row-gap: 6px;                /* ↓ espaço vertical */
   align-items: center;
 }
+@media (max-width: 1200px) { .summary-grid { grid-template-columns: repeat(3, minmax(160px, 1fr)); } }
+@media (max-width: 700px)  { .summary-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); } }
 
-.kpi-block { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.kpi-label { color:#6a7785; font-size:12px; }
-.kpi-value { font-weight:700; }
+.kpi-label { color:#6a7785; font-size:12px; margin-bottom: 2px; }
+.kpi-value { font-weight:700; line-height: 1.1; }
 .kpi-value.pos { color:#0c7a43; }
 .kpi-value.neg { color:#cc2e2e; }
 
-@media (max-width: 1250px) { .summary-grid { grid-template-columns: repeat(3, minmax(160px, 1fr)); } }
-@media (max-width: 680px)  { .summary-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); } }
-
-::ng-deep .mat-mdc-form-field-infix {
-  padding-top: 6px !important;
-  padding-bottom: 6px !important;
+/* ===== CARDS EM FILA (UMA LINHA) ===== */
+.cards-grid {
+  display: flex;
+  flex-wrap: nowrap;         /* tudo em uma linha */
+  gap: 16px;
+  overflow-x: auto;          /* scroll horizontal */
+  overflow-y: visible;
+  padding: 6px 2px 10px;     /* um respiro para a sombra não cortar */
+  scroll-snap-type: x proximity;
 }
-::ng-deep input[type="number"] {
-  text-align: right;
-}
+.card {
+  flex: 0 0 360px;           /* largura do card (ajuste se quiser) */
+  scroll-snap-align: start;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 8px 22px rgba(0,0,0,.06);
+  padding: 14px;
+  transition: transform .12s ease, box-shadow .12s ease;
 
-.kpi .kpi-label,
-.sum-box .kpi-label {
-  font-size: 12px;
-  margin-bottom: 2px;
-  opacity: .85;
-}
-.kpi .kpi-value,
-.sum-box .kpi-value {
-  font-weight: 600;
-  line-height: 1.1;
-}
-
-/* Totais */
-.totais {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-top: 18px;
-
-  .total-card {
-    border-radius: 12px;
-    color: #fff;
-    padding: 16px 20px;
-    display: grid;
-    row-gap: 6px;
-
-    &.green { background: #24b072; }
-    &.blue  { background: #2878ff; }
-
-    .label { opacity: .9; }
-    .big   { font-weight: 800; font-size: 20px; }
-  }
-
-  @media (max-width: 900px) {
-    grid-template-columns: 1fr;
-  }
+  &:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,.10); }
 }
 
-/* deixar os mat-form-field realmente compactos */
-.compact .mat-mdc-text-field-wrapper { padding: 0 8px; }
-.compact .mat-mdc-form-field-infix   { padding: 0 !important; }
-.compact .mat-mdc-form-field-subscript-wrapper { display: none; } /* tira área de hints/erros */
-.compact input[matInput] { height: 36px; line-height: 36px; }      /* altura menor */
+/* tipografia e miúdos dos cards */
+.card-head { display:flex; align-items:center; gap:12px; margin-bottom: 10px; }
+.card-head .pin { font-variation-settings:'FILL' 1; background:#eef4ff; color:#2f5aff; border-radius:8px; padding:6px; font-size:22px; }
+.card .metric { display:grid; grid-template-columns:1fr auto; align-items:end; padding:6px 0; }
+.card .metric label { color:#6a7785; font-size:12px; }
+.card .metric .value { font-weight:700; color:#17212a; }
 
-/* Pílulas de cor para valores */
-.ok   { color: #0c7a43; font-weight: 600; }   /* verde */
-.warn { color: #b96e00; font-weight: 600; }   /* amarelo */
-.bad  { color: #cc2e2e; font-weight: 600; }   /* vermelho */
+/* centraliza inputs de meta nos cards quando usar .compact */
+.card .compact .mat-mdc-input-element { text-align:center !important; font-weight:600; }
 
-.metric.neg .value { color: #d93025; }
+/* pílulas de cor */
+.ok{color:#0c7a43;font-weight:600;} .warn{color:#b96e00;font-weight:600;} .bad{color:#cc2e2e;font-weight:600;}
+.pos{color:#0c7a43;} .neg{color:#cc2e2e;}
