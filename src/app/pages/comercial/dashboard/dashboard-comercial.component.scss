@@ -20,10 +20,16 @@
 
   .filters {
     display: flex;
-    align-items: flex-end;
+    align-items: flex-end;   /* alinha pela base dos campos */
     gap: 14px;
+
     .date { width: 220px; }
-    button { height: 40px; }
+
+    button {
+      height: 56px;          /* mesma altura “visual” do mat-field */
+      padding: 0 20px;
+      align-self: end;       /* gruda na base mesmo se a linha quebrar */
+    }
   }
 }
 
@@ -40,29 +46,29 @@
 
 /* ===== CARD GERAL MAIS ENXUTO ===== */
 .summary-row { margin: 8px 0 12px; display: flex; }
+
 .summary-card {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,.06);
-  padding: 10px 14px;          /* ↓ menor */
+  padding: 10px 12px;        /* ↓ menos padding */
   width: 100%;
 }
-.summary-title { font-weight: 800; letter-spacing: .2px; color:#1b2733; margin-bottom: 6px; }
+
+.summary-title { font-weight: 800; color:#1b2733; margin-bottom: 6px; }
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(160px, 1fr)); /* mais colunas => menos altura */
-  column-gap: 14px;
-  row-gap: 6px;                /* ↓ espaço vertical */
+  grid-template-columns: repeat(6, minmax(160px, 1fr)); /* mais colunas = menos altura */
+  column-gap: 12px;
+  row-gap: 4px;              /* ↓ espaço vertical */
   align-items: center;
 }
 @media (max-width: 1200px) { .summary-grid { grid-template-columns: repeat(3, minmax(160px, 1fr)); } }
 @media (max-width: 700px)  { .summary-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); } }
 
-.kpi-label { color:#6a7785; font-size:12px; margin-bottom: 2px; }
-.kpi-value { font-weight:700; line-height: 1.1; }
-.kpi-value.pos { color:#0c7a43; }
-.kpi-value.neg { color:#cc2e2e; }
+.kpi-label { color:#6a7785; font-size:12px; margin-bottom:2px; }
+.kpi-value { font-weight:700; line-height:1.1; }
 
 /* ===== CARDS EM FILA (UMA LINHA) ===== */
 .cards-grid {
