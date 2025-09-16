@@ -60,6 +60,72 @@
   }
 }
 
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  .filters {
+    display: flex;
+    align-items: flex-end;       /* alinha botão com os campos */
+    gap: 14px;
+
+    .date {
+      width: 220px;
+    }
+  }
+}
+
+/* Card geral (linha) */
+.summary-row {
+  margin-bottom: 16px;
+
+  .summary-card {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 8px 22px rgba(0,0,0,.06);
+    padding: 16px 18px;
+
+    .summary-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 16px 22px;
+      align-items: end;
+
+      .sum-box .kpi-value { font-weight: 700; }
+
+      .kpi .kpi-value { font-weight: 700; }
+    }
+
+    @media (max-width: 1200px) {
+      .summary-grid {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+      }
+    }
+  }
+}
+
+/* Inputs compactos */
+.compact {
+  width: 180px;
+  --mdc-outlined-text-field-container-shape: 8px;
+
+  input { text-align: right; }
+}
+
+/* Cores rápidas */
+.ok   { color: #0c7a43; font-weight: 600; }
+.warn { color: #b96e00; font-weight: 600; }
+.bad  { color: #cc2e2e; font-weight: 600; }
+
+.pos { color: #0c7a43; }
+.neg { color: #cc2e2e; }
 
 .card {
   background: #fff;

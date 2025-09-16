@@ -38,7 +38,11 @@ interface MetaValores {
 
 type Metas = Record<number, { metaFat: number; metaMargem: number }>;
 const GENERAL_ID = -1;  // id especial para o “Empresa (Geral)”
-type MetaGeral = { metaFat: number; metaLucro: number };
+type MetaGeral = {
+  metaFat: number;       // valor em R$
+  metaMargemPct: number; // 0..100 (percentual digitado pelo usuário)
+};
+
 
 @Component({
   selector: 'app-dashboard-comercial',
@@ -74,8 +78,7 @@ export class DashboardComercialComponent implements OnInit {
   /** metas locais, editáveis (salvas em localStorage) */
   metas: Record<IdEmpresa, MetaValores> = {};
   
-  metaGeral: MetaGeral = { metaFat: 0, metaLucro: 0 };
-
+  metaGeral: MetaGeral = { metaFat: 0, metaMargemPct: 0 };
   get cardGeral(): { idEmpresa: number, apelido: string, faturamento: number, lucro: number } {
   return {
     idEmpresa: GENERAL_ID,
@@ -194,16 +197,16 @@ export class DashboardComercialComponent implements OnInit {
   }
 
   /** Seleciona tudo ao focar (qualquer input) */
-  selectAll(ev: FocusEvent) {
-    const el = ev.target as HTMLInputElement;
-    setTimeout(() => el.select(), 0);
-  }
+ selectAll(e: Event) {
+  const el = e.target as HTMLInputElement;
+  queueMicrotask(() => el.select());
+}
 
   /** Formata inteiro em pt-BR (sem centavos) */
-  formatMoney(v: number): string {
-    const n = Math.round(Number(v || 0));
-    return n.toLocaleString('pt-BR');
-  }
+formatMoney(n: number) {
+  // “00.000,00”
+  return (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
   /** Remove tudo que não for dígito (valor inteiro em reais) */
   unformatMoney(s: string): number {
@@ -211,20 +214,32 @@ export class DashboardComercialComponent implements OnInit {
     return Number(onlyDigits || 0);
   }
 
+onMetaGeralFatInput(value: string) {
+  const onlyNums = value.replace(/[^\d]/g, '');
+  const cents = Number(onlyNums || 0);
+  this.metaGeral.metaFat = cents / 100;
+}
+onMetaGeralFatBlur() {
+  this.metaGeral.metaFat = this.round(this.metaGeral.metaFat, 2);
+}
+
+onMetaGeralMargemInput(value: number | string | null) {
+  const pct = Number(String(value ?? '').replace(',', '.'));
+  this.metaGeral.metaMargemPct = isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
+}
+
   /** Enquanto digita, mantém o número no estado e devolve formatado */
-  onMetaFatInput(id: number, raw: string) {
-    const n = this.unformatMoney(raw);
-    this.getMeta(id).metaFat = n;
-    // nada a retornar: o [value] se atualiza pela mudança do estado
-  }
+onMetaFatInput(id: number, value: string) {
+  const onlyNums = value.replace(/[^\d]/g, '');
+  const cents = Number(onlyNums || 0);
+  this.getMeta(id).metaFat = cents / 100;
+}
 
   /** Ao sair do campo (blur), força o formato bonito */
-  onMetaFatBlur(id: number) {
-    // forçar detecção: trocar o objeto para o [value] renderizar
-    const m = this.getMeta(id);
-    this.metas[id] = { ...m, metaFat: Math.round(m.metaFat || 0) };
-    this.onChangeMeta({ idEmpresa: id } as any);
-  }
+ onMetaFatBlur(id: number) {
+  this.getMeta(id).metaFat = this.round(this.getMeta(id).metaFat, 2);
+  this.onChangeMeta({ idEmpresa: id } as any);
+}
 
   get metaFatTotal(): number {
     return this.cards.reduce((s,c) => s + (this.meta(c.idEmpresa ?? -1).metaFat || 0), 0);
@@ -232,36 +247,37 @@ export class DashboardComercialComponent implements OnInit {
   get metaLucroTotalGeral(): number {
     return this.cards.reduce((s,c) => s + (this.meta(c.idEmpresa ?? -1).metaFat * this.meta(c.idEmpresa ?? -1).metaMargem || 0), 0);
   }
-  get percFatGeral(): number {
-    const meta = this.metaFatTotal;
-    return meta ? (this.faturamentoTotal / meta) * 100 : 0;
-  }
+
   get metaLucroTotalCards(): number { // soma das metas de lucro dos cards (informativo)
   return this.cards.reduce((s,c) => {
     const m = this.meta(c.idEmpresa ?? -1);
     return s + (m.metaFat * m.metaMargem || 0);
   }, 0);
 }
-  get percLucroGeral(): number {
-    const meta = this.metaLucroTotalGeral;
-    return meta ? (this.lucroTotal / meta) * 100 : 0;
-  }
 
-  onMetaGeralFatInput(raw: string) {
-  this.metaGeral.metaFat = this.unformatMoney(raw);
-  }
-  onMetaGeralFatBlur() {
-    this.metaGeral.metaFat = Math.round(this.metaGeral.metaFat || 0);
-    this.salvarMetaGeralLocal();
-  }
+  /** arredonda com segurança */
+private round(n: number, places = 2) {
+  const f = Math.pow(10, places);
+  return Math.round((n + Number.EPSILON) * f) / f;
+}
 
-  onMetaGeralLucroInput(raw: string) {
-    this.metaGeral.metaLucro = this.unformatMoney(raw);
-  }
-  onMetaGeralLucroBlur() {
-    this.metaGeral.metaLucro = Math.round(this.metaGeral.metaLucro || 0);
-    this.salvarMetaGeralLocal();
-  }
+
+/** KPIs gerais calculados (exemplo simples) */
+get percFatGeral(): number {
+  const meta = this.metaGeral.metaFat || 0;
+  return meta ? (this.faturamentoTotal / meta) * 100 : 0;
+}
+get saldoFatGeral(): number {
+  return this.faturamentoTotal - (this.metaGeral.metaFat || 0);
+}
+get variacaoFatGeral(): number {
+  const meta = this.metaGeral.metaFat || 0;
+  return meta ? ((this.faturamentoTotal / meta) - 1) * 100 : 0;
+}
+get percLucroGeral(): number {
+  const metaL = (this.metaGeral.metaFat || 0) * ((this.metaGeral.metaMargemPct || 0) / 100);
+  return metaL ? (this.lucroTotal / metaL) * 100 : 0;
+}
 
   /** Ex.: 12.3 mil, 4.5 mi, 980  */
   short(n: number): string {
@@ -351,10 +367,10 @@ setMetaFat(id: IdEmpresa, valor: number | string | null): void {
   this.onChangeMeta({ idEmpresa: id } as any); // mantém seu recálculo
 }
 
-setMetaMargem(id: IdEmpresa, valorPercent: number | string | null): void {
-  const p = Number(valorPercent ?? 0);     // vem 0..100 do input
-  const frac = isNaN(p) ? 0 : p / 100;     // guarda como 0..1
-  this.getMeta(id).metaMargem = frac;
+setMetaMargem(id: number, valorPercent: number | string | null): void {
+  const pct = Number(String(valorPercent ?? '').replace(',', '.'));
+  const clean = isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
+  this.getMeta(id).metaMargem = clean / 100; // guarda em fração (0..1)
   this.onChangeMeta({ idEmpresa: id } as any);
 }
   // Cores rápidas (−10% vermelho, entre −10 e 0 amarelo, ≥0 verde)

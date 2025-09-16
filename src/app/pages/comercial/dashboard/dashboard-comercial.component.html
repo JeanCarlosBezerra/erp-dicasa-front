@@ -22,96 +22,72 @@
   </div>
 </div>
 
-<!-- ===== CARD GERAL (EMPRESA) ===== -->
 <div class="summary-row">
   <div class="summary-card">
     <div class="summary-title">Empresa (Geral)</div>
 
     <div class="summary-grid">
-      <!-- Faturamento/Lucro reais (totais) -->
-      <div>
+      <!-- Reais somados -->
+      <div class="sum-box">
         <div class="kpi-label">Faturamento Real</div>
         <div class="kpi-value">R$ {{ moeda(faturamentoTotal) }}</div>
       </div>
-      <div>
+      <div class="sum-box">
         <div class="kpi-label">Lucro Real</div>
         <div class="kpi-value">R$ {{ moeda(lucroTotal) }}</div>
       </div>
 
-      <!-- Meta Faturamento (igual aos cards, com máscara) -->
+      <!-- Metas gerais (editáveis) -->
       <mat-form-field appearance="outline" class="compact">
         <mat-label>Meta Faturamento</mat-label>
         <input
-          matInput
-          type="text"
-          [value]="formatMoney(meta(-1).metaFat)"
+          matInput type="text"
+          [value]="formatMoney(metaGeral.metaFat)"
           (focus)="selectAll($event)"
-          (input)="onMetaFatInput(-1, $any($event.target).value)"
-          (blur)="onMetaFatBlur(-1)"
+          (input)="onMetaGeralFatInput($any($event.target).value)"
+          (blur)="onMetaGeralFatBlur()"
         />
         <span matSuffix>R$</span>
       </mat-form-field>
 
-      <!-- Meta Margem (%) (igual aos cards) -->
-      <mat-form-field appearance="outline" class="compact">
-        <mat-label>Meta Margem (%)</mat-label>
-        <input
-          matInput
-          type="number"
-          min="0" max="100" step="0.1"
-          [ngModel]="meta(-1).metaMargem * 100"
-          (ngModelChange)="setMetaMargem(-1, $event)"
-        />
-        <span matSuffix>%</span>
-      </mat-form-field>
+<mat-form-field appearance="outline" class="compact">
+  <mat-label>Meta Margem (%)</mat-label>
+  <input
+    matInput
+    type="number"
+    min="0" max="100" step="any"
+    [ngModel]="metaGeral.metaMargemPct"
+    (ngModelChange)="onMetaGeralMargemInput($event)"
+  />
+  <span matSuffix>%</span>
+</mat-form-field>
 
-      <!-- KPIs do Geral, reaproveitando as MESMAS funções passando cardGeral -->
-      <div class="kpi-block">
-        <div class="row">
-          <span>% Faturamento:</span>
-          <strong [ngClass]="corNum(percFaturamento(cardGeral) - 100)">
-            {{ pct(percFaturamento(cardGeral)) }}
-          </strong>
+      <!-- KPIs gerais -->
+      <div class="kpi">
+        <div class="kpi-label">% Faturamento</div>
+        <div class="kpi-value" [class.pos]="percFatGeral>=100" [class.neg]="percFatGeral<100">
+          {{ pct(percFatGeral) }}
         </div>
+      </div>
 
-        <div class="row">
-          <span>Saldo Faturamento:</span>
-          <strong [ngClass]="corNum(saldoFaturamento(cardGeral))">
-            R$ {{ moeda(saldoFaturamento(cardGeral)) }}
-          </strong>
+      <div class="kpi">
+        <div class="kpi-label">Saldo Faturamento</div>
+        <div class="kpi-value" [ngClass]="corNum(saldoFatGeral)">
+          R$ {{ moeda(saldoFatGeral) }}
         </div>
+      </div>
 
-        <div class="row">
-          <span>Variação:</span>
-          <strong [ngClass]="corNum(variacaoFaturamento(cardGeral))">
-            {{ signo(variacaoFaturamento(cardGeral)) }}{{ pct(variacaoFaturamento(cardGeral)) }}
-          </strong>
+      <div class="kpi">
+        <div class="kpi-label">Variação</div>
+        <div class="kpi-value" [ngClass]="corNum(variacaoFatGeral)">
+          {{ signo(variacaoFatGeral) }}{{ pct(variacaoFatGeral) }}
         </div>
+      </div>
 
-        <div class="row">
-          <span>% Lucro (vs meta):</span>
-          <strong [ngClass]="corNum(percLucro(cardGeral) - 100)">
-            {{ pct(percLucro(cardGeral)) }}
-          </strong>
-        </div>
-
-        <div class="row">
-          <span>Saldo Lucro:</span>
-          <strong [ngClass]="corNum(saldoLucro(cardGeral))">
-            R$ {{ moeda(saldoLucro(cardGeral)) }}
-          </strong>
-        </div>
-
-        <div class="row">
-          <span>Margem Real:</span>
-          <strong>{{ pct(margemReal(cardGeral) * 100) }}</strong>
-        </div>
-
-        <div class="row">
-          <span>Diferença Margem:</span>
-          <strong [ngClass]="corNum(margemVar(cardGeral) * 100)">
-            {{ signo(margemVar(cardGeral) * 100) }}{{ pct(margemVar(cardGeral) * 100) }}
-          </strong>
+      <div class="kpi">
+        <div class="kpi-label">% Lucro (vs meta)</div>
+        <div class="kpi-value" [class.pos]="percLucroGeral>=100" [class.neg]="percLucroGeral<100">
+          {{ pct(percLucroGeral) }}
         </div>
       </div>
     </div>
@@ -147,10 +123,8 @@
   <input
     matInput
     type="number"
-    min="0"
-    max="100"
-    step="0.1"
-    [ngModel]="meta(c.idEmpresa ?? -1).metaMargem * 100"
+    min="0" max="100" step="0.1"
+    [ngModel]="(meta(c.idEmpresa ?? -1).metaMargem * 100) | number:'1.0-1'"
     (ngModelChange)="setMetaMargem(c.idEmpresa ?? -1, $event)"
   />
   <span matSuffix>%</span>
