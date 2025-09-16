@@ -1,5 +1,10 @@
 :host { display: block; }
 
+.page-header .mat-mdc-form-field-infix {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+}
+
 /* ===== SCROLL DA PÁGINA ===== */
 .dash-scroll {
   min-height: 100dvh;
@@ -20,23 +25,24 @@
 
   .filters {
     display: flex;
-    align-items: flex-end;   /* alinha pela base dos campos */
+    align-items: flex-end;     /* base alinhada */
     gap: 14px;
 
     .date { width: 220px; }
 
     button {
       height: 56px;          /* mesma altura “visual” do mat-field */
-      padding: 0 20px;
       align-self: end;       /* gruda na base mesmo se a linha quebrar */
     }
   }
 }
-
-/* >>> REMOVA o global abaixo se existir:
-   ::ng-deep .mat-mdc-form-field-infix { padding-top:6px; padding-bottom:6px; }
-   Ele que cortava "Data Início".
-*/
+.page-header .filters .mat-mdc-form-field {
+  margin-bottom: 0;          /* tira margem que empurra o botão */
+}
+.page-header .filters button {
+  height: 56px;              /* mesma “altura visual” do field outlined */
+  align-self: end;
+}
 
 /* compacta APENAS inputs com a classe .compact */
 .compact .mat-mdc-text-field-wrapper { padding: 0 8px; }
@@ -51,7 +57,7 @@
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 6px 18px rgba(0,0,0,.06);
-  padding: 10px 12px;        /* ↓ menos padding */
+  padding: 8px 12px;        /* ↓ menos padding */
   width: 100%;
 }
 
@@ -59,9 +65,9 @@
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(160px, 1fr)); /* mais colunas = menos altura */
-  column-gap: 12px;
-  row-gap: 4px;              /* ↓ espaço vertical */
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
+  column-gap: 10px;
+  row-gap: 2px;               /* ↓ espaço vertical */
   align-items: center;
 }
 @media (max-width: 1200px) { .summary-grid { grid-template-columns: repeat(3, minmax(160px, 1fr)); } }
@@ -73,9 +79,9 @@
 /* ===== CARDS EM FILA (UMA LINHA) ===== */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* ajusta para caber na largura */
-  gap: 12px;
-  overflow: visible;       /* nada de scroll horizontal aqui */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 10px;
+  overflow: visible;
 }
 
 .card {
@@ -90,8 +96,13 @@
 }
 
 /* deixa a grade ainda mais densa em telas largas */
-@media (min-width: 1400px) {
-  .cards-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+@media (min-width: 1480px) {
+  .cards-grid { grid-template-columns: repeat(6, 1fr); }
+  .card       { padding: 10px; }
+  .card .metric { padding: 4px 0; }
+  .card .metric label { font-size: 11px; }
+  .card .metric .value { font-size: 13px; }
+  .compact input[matInput] { height: 32px; line-height: 32px; }
 }
 
 /* tipografia e miúdos dos cards */
