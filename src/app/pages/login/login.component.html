@@ -1,19 +1,42 @@
-<form [formGroup]="loginForm" (ngSubmit)="Logar()" class="login-card">
-  <img src="assets/img/logo2.png" alt="Logo" class="logo" />
+<!-- === INÍCIO ALTERAÇÃO: login.component.html === -->
+<div class="login-page">
+  <div class="login-overlay"></div>
 
-  <mat-form-field appearance="outline" class="w-100">
-    <mat-label>Usuário</mat-label>
-    <input matInput formControlName="usuario" />
-  </mat-form-field>
+  <div class="login-wrapper">
+    <div class="login-brand">
+      <img src="assets/img/logo2.png" alt="Logo" class="logo" />
+      <h1>ERP Portal</h1>
+      <p>Acesse a plataforma com seu usuário e senha</p>
+    </div>
 
-  <mat-form-field appearance="outline" class="w-100">
-    <mat-label>Senha</mat-label>
-    <input matInput type="password" formControlName="senha" />
-  </mat-form-field>
+    <form [formGroup]="loginForm" (ngSubmit)="Logar()" class="login-card">
+      <div class="form-header">
+        <h2>Entrar</h2>
+        <span>Bem-vindo de volta</span>
+      </div>
 
-  <button mat-raised-button color="primary" class="w-100" type="submit">
-    Entrar
-  </button>
+      <mat-form-field appearance="outline" class="w-100 custom-field">
+        <mat-label>Usuário</mat-label>
+        <input matInput formControlName="usuario" autocomplete="username" />
+      </mat-form-field>
 
-  <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
-</form>
+      <mat-form-field appearance="outline" class="w-100 custom-field">
+        <mat-label>Senha</mat-label>
+        <input matInput type="password" formControlName="senha" autocomplete="current-password" />
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" class="w-100 login-btn" type="submit">
+        Entrar
+      </button>
+
+      <div *ngIf="errorMsg" class="error">
+        {{ errorMsg }}
+      </div>
+
+      <div class="login-footer">
+        © {{ currentYear }} ERP Portal
+      </div>
+    </form>
+  </div>
+</div>
+<!-- === FIM ALTERAÇÃO: login.component.html === -->

@@ -1,83 +1,132 @@
-.page-header {
-  position: relative; // ✅ Adicione isso
+:host {
+  display: block;
+}
+
+.colab-shell {
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 100dvh;
+  padding-bottom: 28px;
+}
+
+/* HERO */
+.hero {
+  display: flex;
   justify-content: space-between;
-  background: url('/assets/img/background.jpg') center/cover no-repeat;
-  padding: 1rem;
-  color: white;
-
-  .filters {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-  }
+  align-items: stretch;
+  gap: 20px;
+  padding: 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 26%),
+    linear-gradient(135deg, #0f172a 0%, #111827 55%, #172554 100%);
+  color: #ffffff;
+  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.14);
 }
 
-.table-container {
-  margin: 1rem;
+.hero-left {
+  max-width: 860px;
 }
 
-.full-width {
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #93c5fd;
+}
+
+.hero h1 {
+  margin: 0 0 10px;
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1.05;
+  color: #ffffff;
+}
+
+.hero p {
+  margin: 0;
+  max-width: 760px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.hero-right {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  min-width: 260px;
+}
+
+.hero-meta-card {
+  min-width: 240px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.hero-meta-card .meta-label {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #93c5fd;
+  margin-bottom: 8px;
+}
+
+.hero-meta-card strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 6px;
+}
+
+.hero-meta-card small {
+  color: rgba(255,255,255,0.72);
+  font-size: 13px;
+}
+
+/* FILTROS */
+.filters-card {
+  display: grid;
+  grid-template-columns: 180px 180px minmax(220px, 320px) 160px;
+  gap: 12px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  align-items: start;
+}
+
+.trigger-text {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.filter-field {
   width: 100%;
 }
 
-.export-buttons {
-  position: absolute;
-  right: 2rem;
-  top: 2rem;
-  display: flex;
-  gap: 12px;
-  margin-top: 8px;
+.btn-filtrar {
+  height: 56px;
+  border-radius: 16px;
+  font-weight: 700;
 }
 
-
-.export-buttons-inline {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-bottom: 1rem;
-  margin-top: 1rem;
-  background-color: rgba(0, 0, 0, 0.05); // Só para teste
-}
-
-td.mat-cell:last-child,
-th.mat-header-cell:last-child {
-  min-width: 100px;
-  white-space: nowrap;
-}
-
-.acoes-header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 8px;
-}
-
-.table-wrapper {
-  position: relative; // <- âncora dos botões
-
-  .floating-export-buttons {
-    position: absolute;
-    top: 0.5rem;         // Alinhado ao topo da tabela
-    right: 1rem;         // Encostado à direita da tabela
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    z-index: 999;
-
-    button {
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-    }
-  }
-}
-
-.empresa-field .mat-mdc-select {
-  background: #fff !important;
-  border-radius: 8px;
-}
-
-/* chips (IDs selecionados) no trigger */
+/* chips do select */
 .empresa-field .chip {
   display: inline-block;
   padding: 2px 8px;
@@ -89,7 +138,6 @@ th.mat-header-cell:last-child {
   color: #1e293b;
 }
 
-/* Painel do dropdown mais largo e legível */
 .empresas-panel .mdc-list {
   padding: 6px 0;
   min-width: 420px;
@@ -119,28 +167,125 @@ th.mat-header-cell:last-child {
   color: #1f2937;
 }
 
-/* Força o fundo sólido e o texto visível no campo selecionado */
+/* TABELA */
+.table-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.section-eyebrow {
+  display: inline-block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #2563eb;
+}
+
+.table-header h2 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.export-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.export-actions button {
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+}
+
+.table-card {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 24px;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+  padding: 16px;
+}
+
+.table-container {
+  overflow: auto;
+  border-radius: 18px;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.10);
+}
+
+.full-width {
+  width: 100%;
+  min-width: 980px;
+}
+
+/* tabela material */
+::ng-deep .mat-mdc-header-row {
+  background: #eff6ff;
+}
+
+::ng-deep .mat-mdc-header-cell {
+  color: #1e3a8a !important;
+  font-weight: 800 !important;
+  font-size: 13px;
+}
+
+::ng-deep .mat-mdc-cell {
+  color: #334155;
+  font-size: 14px;
+}
+
+::ng-deep .mat-mdc-row:hover {
+  background: #f8fafc !important;
+}
+
+/* select mais legível */
 ::ng-deep .mat-mdc-select {
-  background-color: #fff !important; /* Fundo sólido */
+  background-color: #fff !important;
   border-radius: 4px;
 }
 
-/* Texto no campo selecionado (trigger) */
 ::ng-deep .mat-mdc-select-value {
-  color: #000 !important; /* Texto preto */
-  opacity: 1 !important; /* Remove efeito translúcido */
+  color: #000 !important;
+  opacity: 1 !important;
   font-weight: 700;
-  letter-spacing: .3px;
+  letter-spacing: 0.3px;
 }
 
-/* Itens da lista no dropdown */
 ::ng-deep .mdc-list-item__primary-text {
   line-height: 1.2;
-  color: #1f1f1f !important; /* Texto normal */
+  color: #1f1f1f !important;
   opacity: 1 !important;
 }
 
+@media (max-width: 1280px) {
+  .hero {
+    flex-direction: column;
+  }
 
-//::ng-deep .mat-mdc-select {
-//  border: 1px solid rgba(0,0,0,0.2);
-//
+  .filters-card {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 32px;
+  }
+
+  .filters-card {
+    grid-template-columns: 1fr;
+  }
+
+  .table-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

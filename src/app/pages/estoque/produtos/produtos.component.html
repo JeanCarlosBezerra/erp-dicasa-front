@@ -1,0 +1,38 @@
+<div class="filtros">
+  <label>
+    Data base:
+    <input type="date" [(ngModel)]="dtBase" (change)="carregarCurvaAbc()" />
+  </label>
+</div>
+
+<div *ngIf="loading">Carregando...</div>
+
+<div *ngIf="!loading">
+  <h3>Resumo por Curva</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Curva</th>
+        <th>Vd Anterior</th>
+        <th>FatK Ant</th>
+        <th>Vd Atual</th>
+        <th>FatK Atual</th>
+        <th>FatK Proj</th>
+        <th>Est Venda</th>
+        <th>Venda Proj</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of resumo">
+        <td>{{ r.curva }}</td>
+        <td>{{ r.vdAnterior | number: '1.0-2' }}</td>
+        <td>{{ r.fatKAnterior | number: '1.0-2' }}</td>
+        <td>{{ r.vdAtual | number: '1.0-2' }}</td>
+        <td>{{ r.fatKAtual | number: '1.0-2' }}</td>
+        <td>{{ r.fatKProj | number: '1.0-2' }}</td>
+        <td>{{ r.estVenda | number: '1.0-2' }}</td>
+        <td>{{ r.vendaProj | number: '1.0-2' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>

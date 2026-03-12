@@ -21,6 +21,7 @@ import { ExportService } from '../../../shared/export.service';
 import { MatIconModule } from '@angular/material/icon'; // ✅ IMPORTAR
 import { EmpresaService, EmpresaLite  } from '../../../services/empresa.service';
 import { Empresa } from '../../../models/empresa.model';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 
 
@@ -42,6 +43,7 @@ import { Empresa } from '../../../models/empresa.model';
     MatCardModule,
     MatTableModule,
     MatIconModule, // ✅ AQUI!!!
+    MatTooltipModule,
   ],
   providers: [ExportService], // ✅ AQUI!
   templateUrl: './colaborador.component.html',
@@ -103,6 +105,10 @@ onEmpresasChange() {
     error: err => console.error('Angular ← erro na API', err)
   });
 }
+getEmpresaApelido(id: number): string {
+  const empresa = this.empresas.find(e => e.id === id);
+  return empresa?.apelido ?? String(id);
+}
 
   exportarExcel() {
   const headers = ['#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG', 'Devol.'];
@@ -117,6 +123,19 @@ onEmpresasChange() {
   ]);
 
   this.exportService.exportToExcel(headers, rows, 'produtividade-colaborador');
+}
+get empresasSelecionadasResumo(): string {
+  if (!this.empresasSelecionadas?.length) return '';
+
+  const apelidos = this.empresasSelecionadas
+    .map(id => this.getEmpresaApelido(id))
+    .filter(Boolean);
+
+  if (apelidos.length <= 3) {
+    return apelidos.join(', ');
+  }
+
+  return `${apelidos.slice(0, 3).join(', ')} +${apelidos.length - 3}`;
 }
 
 exportarPDF() {

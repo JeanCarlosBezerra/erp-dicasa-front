@@ -12,6 +12,7 @@ import { AuthService } from '../../services/auth.service';  // ajuste o path
 
 @Component({
   selector: 'app-menu',
+  standalone: true,
   imports: [MatSidenavModule,
             MatButtonModule,
             MatIconModule,

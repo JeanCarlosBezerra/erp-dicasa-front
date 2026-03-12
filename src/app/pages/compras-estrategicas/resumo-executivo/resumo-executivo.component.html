@@ -1,0 +1,304 @@
+<div class="resumo-shell">
+  <section class="hero">
+    <div class="hero-left">
+      <span class="eyebrow">Compras Estratégicas</span>
+      <h1>Resumo Executivo</h1>
+      <p>
+        Visão consolidada dos principais indicadores de procurement, criticidade de fornecedores
+        e concentração de vendas. Estruturado para leitura executiva e evolução futura com filtros reais.
+      </p>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-meta-card">
+        <span class="meta-label">Módulo</span>
+        <strong>Procurement Dashboard</strong>
+        <small>Visão analítica executiva</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="filters-bar">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Lojas</mat-label>
+      <mat-select [(ngModel)]="lojaSelecionada" multiple>
+        <mat-option *ngFor="let loja of lojas" [value]="loja.id">
+          {{ loja.id }} - {{ loja.apelido }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Fornecedor</mat-label>
+      <mat-select [(ngModel)]="fornecedorSelecionado">
+        <mat-option [value]="null">Todos</mat-option>
+        <mat-option *ngFor="let fornecedor of fornecedores" [value]="fornecedor.id">
+          {{ fornecedor.nome }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Data inicial</mat-label>
+      <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="dataInicio">
+      <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+      <mat-datepicker #pickerInicio></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Data final</mat-label>
+      <input matInput [matDatepicker]="pickerFim" [(ngModel)]="dataFim">
+      <mat-datepicker-toggle matSuffix [for]="pickerFim"></mat-datepicker-toggle>
+      <mat-datepicker #pickerFim></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-flat-button class="apply-btn" (click)="aplicarFiltros()" [disabled]="carregando">
+      <mat-icon>filter_alt</mat-icon>
+      {{ carregando ? 'Aplicando...' : 'Aplicar' }}
+    </button>
+  </section>
+
+  <section class="kpis-row">
+    <div class="kpi-card estrategico">
+      <div class="kpi-top">
+        <span class="kpi-title">{{ kpisCache.estrategicos.titulo }}</span>
+      </div>
+      <div class="kpi-value">{{ kpisCache.estrategicos.valor }}</div>
+      <div class="kpi-detail">{{ kpisCache.estrategicos.descricao }}</div>
+    </div>
+
+    <div class="kpi-card alavancagem">
+      <div class="kpi-top">
+        <span class="kpi-title">{{ kpisCache.alavancagem.titulo }}</span>
+      </div>
+      <div class="kpi-value">{{ kpisCache.alavancagem.valor }}</div>
+      <div class="kpi-detail">{{ kpisCache.alavancagem.descricao }}</div>
+    </div>
+
+    <div class="kpi-card gargalo">
+      <div class="kpi-top">
+        <span class="kpi-title">{{ kpisCache.gargalo.titulo }}</span>
+      </div>
+      <div class="kpi-value">{{ kpisCache.gargalo.valor }}</div>
+      <div class="kpi-detail">{{ kpisCache.gargalo.descricao }}</div>
+    </div>
+
+    <div class="kpi-card alertas">
+      <div class="kpi-top">
+        <span class="kpi-title">{{ kpisCache.alertasCriticos.titulo }}</span>
+      </div>
+      <div class="kpi-value">{{ kpisCache.alertasCriticos.valor }}</div>
+      <div class="kpi-detail">{{ kpisCache.alertasCriticos.descricao }}</div>
+    </div>
+  </section>
+
+  <section class="pill-nav">
+    <button
+      type="button"
+      class="pill-btn"
+      [class.active]="abaAtiva === 'visao-geral'"
+      (click)="selecionarAba('visao-geral')"
+    >
+      Visão Geral
+    </button>
+
+    <button
+      type="button"
+      class="pill-btn"
+      [class.active]="abaAtiva === 'matriz-kraljic'"
+      (click)="selecionarAba('matriz-kraljic')"
+    >
+      Matriz Kraljic
+    </button>
+
+    <button
+      type="button"
+      class="pill-btn"
+      [class.active]="abaAtiva === 'pareto'"
+      (click)="selecionarAba('pareto')"
+    >
+      Pareto 80/20
+    </button>
+
+    <button
+      type="button"
+      class="pill-btn"
+      [class.active]="abaAtiva === 'top10'"
+      (click)="selecionarAba('top10')"
+    >
+      Top 10 Fornecedores
+    </button>
+
+    <button
+      type="button"
+      class="pill-btn"
+      [class.active]="abaAtiva === 'alertas'"
+      (click)="selecionarAba('alertas')"
+    >
+      Alertas e Ações
+    </button>
+  </section>
+
+  <section class="content-panel" *ngIf="abaAtiva === 'visao-geral'">
+    <div class="panel-header">
+      <div>
+        <span class="panel-eyebrow">Leitura executiva</span>
+        <h2>Visão Geral</h2>
+      </div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="overview-card">
+        <div class="overview-title">Matriz Kraljic</div>
+        <div class="overview-text">
+          Classificação estratégica dos fornecedores com base em criticidade e impacto.
+        </div>
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-title">Pareto 80/20</div>
+        <div class="overview-text">
+          Concentração das vendas por grupos A, B e C.
+        </div>
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-title">Top 10 Fornecedores</div>
+        <div class="overview-text">
+          Ranking por score, vendas, margem e OTIF.
+        </div>
+      </div>
+
+      <div class="overview-card danger">
+        <div class="overview-title">Alertas e Ações</div>
+        <div class="overview-text">
+          Rupturas, gargalos e recomendações de ação imediata.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-panel" *ngIf="abaAtiva === 'matriz-kraljic'">
+    <div class="panel-header">
+      <div>
+        <span class="panel-eyebrow">Classificação estratégica</span>
+        <h2>Matriz Kraljic</h2>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Categoria</th>
+            <th>Qtd Fornec.</th>
+            <th>Vendas Totais</th>
+            <th>% do Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of matrizKraljicCache">
+            <td>{{ item.categoria }}</td>
+            <td>{{ item.qtdFornec }}</td>
+            <td>{{ item.vendasTotaisTexto }}</td>
+            <td>{{ item.percTotalTexto }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="content-panel" *ngIf="abaAtiva === 'pareto'">
+    <div class="panel-header">
+      <div>
+        <span class="panel-eyebrow">Concentração de vendas</span>
+        <h2>Pareto 80/20</h2>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Classificação</th>
+            <th>Qtd Fornec.</th>
+            <th>% Vendas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of paretoCache">
+            <td>{{ item.classificacao }}</td>
+            <td>{{ item.qtdFornec }}</td>
+            <td>{{ item.percVendas }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="content-panel" *ngIf="abaAtiva === 'top10'">
+    <div class="panel-header">
+      <div>
+        <span class="panel-eyebrow">Ranking de performance</span>
+        <h2>Top 10 Fornecedores</h2>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Fornecedor</th>
+            <th>Score</th>
+            <th>Vendas (R$)</th>
+            <th>Margem %</th>
+            <th>OTIF %</th>
+            <th>Kraljic</th>
+            <th>Pareto</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of topFornecedoresCache">
+            <td>{{ item.rank }}</td>
+            <td>{{ item.fornecedor }}</td>
+            <td>{{ item.score }}</td>
+            <td>{{ item.vendas }}</td>
+            <td>{{ item.margem }}</td>
+            <td>{{ item.otif }}</td>
+            <td>{{ item.kraljic }}</td>
+            <td>{{ item.pareto }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="content-panel danger-panel" *ngIf="abaAtiva === 'alertas'">
+    <div class="panel-header">
+      <div>
+        <span class="panel-eyebrow danger-text">Sinais críticos</span>
+        <h2>Alertas e Ações</h2>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Alerta</th>
+            <th>Quantidade</th>
+            <th>Ação recomendada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of alertasCache">
+            <td>{{ item.alerta }}</td>
+            <td>{{ item.quantidade }}</td>
+            <td>{{ item.acao }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

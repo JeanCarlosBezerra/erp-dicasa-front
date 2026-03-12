@@ -1,111 +1,140 @@
-<div class="page-header">
-  <h2>Produtividade por Colaborador</h2>
+<div class="colab-shell">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <span class="eyebrow">Comercial</span>
+      <h1>Produtividade por Colaborador</h1>
+      <p>
+        Consulte vendas, faturamento líquido, lucro, margem e devoluções dos colaboradores
+        ativos por período e empresa.
+      </p>
+    </div>
 
-  <div class="filters">
-    <mat-form-field appearance="fill">
+    <div class="hero-right">
+      <div class="hero-meta-card">
+        <span class="meta-label">Módulo</span>
+        <strong>Produtividade Comercial</strong>
+        <small>{{ dataSource.data.length }} colaboradores retornados</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILTROS -->
+  <section class="filters-card">
+    <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Data Início</mat-label>
       <input matInput [matDatepicker]="dp1" [(ngModel)]="dataInicio">
       <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
       <mat-datepicker #dp1></mat-datepicker>
     </mat-form-field>
 
-    <mat-form-field appearance="fill">
+    <mat-form-field appearance="outline" class="filter-field">
       <mat-label>Data Fim</mat-label>
       <input matInput [matDatepicker]="dp2" [(ngModel)]="dataFim">
       <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
       <mat-datepicker #dp2></mat-datepicker>
     </mat-form-field>
 
-    <mat-form-field appearance="outline" class="empresa-field">
-  <mat-label>Empresas</mat-label>
+    <mat-form-field appearance="outline" class="filter-field empresa-field">
+      <mat-label>Empresas</mat-label>
+      <mat-select
+        [(ngModel)]="empresasSelecionadas"
+        multiple
+        panelClass="empresas-panel"
+        (selectionChange)="onEmpresasChange()"
+      >
+        <mat-select-trigger>
+          <span class="trigger-text">
+            {{ empresasSelecionadasResumo }}
+          </span>
+        </mat-select-trigger>
 
-  <!-- Mostra SÓ os IDs, em “chips” -->
-  <mat-select
-    [(ngModel)]="empresasSelecionadas"
-    multiple
-    panelClass="empresas-panel"
-    (selectionChange)="onEmpresasChange()">
+        <mat-option *ngFor="let e of empresas" [value]="e.id">
+          <div class="option-row">
+            <span class="option-id">{{ e.id }}</span>
+            <span class="option-name">{{ e.apelido }}</span>
+          </div>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
 
-    <mat-select-trigger>
-      <span class="chip" *ngFor="let id of empresasSelecionadas; let last = last">
-        {{ id }}<span *ngIf="!last">,</span>
-      </span>
-    </mat-select-trigger>
+    <button mat-flat-button color="primary" class="btn-filtrar" (click)="carregar()">
+      <mat-icon>filter_alt</mat-icon>
+      Filtrar
+    </button>
+  </section>
 
-    <!-- Opções com ID destacado + nome ao lado -->
-    <mat-option *ngFor="let e of empresas" [value]="e.id">
-      <div class="option-row">
-        <span class="option-id">{{ e.id }}</span>
-        <span class="option-name">{{ e.apelido }}</span>
+  <!-- TABELA -->
+  <section class="table-section">
+    <div class="table-header">
+      <div>
+        <span class="section-eyebrow">Resultado analítico</span>
+        <h2>Colaboradores</h2>
       </div>
-    </mat-option>
-  </mat-select>
-</mat-form-field>
 
+      <div class="export-actions">
+        <button
+          mat-mini-fab
+          color="primary"
+          matTooltip="Exportar Excel"
+          (click)="exportarExcel()"
+        >
+          <mat-icon>grid_on</mat-icon>
+        </button>
 
-    <button mat-raised-button color="primary" (click)="carregar()">Filtrar</button>
-  </div>
-</div>
+        <button
+          mat-mini-fab
+          color="accent"
+          matTooltip="Exportar PDF"
+          (click)="exportarPDF()"
+        >
+          <mat-icon>picture_as_pdf</mat-icon>
+        </button>
+      </div>
+    </div>
 
-<div class="table-wrapper">
-  <div class="floating-export-buttons">
-    <button mat-mini-fab color="primary" matTooltip="Exportar Excel" (click)="exportarExcel()">
-      <mat-icon>grid_on</mat-icon>
-    </button>
+    <div class="table-card">
+      <div class="table-container">
+        <table mat-table [dataSource]="dataSource" class="full-width">
+          <ng-container matColumnDef="idVendedor">
+            <th mat-header-cell *matHeaderCellDef>#</th>
+            <td mat-cell *matCellDef="let row">{{ row.idVendedor }}</td>
+          </ng-container>
 
-    <button mat-mini-fab color="accent" matTooltip="Exportar PDF" (click)="exportarPDF()">
-      <mat-icon>picture_as_pdf</mat-icon>
-    </button>
-  </div>
-  <div class="table-container mat-elevation-z2">
-  
-    <table mat-table [dataSource]="dataSource" class="full-width">
-  
-      <!-- # -->
-      <ng-container matColumnDef="idVendedor">
-        <th mat-header-cell *matHeaderCellDef>#</th>
-        <td mat-cell *matCellDef="let row">{{ row.idVendedor }}</td>
-      </ng-container>
-  
-      <!-- Nome -->
-      <ng-container matColumnDef="nome">
-        <th mat-header-cell *matHeaderCellDef>Nome</th>
-        <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
-      </ng-container>
-  
-      <!-- Vendas -->
-      <ng-container matColumnDef="qtdvenda">
-        <th mat-header-cell *matHeaderCellDef>Vendas</th>
-        <td mat-cell *matCellDef="let row">{{ row.qtdvenda }}</td>
-      </ng-container>
-  
-      <!-- Faturamento -->
-      <ng-container matColumnDef="faturamento">
-        <th mat-header-cell *matHeaderCellDef>Fatur. Líq</th>
-        <td mat-cell *matCellDef="let row">{{ row.faturamento | number:'1.2-2' }}</td>
-      </ng-container>
-  
-      <!-- Lucro -->
-      <ng-container matColumnDef="lucro">
-        <th mat-header-cell *matHeaderCellDef>Lucro Líq</th>
-        <td mat-cell *matCellDef="let row">{{ row.lucro | number:'1.2-2' }}</td>
-      </ng-container>
-  
-      <!-- Margem -->
-      <ng-container matColumnDef="margem">
-        <th mat-header-cell *matHeaderCellDef>%MG</th>
-        <td mat-cell *matCellDef="let row">{{ row.margem | number:'1.2-2' }}%</td>
-      </ng-container>
-  
-      <!-- Devoluções -->
-      <ng-container matColumnDef="devolucoes">
-        <th mat-header-cell *matHeaderCellDef>Devol.</th>
-        <td mat-cell *matCellDef="let row">{{ row.devolucoes | number:'1.2-2' }}</td>
-      </ng-container>
-  
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  
-    </table>
-  </div>
+          <ng-container matColumnDef="nome">
+            <th mat-header-cell *matHeaderCellDef>Nome</th>
+            <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="qtdvenda">
+            <th mat-header-cell *matHeaderCellDef>Vendas</th>
+            <td mat-cell *matCellDef="let row">{{ row.qtdvenda }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="faturamento">
+            <th mat-header-cell *matHeaderCellDef>Fatur. Líq</th>
+            <td mat-cell *matCellDef="let row">{{ row.faturamento | number:'1.2-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="lucro">
+            <th mat-header-cell *matHeaderCellDef>Lucro Líq</th>
+            <td mat-cell *matCellDef="let row">{{ row.lucro | number:'1.2-2' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="margem">
+            <th mat-header-cell *matHeaderCellDef>%MG</th>
+            <td mat-cell *matCellDef="let row">{{ row.margem | number:'1.2-2' }}%</td>
+          </ng-container>
+
+          <ng-container matColumnDef="devolucoes">
+            <th mat-header-cell *matHeaderCellDef>Devol.</th>
+            <td mat-cell *matCellDef="let row">{{ row.devolucoes | number:'1.2-2' }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        </table>
+      </div>
+    </div>
+  </section>
 </div>

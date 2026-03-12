@@ -26,13 +26,6 @@ body {
 
 h1, .mat-h1 { font-family: $font-family-heading; font-size: $font-size-h1; }
 
-.mat-expansion-panel-header .mat-content span,
-.mat-expansion-panel-header .mat-content .mat-expansion-panel-header-title,
-.mat-expansion-panel-header .mat-content .mat-panel-title {
-  color: #ffffff !important;
-  font-weight: 600;
-}
-
 
 .sidenav {
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.4);

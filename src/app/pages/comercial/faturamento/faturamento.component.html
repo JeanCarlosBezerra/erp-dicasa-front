@@ -1,0 +1,180 @@
+<div class="faturamento-shell">
+  <section class="hero">
+    <div class="hero-left">
+      <span class="eyebrow">Comercial</span>
+      <h1>Análise de Faturamento</h1>
+      <p>
+        Visão consolidada do faturamento por empresa e por forma de pagamento,
+        com filtros por loja e período para leitura executiva.
+      </p>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-meta-card">
+        <span class="meta-label">Módulo</span>
+        <strong>Faturamento Comercial</strong>
+        <small>Visão analítica por período</small>
+      </div>
+    </div>
+  </section>
+
+  <section class="filters-bar">
+    <mat-form-field appearance="outline" class="filter-field lojas-field">
+      <mat-label>Lojas</mat-label>
+      <mat-select [(ngModel)]="empresasSelecionadas" multiple>
+        <mat-option *ngFor="let empresa of empresas" [value]="empresa.id">
+          {{ empresa.id }} - {{ empresa.apelido }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Data inicial</mat-label>
+      <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="dataInicio">
+      <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+      <mat-datepicker #pickerInicio></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Data final</mat-label>
+      <input matInput [matDatepicker]="pickerFim" [(ngModel)]="dataFim">
+      <mat-datepicker-toggle matSuffix [for]="pickerFim"></mat-datepicker-toggle>
+      <mat-datepicker #pickerFim></mat-datepicker>
+    </mat-form-field>
+
+    <button mat-flat-button class="apply-btn" (click)="aplicarFiltros()" [disabled]="carregando">
+      <mat-icon>filter_alt</mat-icon>
+      {{ carregando ? 'Aplicando...' : 'Aplicar' }}
+    </button>
+  </section>
+
+  <section class="kpis-row">
+    <div class="kpi-card azul">
+      <div class="kpi-top">
+        <span class="kpi-title">Faturamento Líquido</span>
+      </div>
+      <div class="kpi-value">{{ moeda(totalFaturamentoLiquido) }}</div>
+      <div class="kpi-detail">soma do período</div>
+    </div>
+
+    <div class="kpi-card verde">
+      <div class="kpi-top">
+        <span class="kpi-title">Lucro Líquido</span>
+      </div>
+      <div class="kpi-value">{{ moeda(totalLucroLiquido) }}</div>
+      <div class="kpi-detail">resultado consolidado</div>
+    </div>
+
+    <div class="kpi-card laranja">
+      <div class="kpi-top">
+        <span class="kpi-title">Devoluções</span>
+      </div>
+      <div class="kpi-value">{{ moeda(totalDevolucoes) }}</div>
+      <div class="kpi-detail">impacto no período</div>
+    </div>
+
+    <div class="kpi-card vermelho">
+      <div class="kpi-top">
+        <span class="kpi-title">Qtd. Vendas</span>
+      </div>
+      <div class="kpi-value">{{ totalVendas }}</div>
+      <div class="kpi-detail">documentos contabilizados</div>
+    </div>
+  </section>
+
+  <section class="pill-nav">
+    <button
+      type="button"
+      class="pill-btn"
+      [class.active]="abaAtiva === 'empresa'"
+      (click)="selecionarAba('empresa')"
+    >
+      Por Empresa
+    </button>
+
+    <button
+      type="button"
+      class="pill-btn"
+      [class.active]="abaAtiva === 'forma-pagamento'"
+      (click)="selecionarAba('forma-pagamento')"
+    >
+      Por Forma de Pagamento
+    </button>
+  </section>
+
+  <section class="content-panel" *ngIf="abaAtiva === 'empresa'">
+    <div class="panel-header">
+      <div>
+        <span class="panel-eyebrow">Visão consolidada</span>
+        <h2>Faturamento por Empresa</h2>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Empresa</th>
+            <th>Venda Líquida</th>
+            <th>% Lucratividade</th>
+            <th>Lucro Líquido</th>
+            <th>Devoluções</th>
+            <th>Venda Bruta</th>
+            <th>Lucro Bruto</th>
+            <th>Qtd. Vendas</th>
+            <th>Ticket Médio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of dadosPorEmpresa">
+            <td>{{ item.NOME }}</td>
+            <td>{{ moeda(item.TOTALVENDA) }}</td>
+            <td>{{ percentual(item.PERCLUCRATIVIDADE) }}</td>
+            <td>{{ moeda(item.LUCRO) }}</td>
+            <td>{{ moeda(item.DEVOLUCOES) }}</td>
+            <td>{{ moeda(item.TOTALVENDABRUTA) }}</td>
+            <td>{{ moeda(item.LUCROBRUTO) }}</td>
+            <td>{{ item.QTDVENDA }}</td>
+            <td>{{ moeda(item.TICKETMEDIO) }}</td>
+          </tr>
+
+          <tr *ngIf="!dadosPorEmpresa.length">
+            <td colspan="9" class="empty-row">Nenhum dado encontrado.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="content-panel" *ngIf="abaAtiva === 'forma-pagamento'">
+    <div class="panel-header">
+      <div>
+        <span class="panel-eyebrow">Recebimentos</span>
+        <h2>Faturamento por Forma de Pagamento</h2>
+      </div>
+    </div>
+
+    <div class="table-panel">
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descrição</th>
+            <th>Valor Venda</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of dadosFormaPagamento">
+            <td>{{ item.IDRECEBIMENTO }}</td>
+            <td>{{ item.DESCRICAO }}</td>
+            <td>{{ moeda(item.TOTALDUP) }}</td>
+          </tr>
+
+          <tr *ngIf="!dadosFormaPagamento.length">
+            <td colspan="4" class="empty-row">Nenhum dado encontrado.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

@@ -1,0 +1,49 @@
+:host {
+  display: block;
+  padding: 16px 20px;
+}
+
+.filtros {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+
+  label {
+    font-weight: 600;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  input[type="date"] {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,.15);
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(255,255,255,.7);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+thead th {
+  text-align: left;
+  font-weight: 700;
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0,0,0,.10);
+  background: rgba(0,0,0,.03);
+}
+
+tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(0,0,0,.06);
+}
+
+tbody tr:hover {
+  background: rgba(0,0,0,.02);
+}

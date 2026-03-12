@@ -1,0 +1,101 @@
+<!-- === INÍCIO ALTERAÇÃO: home.component.html === -->
+<div class="home-page">
+  <section class="hero">
+    <div class="hero-text">
+      <span class="eyebrow">Painel principal</span>
+      <h1>Bem-vindo ao ERP Portal</h1>
+      <p>
+        Centralize operações, acompanhe indicadores e navegue pelos módulos do sistema
+        com uma experiência mais moderna e organizada.
+      </p>
+    </div>
+
+    <div class="hero-badge">
+      <div class="hero-badge-icon">EP</div>
+      <div class="hero-badge-text">
+        <strong>Business Suite</strong>
+        <span>Gestão integrada</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="kpis">
+    <div class="kpi-card">
+      <span class="kpi-label">Módulos disponíveis</span>
+      <strong class="kpi-value">5</strong>
+      <small class="kpi-foot">Pedidos, Estoque, Financeiro, Comercial e Configurações</small>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-label">Ambiente</span>
+      <strong class="kpi-value">Local</strong>
+      <small class="kpi-foot">Execução em desenvolvimento</small>
+    </div>
+
+    <div class="kpi-card">
+      <span class="kpi-label">Status visual</span>
+      <strong class="kpi-value">Em evolução</strong>
+      <small class="kpi-foot">Base pronta para white-label</small>
+    </div>
+  </section>
+
+  <section class="modules-section">
+    <div class="section-header">
+      <h2>Módulos do sistema</h2>
+      <p>Atalhos principais para navegação rápida.</p>
+    </div>
+
+    <div class="modules-grid">
+      <a class="module-card" routerLink="/menu/pedidos-list">
+        <div class="module-icon">
+          <mat-icon>inventory_2</mat-icon>
+        </div>
+        <div class="module-content">
+          <h3>Pedidos</h3>
+          <p>Consulta de pedidos e acompanhamento operacional.</p>
+        </div>
+      </a>
+
+      <a class="module-card" routerLink="/menu/estoque/produtos">
+        <div class="module-icon">
+          <mat-icon>warehouse</mat-icon>
+        </div>
+        <div class="module-content">
+          <h3>Estoque</h3>
+          <p>Produtos, inventário e informações logísticas.</p>
+        </div>
+      </a>
+
+      <a class="module-card" routerLink="/menu/financeiro/dashboard">
+        <div class="module-icon">
+          <mat-icon>attach_money</mat-icon>
+        </div>
+        <div class="module-content">
+          <h3>Financeiro</h3>
+          <p>Indicadores, fluxo de caixa e contas a receber.</p>
+        </div>
+      </a>
+
+      <a class="module-card" routerLink="/menu/comercial/dashboard">
+        <div class="module-icon">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+        <div class="module-content">
+          <h3>Comercial</h3>
+          <p>Dashboard de performance e análise por colaborador.</p>
+        </div>
+      </a>
+
+      <a class="module-card" routerLink="/menu/settings/geral">
+        <div class="module-icon">
+          <mat-icon>settings</mat-icon>
+        </div>
+        <div class="module-content">
+          <h3>Configurações</h3>
+          <p>Permissões, ajustes gerais e parametrizações.</p>
+        </div>
+      </a>
+    </div>
+  </section>
+</div>
+<!-- === FIM ALTERAÇÃO: home.component.html === -->

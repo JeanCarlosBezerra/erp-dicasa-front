@@ -27,7 +27,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 export class LoginComponent {
   loginForm: FormGroup;
   errorMsg = '';
-
+  currentYear = new Date().getFullYear();
   constructor(
     private fb: FormBuilder,
     private auth: AuthService,

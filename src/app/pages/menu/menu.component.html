@@ -1,9 +1,31 @@
+<!-- === INÍCIO ALTERAÇÃO: menu.component.html === -->
 <mat-sidenav-container class="sidenav-container">
   <!-- MENU LATERAL -->
-  <mat-sidenav #sidenav mode="side" [opened]="opened" class="sidenav" [fixedInViewport]="true">
+  <mat-sidenav
+    #sidenav
+    mode="side"
+    [opened]="opened"
+    class="sidenav"
+    [fixedInViewport]="true"
+  >
     <div class="sidenav-inner">
-      <div class="logo">DiCasa</div>
-      <div class="user-info">👤 {{ usuario }}</div>
+      <div class="brand-block">
+        <div class="brand-badge">EP</div>
+        <div class="brand-text">
+          <div class="brand-title">ERP Portal</div>
+          <div class="brand-subtitle">Business Suite</div>
+        </div>
+      </div>
+
+      <div class="user-card">
+        <div class="user-avatar">
+          <mat-icon>person</mat-icon>
+        </div>
+        <div class="user-meta">
+          <span class="user-label">Usuário logado</span>
+          <strong>{{ usuario }}</strong>
+        </div>
+      </div>
 
       <mat-divider></mat-divider>
 
@@ -14,15 +36,19 @@
           <mat-expansion-panel-header class="menu-btn">
             <mat-panel-title>
               <mat-icon class="menu-icon">inventory_2</mat-icon>
-              Pedidos
+              <span class="menu-title-text">Pedidos</span>
             </mat-panel-title>
           </mat-expansion-panel-header>
+
           <div class="submenu-wrapper">
-            <button mat-button class="submenu-btn" routerLink="/menu/pedidos-list">
-              📄 Consultar
+            <button mat-button class="submenu-btn" routerLink="/menu/pedidos-list" routerLinkActive="active-submenu">
+              <mat-icon>description</mat-icon>
+              Consultar
             </button>
+
             <button mat-button class="submenu-btn" disabled>
-              ➕ Novo Pedido
+              <mat-icon>add_circle</mat-icon>
+              Novo Pedido
             </button>
           </div>
         </mat-expansion-panel>
@@ -32,15 +58,24 @@
           <mat-expansion-panel-header class="menu-btn">
             <mat-panel-title>
               <mat-icon class="menu-icon">warehouse</mat-icon>
-              Estoque
+              <span class="menu-title-text">Estoque</span>
             </mat-panel-title>
           </mat-expansion-panel-header>
+
           <div class="submenu-wrapper">
-            <button mat-button class="submenu-btn" disabled>
-              📦 Produtos
+            <button
+              mat-button
+              class="submenu-btn"
+              [routerLink]="['/menu/estoque/produtos']"
+              routerLinkActive="active-submenu"
+            >
+              <mat-icon>inventory</mat-icon>
+              Produtos
             </button>
+
             <button mat-button class="submenu-btn" disabled>
-              📝 Inventário
+              <mat-icon>assignment</mat-icon>
+              Inventário
             </button>
           </div>
         </mat-expansion-panel>
@@ -50,77 +85,150 @@
           <mat-expansion-panel-header class="menu-btn">
             <mat-panel-title>
               <mat-icon class="menu-icon">attach_money</mat-icon>
-              Financeiro
+              <span class="menu-title-text">Financeiro</span>
             </mat-panel-title>
           </mat-expansion-panel-header>
+
           <div class="submenu-wrapper">
-            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/dashboard">
-              📊 Dashboard
+            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/dashboard" routerLinkActive="active-submenu">
+              <mat-icon>dashboard</mat-icon>
+              Dashboard
             </button>
-            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/indicadores">
-              📊 Indicadores
+
+            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/indicadores" routerLinkActive="active-submenu">
+              <mat-icon>analytics</mat-icon>
+              Indicadores
             </button>
-            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/fluxo-caixa">
-              📈 Fluxo de Caixa
+
+            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/fluxo-caixa" routerLinkActive="active-submenu">
+              <mat-icon>show_chart</mat-icon>
+              Fluxo de Caixa
             </button>
-            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/contas-receber">
-              💳 Contas a Receber
+
+            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/contas-receber" routerLinkActive="active-submenu">
+              <mat-icon>payments</mat-icon>
+              Contas a Receber
             </button>
           </div>
         </mat-expansion-panel>
-        
-          <!-- Comercial -->
-           <!-- Comercial (exemplo já funcionando) -->
+
+        <!-- Comercial -->
         <mat-expansion-panel>
-            <mat-expansion-panel-header class="menu-btn">
-              <mat-panel-title>
-                <mat-icon class="menu-icon">trending_up</mat-icon>
-                Comercial
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <div class="submenu-wrapper">
-              <button mat-button class="submenu-btn" routerLink="/menu/comercial/dashboard">
-                📊 Dashboard
-              </button>
-              <button mat-button class="submenu-btn" routerLink="/menu/comercial/colaborador">
-                👤 Colaborador
-              </button>
-            </div>
-          </mat-expansion-panel>
-      
-        <!-- Configurações (igual ao Comercial) -->
-       <mat-expansion-panel class="config-panel">
-        <mat-expansion-panel-header class="menu-btn">
-          <mat-panel-title>⚙️ Configurações</mat-panel-title>
-        </mat-expansion-panel-header>
-      
-        <div class="submenu-wrapper">
-          <button
-            mat-button
-            class="submenu-btn"
-            routerLink="/menu/settings/permissions"
-            routerLinkActive="active-submenu"
-          >
-            🛡️ Permissões
-          </button>
+          <mat-expansion-panel-header class="menu-btn">
+            <mat-panel-title>
+              <mat-icon class="menu-icon">trending_up</mat-icon>
+              <span class="menu-title-text">Comercial</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="submenu-wrapper">
+            <button mat-button class="submenu-btn" routerLink="/menu/comercial/dashboard" routerLinkActive="active-submenu">
+              <mat-icon>dashboard</mat-icon>
+              Dashboard
+            </button>
+
+            <button mat-button class="submenu-btn" routerLink="/menu/comercial/colaborador" routerLinkActive="active-submenu">
+              <mat-icon>groups</mat-icon>
+              Colaborador
+            </button>
+
+            <button mat-button class="submenu-btn" routerLink="/menu/comercial/faturamento" routerLinkActive="active-submenu">
+              <mat-icon>bar_chart</mat-icon>
+              Análise de Faturamento
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Compras Estratégicas -->
+        <mat-expansion-panel>
+          <mat-expansion-panel-header class="menu-btn">
+            <mat-panel-title>
+              <mat-icon class="menu-icon">insights</mat-icon>
+              <span class="menu-title-text">Compras Estratégicas</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
         
-          <button
-            mat-button
-            class="submenu-btn"
-            routerLink="/menu/settings/geral"
-            routerLinkActive="active-submenu"
-          >
-            ⚙️ Geral
+          <div class="submenu-wrapper">
+            <button
+              mat-button
+              class="submenu-btn"
+              routerLink="/menu/compras-estrategicas/resumo-executivo"
+              routerLinkActive="active-submenu"
+            >
+              <mat-icon>dashboard</mat-icon>
+              Resumo Executivo
+            </button>
+          
+            <button
+              mat-button
+              class="submenu-btn"
+              routerLink="/menu/compras-estrategicas/analise-fornecedores"
+              routerLinkActive="active-submenu"
+            >
+              <mat-icon>groups</mat-icon>
+              Análise de Fornecedores
+            </button>
+          
+            <button
+              mat-button
+              class="submenu-btn"
+              routerLink="/menu/compras-estrategicas/analise-produtos"
+              routerLinkActive="active-submenu"
+            >
+              <mat-icon>inventory_2</mat-icon>
+              Análise de Produtos
+            </button>
+          
+            <button
+              mat-button
+              class="submenu-btn"
+              routerLink="/menu/compras-estrategicas/analise-spend-abc"
+              routerLinkActive="active-submenu"
+            >
+              <mat-icon>query_stats</mat-icon>
+              Análise de Spend & ABC
+            </button>
+          </div>
+        </mat-expansion-panel>
+
+        <!-- Configurações -->
+        <mat-expansion-panel class="config-panel">
+          <mat-expansion-panel-header class="menu-btn">
+            <mat-panel-title>
+              <mat-icon class="menu-icon">settings</mat-icon>
+              <span class="menu-title-text">Configurações</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="submenu-wrapper">
+            <button
+              mat-button
+              class="submenu-btn"
+              routerLink="/menu/settings/permissions"
+              routerLinkActive="active-submenu"
+            >
+              <mat-icon>admin_panel_settings</mat-icon>
+              Permissões
+            </button>
+
+            <button
+              mat-button
+              class="submenu-btn"
+              routerLink="/menu/settings/geral"
+              routerLinkActive="active-submenu"
+            >
+              <mat-icon>tune</mat-icon>
+              Geral
             </button>
           </div>
         </mat-expansion-panel>
       </mat-accordion>
 
-      <mat-divider></mat-divider>
+      <div class="spacer"></div>
 
       <div class="logout-fixed">
-        <button mat-flat-button color="warn" (click)="logout()">
-          <mat-icon class="menu-icon">logout</mat-icon>
+        <button mat-stroked-button class="logout-btn" (click)="logout()">
+          <mat-icon>logout</mat-icon>
           Sair
         </button>
       </div>
@@ -133,7 +241,9 @@
       <mat-icon>{{ menuIcon }}</mat-icon>
     </button>
 
-    <!-- É aqui que as rotas filhas do “/menu” vão renderizar -->
-    <router-outlet></router-outlet>
+    <div class="content-shell">
+      <router-outlet></router-outlet>
+    </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
+<!-- === FIM ALTERAÇÃO: menu.component.html === -->
