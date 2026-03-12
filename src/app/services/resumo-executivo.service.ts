@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'environments/environment';
 
 export interface ResumoExecutivoBaseItem {
   idProduto: number;
@@ -30,8 +31,7 @@ export interface ResumoExecutivoFiltros {
   providedIn: 'root'
 })
 export class ResumoExecutivoService {
-  private readonly apiUrl = 'http://localhost:3000/compras-estrategicas/resumo-executivo';
-
+  private readonly apiUrl = `${environment.apiUrl}/compras-estrategicas/resumo-executivo`;
   constructor(private http: HttpClient) {}
 
   buscarBase(filtros: ResumoExecutivoFiltros): Observable<ResumoExecutivoBaseItem[]> {
