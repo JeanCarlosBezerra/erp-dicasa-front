@@ -7,7 +7,7 @@ import { environment } from '../../environments/environment';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-  private api = environment.apiUrl;  // defina em environment.ts → apiUrl: 'http://localhost:3000'
+  private api = environment.apiUrl;  // 
 
   constructor(private http: HttpClient) {}
   // pega o token (supondo JWT em localStorage)
