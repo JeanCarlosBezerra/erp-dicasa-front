@@ -1,19 +1,27 @@
-// src/app/settings/permissoes/permissoes.component.ts
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { Component, afterNextRender, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatOptionModule } from '@angular/material/core';
-import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';  // ← remove HttpHeaders
+import { MatIconModule } from '@angular/material/icon';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { environment } from '../../../environments/environment';
+import { ChangeDetectorRef } from '@angular/core';
 
-interface PermissionsConfig {
-  roles: Record<string, string[]>;
-  groups: Record<string, string[]>;
+interface Usuario {
+  id_usuario: number;
+  username: string;
+  nome: string;
+  id_empresa: number;
+  ativo: boolean;
+  roles: string;
+  criado_em: string;
+}
+
+interface CatalogItem {
+  key: string;
+  label: string;
+  description?: string;
+  group: string;
 }
 
 @Component({
@@ -21,87 +29,133 @@ interface PermissionsConfig {
   selector: 'app-permissoes',
   templateUrl: './permissoes.component.html',
   styleUrls: ['./permissoes.component.scss'],
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    MatExpansionModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatOptionModule,
-    MatButtonModule,
-    MatSnackBarModule
-  ]
+  imports: [CommonModule, FormsModule, MatIconModule, MatSnackBarModule],
 })
-export class PermissoesComponent implements OnInit {
-  config!: PermissionsConfig;
-  modules: string[] = [];        // todos os módulos (união de todos os roles)
-  roles: string[] = [];          // seus "papéis"
-  allGroups: string[] = [];      // seus "grupos"
-  form!: FormGroup;
+export class PermissoesComponent {  // ← remove OnInit
+  usuarios: Usuario[] = [];
+  filteredUsuarios: Usuario[] = [];
+  catalog: CatalogItem[] = [];
+  catalogGroups: { group: string; items: CatalogItem[] }[] = [];
+  busca = '';
   private api = environment.apiUrl;
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(
-    private fb: FormBuilder,
-    private http: HttpClient,
-    private snack: MatSnackBar,
-  ) {}
+  constructor(private http: HttpClient, private snack: MatSnackBar) {
+    afterNextRender(() => {       // ← substitui ngOnInit
+      this.loadCatalog();         // só executa no browser
+      this.loadUsuarios();        // após hidratação SSR
+    });
+  }
 
-  ngOnInit() {
-    this.http.get<PermissionsConfig>(`${this.api}/settings/permissions`)
-      .subscribe(cfg => {
-        this.config    = cfg;
-        this.roles     = Object.keys(cfg.roles);
-        this.allGroups = Object.keys(cfg.groups);
-        // monta array de todos os módulos
-        this.modules   = Array.from(new Set(Object.values(cfg.roles).flat()));
 
-        // cria FormGroup de roles e groups
-        const rolesFG  = this.fb.group({});
-        const groupsFG = this.fb.group({});
-
-        this.roles.forEach(role => {
-          rolesFG.addControl(role, new FormControl(cfg.roles[role]));
-        });
-        this.allGroups.forEach(grp => {
-          groupsFG.addControl(grp, new FormControl(cfg.groups[grp]));
-        });
-
-        // agrupa ambos
-        this.form = this.fb.group({
-          roles: rolesFG,
-          groups: groupsFG
-        });
+  loadCatalog() {
+    this.http.get<CatalogItem[]>(`${this.api}/permissoes/catalog`)  // ← sem { headers }
+      .subscribe({ next: (items) => {
+          this.catalog = items;
+          const groups = new Map<string, CatalogItem[]>();
+          items.forEach(item => {
+            if (!groups.has(item.group)) groups.set(item.group, []);
+            groups.get(item.group)!.push(item);
+          });
+          this.catalogGroups = Array.from(groups.entries()).map(([group, items]) => ({ group, items }));
+          this.cdr.detectChanges();
+        }
       });
   }
 
-  /**
-   * Envia toda a configuração (roles + groups) num único PUT
-   */
-  saveAll() {
-    // extrai o objeto { roles: { ... }, groups: { ... } }
-    const newConfig: PermissionsConfig = this.form.value;
-    console.log(this.api)
-    console.log('PUT para:', `${this.api}/settings/permissions`);
-    this.http
-      .put(`${this.api}/settings/permissions`, newConfig)
+  loadUsuarios() {
+    this.http.get<Usuario[]>(`${this.api}/permissoes/usuarios`)
       .subscribe({
-        next: () =>
-          this.snack.open(`Configurações atualizadas com sucesso!`, 'OK', { duration: 2000 }),
-        error: err =>
-          this.snack.open(
-            `Erro ao salvar: ${err.message}`,
-            'OK',
-            { duration: 3000 },
-          ),
+        next: (users) => {
+          this.usuarios = users;
+          this.filtrar();
+          this.cdr.detectChanges(); // ← dentro do next, após os dados chegarem
+        }
       });
   }
 
-  displayModule(key: string) {
-    return key.replace(/\./g, ' → ');
+  filtrar() {
+    const q = this.busca.toLowerCase();
+    this.filteredUsuarios = this.usuarios.filter(u =>
+      u.username.toLowerCase().includes(q) ||
+      (u.nome || '').toLowerCase().includes(q)
+    );
   }
 
-  shortGroup(dn: string) {
-    const m = dn.match(/CN=([^,]+)/);
-    return m ? m[1] : dn;
+  getRoles(user: Usuario): string[] {
+    if (!user.roles) return [];
+    return user.roles.split(',').map(r => r.trim()).filter(Boolean);
+  }
+
+  hasRole(user: Usuario, key: string): boolean {
+    return this.getRoles(user).includes(key);
+  }
+
+  isAdmin(user: Usuario): boolean {
+    return this.getRoles(user).includes('ADMIN');
+  }
+
+  toggleRole(user: Usuario, key: string) {
+    const roles = this.getRoles(user);
+    const idx = roles.indexOf(key);
+    if (idx >= 0) {
+      roles.splice(idx, 1);
+    } else {
+      roles.push(key);
+    }
+    user.roles = roles.join(',');
+  }
+
+  removeRole(user: Usuario, key: string) {
+    const roles = this.getRoles(user).filter(r => r !== key);
+    user.roles = roles.join(',');
+  }
+
+  addPermission(user: Usuario, event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const key = select.value;
+    if (!key) return;
+    if (!this.hasRole(user, key)) {
+      const roles = this.getRoles(user);
+      roles.push(key);
+      user.roles = roles.join(',');
+    }
+    select.value = '';
+  }
+
+  salvar(user: Usuario) {
+    this.http.put(`${this.api}/permissoes/usuarios/${user.id_usuario}/roles`,
+      { roles: user.roles || '' }
+    ).subscribe({
+      next: () => this.snack.open(`Permissões de ${user.username} salvas!`, 'OK', { duration: 2000 }),
+      error: () => this.snack.open('Erro ao salvar', 'OK', { duration: 3000 }),
+    });
+  }
+
+  toggleAtivo(user: Usuario) {
+    const novoStatus = !user.ativo;
+    this.http.put(`${this.api}/permissoes/usuarios/${user.id_usuario}/toggle`,
+      { ativo: novoStatus }
+    ).subscribe({
+      next: () => {
+        user.ativo = novoStatus;
+        this.snack.open(`${user.username} ${novoStatus ? 'ativado' : 'desativado'}`, 'OK', { duration: 2000 });
+      }
+    });
+  }
+
+  getLabelForKey(key: string): string {
+    const item = this.catalog.find(c => c.key === key);
+    return item ? item.label : key;
+  }
+
+  availablePermissions(user: Usuario): CatalogItem[] {
+    const current = this.getRoles(user);
+    return this.catalog.filter(c => !current.includes(c.key));
+  }
+
+  copyCSV(user: Usuario) {
+    navigator.clipboard.writeText(user.roles || '');
+    this.snack.open('Roles copiadas!', 'OK', { duration: 1500 });
   }
 }

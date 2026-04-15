@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation  } from '@angular/core';
+import { Component, inject, ViewEncapsulation  } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
@@ -30,6 +30,7 @@ export class Menu {
   usuario: string = '';
   menuIcon: string = 'menu';
   opened: boolean = window.innerWidth > 768; 
+  auth = inject(AuthService); // ← adicione essa linha
 
   constructor(public authService: AuthService, private router: Router, private themeService: ThemeService) {}
 

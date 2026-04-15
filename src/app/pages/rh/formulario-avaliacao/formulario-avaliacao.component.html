@@ -1,0 +1,205 @@
+<div class="page-header">
+  <p class="page-tag">RECURSOS HUMANOS</p>
+  <h1>Formulário de avaliação</h1>
+  <p class="page-desc">Avaliação de competências técnicas e comportamentais</p>
+</div>
+
+<div class="info-bar">
+  <div class="info-group autocomplete-wrapper">
+    <label>Colaborador</label>
+    <input type="text"
+      [(ngModel)]="form.nome"
+      (ngModelChange)="onNomeInput()"
+      (blur)="mostrarSugestoes = false"
+      placeholder="Nome completo ou matrícula" />
+    <div class="sugestoes" *ngIf="mostrarSugestoes">
+      <div class="sugestao-item"
+        *ngFor="let c of colaboradoresFiltrados"
+        (mousedown)="selecionarColaborador(c)">
+        <span class="sug-nome">{{ c.nome }}</span>
+        <span class="sug-meta">{{ c.matricula }} · {{ c.cargo }} · {{ c.filial }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="info-group sm">
+    <label>Matrícula</label>
+    <input type="text" [(ngModel)]="form.matricula" placeholder="0000" />
+  </div>
+
+  <div class="info-group">
+    <label>Cargo</label>
+    <select [(ngModel)]="form.cargo" (change)="onCargoChange()">
+      <option value="">Selecione o cargo</option>
+      <option *ngFor="let c of cargos" [value]="c">{{ c }}</option>
+    </select>
+  </div>
+
+  <div class="info-group sm">
+    <label>Filial</label>
+    <select [(ngModel)]="form.filial">
+      <option value="HCAB">HCAB</option>
+      <option value="HCAM">HCAM</option>
+      <option value="HCVR">HCVR</option>
+      <option value="CDAM">CDAM</option>
+      <option value="CDAT">CDAT</option>
+      <option value="BENJAMIN">BENJAMIN</option>
+      <option value="CONCEPT">CONCEPT</option>
+    </select>
+  </div>
+
+  <div class="info-group sm">
+    <label>Setor</label>
+    <input type="text" [(ngModel)]="form.setor" placeholder="Setor" />
+  </div>
+</div>
+
+<div class="escala-ref">
+  <span class="escala-title">Escala:</span>
+  <span class="escala-item s1">1 Não atingiu</span>
+  <span class="escala-item s2">2 Parcial</span>
+  <span class="escala-item s3">3 Atingiu</span>
+  <span class="escala-item s4">4 Superou</span>
+  <span class="escala-item s5">5 Superou muito</span>
+</div>
+
+<div class="ciclo-badge" *ngIf="cicloAtivo">
+  Ciclo ativo: <strong>{{ cicloAtivo.nome }} {{ cicloAtivo.ano }}</strong>
+</div>
+<div class="ciclo-badge warn" *ngIf="!cicloAtivo">
+  Nenhum ciclo de avaliação ativo. Contate o RH.
+</div>
+
+<!-- TÉCNICAS -->
+<div class="section-card" *ngIf="tecnicas.length">
+  <div class="section-header">
+    <mat-icon>school</mat-icon>
+    <div>
+      <h2>Competências técnicas</h2>
+      <p>Desempenho — conhecimentos específicos do cargo</p>
+    </div>
+  </div>
+  <div class="comp-table">
+    <div class="comp-header" [class.three-col]="modoGestor">
+      <span class="comp-col-desc">Competência</span>
+      <span class="comp-col-nota">Autoavaliação</span>
+      <span class="comp-col-nota" *ngIf="modoGestor">Gestor</span>
+    </div>
+    <div class="comp-row" [class.three-col]="modoGestor" *ngFor="let comp of tecnicas">
+      <span class="comp-desc">{{ comp.descricao }}</span>
+      <div class="comp-notas">
+        <div class="nota-group">
+          <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
+            [class.selected]="comp.notaAuto === n"
+            [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+            (click)="comp.notaAuto = n">{{ n }}</button>
+        </div>
+      </div>
+      <div class="comp-notas" *ngIf="modoGestor">
+        <div class="nota-group">
+          <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
+            [class.selected]="comp.notaGestor === n"
+            [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+            (click)="comp.notaGestor = n">{{ n }}</button>
+        </div>
+      </div>
+    </div>
+    <div class="comp-footer" [class.three-col]="modoGestor">
+      <span>Média técnica</span>
+      <span class="media-val">{{ mediaAuto(tecnicas) }}</span>
+      <span class="media-val" *ngIf="modoGestor">{{ mediaGestor(tecnicas) }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- COMPORTAMENTAIS -->
+<div class="section-card" *ngIf="comportamentais.length">
+  <div class="section-header">
+    <mat-icon>psychology</mat-icon>
+    <div>
+      <h2>Competências comportamentais</h2>
+      <p>Potencial — atitudes, postura e soft skills</p>
+    </div>
+  </div>
+  <div class="comp-table">
+    <div class="comp-header" [class.three-col]="modoGestor">
+      <span class="comp-col-desc">Competência</span>
+      <span class="comp-col-nota">Autoavaliação</span>
+      <span class="comp-col-nota" *ngIf="modoGestor">Gestor</span>
+    </div>
+    <div class="comp-row" [class.three-col]="modoGestor" *ngFor="let comp of comportamentais">
+      <span class="comp-desc">{{ comp.descricao }}</span>
+      <div class="comp-notas">
+        <div class="nota-group">
+          <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
+            [class.selected]="comp.notaAuto === n"
+            [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+            (click)="comp.notaAuto = n">{{ n }}</button>
+        </div>
+      </div>
+      <div class="comp-notas" *ngIf="modoGestor">
+        <div class="nota-group">
+          <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
+            [class.selected]="comp.notaGestor === n"
+            [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+            (click)="comp.notaGestor = n">{{ n }}</button>
+        </div>
+      </div>
+    </div>
+    <div class="comp-footer" [class.three-col]="modoGestor">
+      <span>Média comportamental</span>
+      <span class="media-val">{{ mediaAuto(comportamentais) }}</span>
+      <span class="media-val" *ngIf="modoGestor">{{ mediaGestor(comportamentais) }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Observações -->
+<div class="section-card">
+  <div class="section-header">
+    <mat-icon>comment</mat-icon>
+    <div>
+      <h2>Observações</h2>
+      <p>Comentários gerais sobre o colaborador</p>
+    </div>
+  </div>
+  <textarea [(ngModel)]="observacoes" rows="4"
+    placeholder="Comentários do avaliador (obrigatório para gestor)..."></textarea>
+</div>
+
+<!-- Resultado 9-Box -->
+<div class="resultado-bar"
+  *ngIf="modoGestor && mediaGestor(tecnicas) !== '-' && mediaGestor(comportamentais) !== '-'">
+  <div class="res-item">
+    <span class="res-label">Desempenho (técnica)</span>
+    <span class="res-val">{{ mediaGestor(tecnicas) }}</span>
+  </div>
+  <div class="res-item">
+    <span class="res-label">Potencial (comportamental)</span>
+    <span class="res-val">{{ mediaGestor(comportamentais) }}</span>
+  </div>
+  <div class="res-item destaque">
+    <span class="res-label">Classificação 9-Box</span>
+    <span class="res-val">{{ classificacao9Box() }}</span>
+  </div>
+</div>
+
+<!-- Ações -->
+<div class="actions">
+  <label class="toggle-gestor">
+    <input type="checkbox" [(ngModel)]="modoGestor" />
+    <span>Modo gestor (habilitar coluna gestor)</span>
+  </label>
+  <div class="action-btns">
+    <button class="btn-secondary" (click)="limpar()">Limpar</button>
+    <button class="btn-primary" (click)="salvar()">
+      <mat-icon>save</mat-icon>
+      Salvar avaliação
+    </button>
+  </div>
+</div>
+
+<div class="empty-state" *ngIf="!tecnicas.length && !comportamentais.length && form.cargo">
+  <mat-icon>info</mat-icon>
+  <p>Nenhuma competência cadastrada para <strong>{{ form.cargo }}</strong>.</p>
+</div>

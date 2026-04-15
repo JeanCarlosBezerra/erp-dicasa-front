@@ -1,28 +1,98 @@
-/* permissions.component.scss */
+:host { display: block; padding: 2rem; max-width: 1000px; }
 
-/* o fundo clarinho continua */
-:host ::ng-deep .mat-expansion-panel-header {
-  background-color: #fafafa !important;
+.page-header {
+  margin-bottom: 1.5rem;
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; color: #1e1e2f; }
+  .page-desc { font-size: 14px; color: #6b7280; margin: 0; }
 }
 
-/* o texto do panel-title (aqui “comercial”, “financeiro”, etc.) */
-:host ::ng-deep .mat-expansion-panel-header .mat-expansion-panel-header-title {
-  color: rgba(0, 0, 0, 0.87) !important;
-  font-weight: 600; /* opcional, deixa o título mais destacado */
+.search-bar {
+  margin-bottom: 1.5rem;
+  label { font-size: 12px; font-weight: 600; color: #6b7280; display: block; margin-bottom: 4px; }
+  input {
+    width: 100%; max-width: 400px; padding: 10px 12px;
+    border: 1px solid #e5e7eb; border-radius: 8px; font-size: 14px;
+    color: #1e1e2f; background: #fff;
+    &::placeholder { color: #9ca3af; }
+  }
+  .count { float: right; font-size: 13px; color: #6b7280; margin-top: -28px; }
 }
 
-/* só para garantir que o conteúdo interno também fique legível */
-:host ::ng-deep .mat-expansion-panel-header .mat-content {
-  color: rgba(0, 0, 0, 0.87) !important;
+.user-card {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+  padding: 1.25rem; margin-bottom: 12px;
 }
 
-/* rótulo do form-field */
-:host ::ng-deep .mat-form-field-label {
-  color: rgba(0, 0, 0, 0.6) !important;
+.user-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 10px;
 }
 
-/* botão salvar mais vivo */
-:host ::ng-deep button.mat-raised-button[color="primary"] {
-  background-color: #3f51b5 !important;
-  color: #fff !important;
+.user-name { font-size: 15px; font-weight: 600; color: #1e1e2f; }
+.user-meta { font-size: 12px; color: #6b7280; margin-top: 2px; }
+.admin-badge {
+  font-size: 11px; color: #534AB7; background: #EEEDFE;
+  padding: 2px 8px; border-radius: 4px; display: inline-block; margin-top: 4px;
+}
+
+.user-actions {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.ativo-toggle {
+  font-size: 13px; color: #6b7280; display: flex; align-items: center; gap: 6px;
+  cursor: pointer;
+  input { accent-color: #534AB7; width: 16px; height: 16px; }
+}
+
+.btn-save {
+  padding: 6px 16px; border: none; border-radius: 8px;
+  background: #534AB7; color: #fff; font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  &:hover { background: #3C3489; }
+}
+
+.permissions-label {
+  font-size: 11px; font-weight: 600; color: #6b7280;
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
+}
+
+.chips {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;
+}
+
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 500;
+  background: #E6F1FB; color: #0C447C;
+}
+
+.chip.empty {
+  background: #f3f4f6; color: #9ca3af; font-style: italic;
+}
+
+.chip-remove {
+  background: none; border: none; color: #0C447C; font-size: 14px;
+  cursor: pointer; padding: 0 0 0 2px; line-height: 1;
+  &:hover { color: #E24B4A; }
+}
+
+.user-bottom {
+  display: flex; align-items: center; gap: 12px;
+  select {
+    padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 6px;
+    font-size: 12px; background: #fff; color: #1e1e2f;
+  }
+}
+
+.btn-text {
+  background: none; border: 1px solid #e5e7eb; border-radius: 6px;
+  padding: 6px 12px; font-size: 12px; color: #6b7280; cursor: pointer;
+  &:hover { background: #f9fafb; }
+}
+
+.empty-state {
+  text-align: center; padding: 3rem; color: #9ca3af;
+  mat-icon { font-size: 40px; width: 40px; height: 40px; color: #d1d5db; }
+  p { font-size: 14px; margin: 8px 0 0; }
 }

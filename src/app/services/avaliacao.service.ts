@@ -1,0 +1,73 @@
+import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
+
+@Injectable({ providedIn: 'root' })
+export class AvaliacaoService {
+  private api = environment.apiUrl;
+
+  constructor(private http: HttpClient) {}
+
+  // ── NOVOS ──
+  getCargos(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/rh/avaliacao/cargos`);
+  }
+
+  getColaboradores(filial?: string): Observable<any[]> {
+    const url = filial
+      ? `${this.api}/rh/avaliacao/colaboradores?filial=${filial}`
+      : `${this.api}/rh/avaliacao/colaboradores`;
+    return this.http.get<any[]>(url);
+  }
+
+  // ── EXISTENTES ──
+  getAllCompetencias(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/rh/avaliacao/competencias`);
+  }
+
+  getCiclos(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/rh/avaliacao/ciclos`);
+  }
+
+  getCicloAtivo(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/rh/avaliacao/ciclo-ativo`);
+  }
+
+  getCompetencias(cargo: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/rh/avaliacao/competencias/${encodeURIComponent(cargo)}`);
+  }
+
+  getNotas(ciclo: number, matricula: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/rh/avaliacao/notas/${ciclo}/${matricula}`);
+  }
+
+  salvarNotas(dados: any): Observable<any> {
+    return this.http.post(`${this.api}/rh/avaliacao/notas`, dados);
+  }
+
+  calcular9Box(ciclo: number, matricula: string): Observable<any> {
+    return this.http.post(`${this.api}/rh/avaliacao/9box/${ciclo}/${matricula}`, {});
+  }
+
+  getDashboard9Box(ciclo: number, filial?: string, setor?: string): Observable<any[]> {
+    let url = `${this.api}/rh/avaliacao/9box/dashboard/${ciclo}`;
+    const params: string[] = [];
+    if (filial) params.push(`filial=${filial}`);
+    if (setor) params.push(`setor=${setor}`);
+    if (params.length) url += '?' + params.join('&');
+    return this.http.get<any[]>(url);
+  }
+
+  getPdi(ciclo: number, matricula: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.api}/rh/avaliacao/pdi/${ciclo}/${matricula}`);
+  }
+
+  salvarPdi(dados: any): Observable<any> {
+    return this.http.post(`${this.api}/rh/avaliacao/pdi`, dados);
+  }
+
+  atualizarStatusPdi(id: number, status: string): Observable<any> {
+    return this.http.put(`${this.api}/rh/avaliacao/pdi/${id}/status`, { status });
+  }
+}

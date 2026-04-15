@@ -1,14 +1,7 @@
-<!-- === INÍCIO ALTERAÇÃO: menu.component.html === -->
 <mat-sidenav-container class="sidenav-container">
-  <!-- MENU LATERAL -->
-  <mat-sidenav
-    #sidenav
-    mode="side"
-    [opened]="opened"
-    class="sidenav"
-    [fixedInViewport]="true"
-  >
+  <mat-sidenav #sidenav mode="side" [opened]="opened" class="sidenav" [fixedInViewport]="true">
     <div class="sidenav-inner">
+
       <div class="brand-block">
         <div class="brand-badge">EP</div>
         <div class="brand-text">
@@ -18,9 +11,7 @@
       </div>
 
       <div class="user-card">
-        <div class="user-avatar">
-          <mat-icon>person</mat-icon>
-        </div>
+        <div class="user-avatar"><mat-icon>person</mat-icon></div>
         <div class="user-meta">
           <span class="user-label">Usuário logado</span>
           <strong>{{ usuario }}</strong>
@@ -32,218 +23,196 @@
       <mat-accordion class="submenu-accordion" [multi]="false">
 
         <!-- Pedidos -->
-        <mat-expansion-panel>
-          <mat-expansion-panel-header class="menu-btn">
-            <mat-panel-title>
-              <mat-icon class="menu-icon">inventory_2</mat-icon>
-              <span class="menu-title-text">Pedidos</span>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-
-          <div class="submenu-wrapper">
-            <button mat-button class="submenu-btn" routerLink="/menu/pedidos-list" routerLinkActive="active-submenu">
-              <mat-icon>description</mat-icon>
-              Consultar
-            </button>
-
-            <button mat-button class="submenu-btn" disabled>
-              <mat-icon>add_circle</mat-icon>
-              Novo Pedido
-            </button>
-          </div>
-        </mat-expansion-panel>
+        @if (auth.hasRole('MOD_PEDIDOS')) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header class="menu-btn">
+              <mat-panel-title>
+                <mat-icon class="menu-icon">inventory_2</mat-icon>
+                <span class="menu-title-text">Pedidos</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="submenu-wrapper">
+              <button mat-button class="submenu-btn" routerLink="/menu/pedidos-list" routerLinkActive="active-submenu">
+                <mat-icon>description</mat-icon> Consultar
+              </button>
+              <button mat-button class="submenu-btn" disabled>
+                <mat-icon>add_circle</mat-icon> Novo Pedido
+              </button>
+            </div>
+          </mat-expansion-panel>
+        }
 
         <!-- Estoque -->
-        <mat-expansion-panel>
-          <mat-expansion-panel-header class="menu-btn">
-            <mat-panel-title>
-              <mat-icon class="menu-icon">warehouse</mat-icon>
-              <span class="menu-title-text">Estoque</span>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-
-          <div class="submenu-wrapper">
-            <button
-              mat-button
-              class="submenu-btn"
-              [routerLink]="['/menu/estoque/produtos']"
-              routerLinkActive="active-submenu"
-            >
-              <mat-icon>inventory</mat-icon>
-              Produtos
-            </button>
-
-            <button mat-button class="submenu-btn" disabled>
-              <mat-icon>assignment</mat-icon>
-              Inventário
-            </button>
-          </div>
-        </mat-expansion-panel>
+        @if (auth.hasRole('MOD_ESTOQUE')) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header class="menu-btn">
+              <mat-panel-title>
+                <mat-icon class="menu-icon">warehouse</mat-icon>
+                <span class="menu-title-text">Estoque</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="submenu-wrapper">
+              <button mat-button class="submenu-btn" routerLink="/menu/estoque/produtos" routerLinkActive="active-submenu">
+                <mat-icon>inventory</mat-icon> Produtos
+              </button>
+              <button mat-button class="submenu-btn" disabled>
+                <mat-icon>assignment</mat-icon> Inventário
+              </button>
+            </div>
+          </mat-expansion-panel>
+        }
 
         <!-- Financeiro -->
-        <mat-expansion-panel>
-          <mat-expansion-panel-header class="menu-btn">
-            <mat-panel-title>
-              <mat-icon class="menu-icon">attach_money</mat-icon>
-              <span class="menu-title-text">Financeiro</span>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-
-          <div class="submenu-wrapper">
-            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/dashboard" routerLinkActive="active-submenu">
-              <mat-icon>dashboard</mat-icon>
-              Dashboard
-            </button>
-
-            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/indicadores" routerLinkActive="active-submenu">
-              <mat-icon>analytics</mat-icon>
-              Indicadores
-            </button>
-
-            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/fluxo-caixa" routerLinkActive="active-submenu">
-              <mat-icon>show_chart</mat-icon>
-              Fluxo de Caixa
-            </button>
-
-            <button mat-button class="submenu-btn" routerLink="/menu/financeiro/contas-receber" routerLinkActive="active-submenu">
-              <mat-icon>payments</mat-icon>
-              Contas a Receber
-            </button>
-          </div>
-        </mat-expansion-panel>
+        @if (auth.hasRole('MOD_FINANCEIRO')) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header class="menu-btn">
+              <mat-panel-title>
+                <mat-icon class="menu-icon">attach_money</mat-icon>
+                <span class="menu-title-text">Financeiro</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="submenu-wrapper">
+              <button mat-button class="submenu-btn" routerLink="/menu/financeiro/dashboard" routerLinkActive="active-submenu">
+                <mat-icon>dashboard</mat-icon> Dashboard
+              </button>
+              @if (auth.hasRole('FIN_INDICADORES')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/financeiro/indicadores" routerLinkActive="active-submenu">
+                  <mat-icon>analytics</mat-icon> Indicadores
+                </button>
+              }
+              @if (auth.hasRole('FIN_FLUXO_CAIXA')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/financeiro/fluxo-caixa" routerLinkActive="active-submenu">
+                  <mat-icon>show_chart</mat-icon> Fluxo de Caixa
+                </button>
+              }
+              @if (auth.hasRole('FIN_CONTAS_RECEBER')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/financeiro/contas-receber" routerLinkActive="active-submenu">
+                  <mat-icon>payments</mat-icon> Contas a Receber
+                </button>
+              }
+            </div>
+          </mat-expansion-panel>
+        }
 
         <!-- Comercial -->
-        <mat-expansion-panel>
-          <mat-expansion-panel-header class="menu-btn">
-            <mat-panel-title>
-              <mat-icon class="menu-icon">trending_up</mat-icon>
-              <span class="menu-title-text">Comercial</span>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-
-          <div class="submenu-wrapper">
-            <button mat-button class="submenu-btn" routerLink="/menu/comercial/dashboard" routerLinkActive="active-submenu">
-              <mat-icon>dashboard</mat-icon>
-              Dashboard
-            </button>
-
-            <button mat-button class="submenu-btn" routerLink="/menu/comercial/colaborador" routerLinkActive="active-submenu">
-              <mat-icon>groups</mat-icon>
-              Colaborador
-            </button>
-
-            <button mat-button class="submenu-btn" routerLink="/menu/comercial/faturamento" routerLinkActive="active-submenu">
-              <mat-icon>bar_chart</mat-icon>
-              Análise de Faturamento
-            </button>
-          </div>
-        </mat-expansion-panel>
+        @if (auth.hasRole('MOD_COMERCIAL')) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header class="menu-btn">
+              <mat-panel-title>
+                <mat-icon class="menu-icon">trending_up</mat-icon>
+                <span class="menu-title-text">Comercial</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="submenu-wrapper">
+              @if (auth.hasRole('COM_DASHBOARD')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/comercial/dashboard" routerLinkActive="active-submenu">
+                  <mat-icon>dashboard</mat-icon> Dashboard
+                </button>
+              }
+              @if (auth.hasRole('COM_COLABORADOR')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/comercial/colaborador" routerLinkActive="active-submenu">
+                  <mat-icon>groups</mat-icon> Colaborador
+                </button>
+              }
+              @if (auth.hasRole('COM_FATURAMENTO')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/comercial/faturamento" routerLinkActive="active-submenu">
+                  <mat-icon>bar_chart</mat-icon> Análise de Faturamento
+                </button>
+              }
+            </div>
+          </mat-expansion-panel>
+        }
 
         <!-- Compras Estratégicas -->
-        <mat-expansion-panel>
-          <mat-expansion-panel-header class="menu-btn">
-            <mat-panel-title>
-              <mat-icon class="menu-icon">insights</mat-icon>
-              <span class="menu-title-text">Compras Estratégicas</span>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-        
-          <div class="submenu-wrapper">
-            <button
-              mat-button
-              class="submenu-btn"
-              routerLink="/menu/compras-estrategicas/resumo-executivo"
-              routerLinkActive="active-submenu"
-            >
-              <mat-icon>dashboard</mat-icon>
-              Resumo Executivo
-            </button>
-          
-            <button
-              mat-button
-              class="submenu-btn"
-              routerLink="/menu/compras-estrategicas/analise-fornecedores"
-              routerLinkActive="active-submenu"
-            >
-              <mat-icon>groups</mat-icon>
-              Análise de Fornecedores
-            </button>
-          
-            <button
-              mat-button
-              class="submenu-btn"
-              routerLink="/menu/compras-estrategicas/analise-produtos"
-              routerLinkActive="active-submenu"
-            >
-              <mat-icon>inventory_2</mat-icon>
-              Análise de Produtos
-            </button>
-          
-            <button
-              mat-button
-              class="submenu-btn"
-              routerLink="/menu/compras-estrategicas/analise-spend-abc"
-              routerLinkActive="active-submenu"
-            >
-              <mat-icon>query_stats</mat-icon>
-              Análise de Spend & ABC
-            </button>
-          </div>
-        </mat-expansion-panel>
+        @if (auth.hasRole('MOD_COMPRAS')) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header class="menu-btn">
+              <mat-panel-title>
+                <mat-icon class="menu-icon">insights</mat-icon>
+                <span class="menu-title-text">Compras Estratégicas</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="submenu-wrapper">
+              <button mat-button class="submenu-btn" routerLink="/menu/compras-estrategicas/resumo-executivo" routerLinkActive="active-submenu">
+                <mat-icon>dashboard</mat-icon> Resumo Executivo
+              </button>
+              <button mat-button class="submenu-btn" routerLink="/menu/compras-estrategicas/analise-fornecedores" routerLinkActive="active-submenu">
+                <mat-icon>groups</mat-icon> Análise de Fornecedores
+              </button>
+              <button mat-button class="submenu-btn" routerLink="/menu/compras-estrategicas/analise-produtos" routerLinkActive="active-submenu">
+                <mat-icon>inventory_2</mat-icon> Análise de Produtos
+              </button>
+              <button mat-button class="submenu-btn" routerLink="/menu/compras-estrategicas/analise-spend-abc" routerLinkActive="active-submenu">
+                <mat-icon>query_stats</mat-icon> Análise de Spend & ABC
+              </button>
+            </div>
+          </mat-expansion-panel>
+        }
+
+        <!-- RH -->
+        @if (auth.hasRole('MOD_RH')) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header class="menu-btn">
+              <mat-panel-title>
+                <mat-icon class="menu-icon">people</mat-icon>
+                <span class="menu-title-text">RH</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="submenu-wrapper">
+              @if (auth.hasRole('RH_DASHBOARD')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/rh/avaliacao-desempenho" routerLinkActive="active-submenu">
+                  <mat-icon>grid_on</mat-icon> Dashboard 9-Box
+                </button>
+              }
+              @if (auth.hasRole('RH_AVALIACAO')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/rh/formulario-avaliacao" routerLinkActive="active-submenu">
+                  <mat-icon>assignment_ind</mat-icon> Formulário de Avaliação
+                </button>
+              }
+            </div>
+          </mat-expansion-panel>
+        }
 
         <!-- Configurações -->
-        <mat-expansion-panel class="config-panel">
-          <mat-expansion-panel-header class="menu-btn">
-            <mat-panel-title>
-              <mat-icon class="menu-icon">settings</mat-icon>
-              <span class="menu-title-text">Configurações</span>
-            </mat-panel-title>
-          </mat-expansion-panel-header>
+        @if (auth.hasRole('MOD_CONFIGURACOES')) {
+          <mat-expansion-panel class="config-panel">
+            <mat-expansion-panel-header class="menu-btn">
+              <mat-panel-title>
+                <mat-icon class="menu-icon">settings</mat-icon>
+                <span class="menu-title-text">Configurações</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="submenu-wrapper">
+              @if (auth.hasRole('CFG_USERS_VIEW')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/settings/permissions" routerLinkActive="active-submenu">
+                  <mat-icon>admin_panel_settings</mat-icon> Permissões
+                </button>
+              }
+              <button mat-button class="submenu-btn" routerLink="/menu/settings/geral" routerLinkActive="active-submenu">
+                <mat-icon>tune</mat-icon> Geral
+              </button>
+            </div>
+          </mat-expansion-panel>
+        }
 
-          <div class="submenu-wrapper">
-            <button
-              mat-button
-              class="submenu-btn"
-              routerLink="/menu/settings/permissions"
-              routerLinkActive="active-submenu"
-            >
-              <mat-icon>admin_panel_settings</mat-icon>
-              Permissões
-            </button>
-
-            <button
-              mat-button
-              class="submenu-btn"
-              routerLink="/menu/settings/geral"
-              routerLinkActive="active-submenu"
-            >
-              <mat-icon>tune</mat-icon>
-              Geral
-            </button>
-          </div>
-        </mat-expansion-panel>
       </mat-accordion>
 
       <div class="spacer"></div>
 
       <div class="logout-fixed">
         <button mat-stroked-button class="logout-btn" (click)="logout()">
-          <mat-icon>logout</mat-icon>
-          Sair
+          <mat-icon>logout</mat-icon> Sair
         </button>
       </div>
     </div>
   </mat-sidenav>
 
-  <!-- CONTEÚDO PRINCIPAL -->
   <mat-sidenav-content class="main-content">
     <button class="menu-toggle" mat-icon-button (click)="toggleSidenav(sidenav)">
       <mat-icon>{{ menuIcon }}</mat-icon>
     </button>
-
     <div class="content-shell">
       <router-outlet></router-outlet>
     </div>
   </mat-sidenav-content>
 </mat-sidenav-container>
-<!-- === FIM ALTERAÇÃO: menu.component.html === -->

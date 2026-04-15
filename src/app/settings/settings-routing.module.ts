@@ -6,8 +6,8 @@ import { GeralComponent }       from './geral/geral.component';
 import { AuthGuard } from '../guards/auth.guard';
 
 const routes: Routes = [
-  { path: 'permissions', component: PermissoesComponent, canActivate: [AuthGuard] },
-  { path: 'geral',       component: GeralComponent,       canActivate: [AuthGuard] },
+  { path: 'permissions', component: PermissoesComponent }, // ← sem canActivate
+  { path: 'geral',       component: GeralComponent },       // ← sem canActivate
   { path: '', redirectTo: 'permissions', pathMatch: 'full' }
 ];
 

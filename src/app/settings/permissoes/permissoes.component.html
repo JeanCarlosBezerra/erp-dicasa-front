@@ -1,46 +1,58 @@
-<!-- src/app/settings/permissoes/permissoes.component.html -->
-<form *ngIf="form" [formGroup]="form">
-  <!-- 1) Bloco de Papéis -->
-  <div formGroupName="roles">
-    <mat-accordion>
-      <mat-expansion-panel *ngFor="let role of roles">
-        <mat-expansion-panel-header>
-          <mat-panel-title>Papéis ({{ role }})</mat-panel-title>
-        </mat-expansion-panel-header>
+<div class="page-header">
+  <h1>Usuários & Permissões</h1>
+  <p class="page-desc">Gerencie permissões de acesso por usuário</p>
+</div>
 
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Módulos permitidos</mat-label>
-          <mat-select [formControlName]="role" multiple>
-            <mat-option *ngFor="let mod of modules" [value]="mod">
-              {{ displayModule(mod) }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </mat-expansion-panel>
-    </mat-accordion>
+<div class="search-bar">
+  <label>Buscar</label>
+  <input type="text" [(ngModel)]="busca" (ngModelChange)="filtrar()" placeholder="username ou nome..." />
+  <span class="count">Itens: {{ filteredUsuarios.length }}</span>
+</div>
+
+<div class="user-card" *ngFor="let user of filteredUsuarios">
+  <div class="user-header">
+    <div class="user-info">
+      <div class="user-name">{{ user.username }}</div>
+      <div class="user-meta">{{ user.nome }} • Empresa #{{ user.id_empresa }} • LDAP</div>
+      <div class="admin-badge" *ngIf="isAdmin(user)">ADMIN ativo (god mode)</div>
+    </div>
+    <div class="user-actions">
+      <label class="ativo-toggle">
+        Ativo
+        <input type="checkbox" [checked]="user.ativo" (change)="toggleAtivo(user)" />
+      </label>
+      <button class="btn-save" (click)="salvar(user)">Salvar</button>
+    </div>
   </div>
 
-  <!-- 2) Bloco de Grupos -->
-  <div formGroupName="groups">
-    <mat-accordion>
-      <mat-expansion-panel *ngFor="let grp of allGroups">
-        <mat-expansion-panel-header>
-          <mat-panel-title>Grupos ({{ shortGroup(grp) }})</mat-panel-title>
-        </mat-expansion-panel-header>
+  <div class="permissions-label">Permissões</div>
 
-        <mat-form-field appearance="fill" class="w-100">
-          <mat-label>Papéis atribuídos</mat-label>
-          <mat-select [formControlName]="grp" multiple>
-            <mat-option *ngFor="let role of roles" [value]="role">
-              {{ role }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </mat-expansion-panel>
-    </mat-accordion>
+  <div class="chips">
+    <span class="chip" *ngFor="let role of getRoles(user)">
+      {{ getLabelForKey(role) }}
+      <button class="chip-remove" (click)="removeRole(user, role)">×</button>
+    </span>
+    <span class="chip empty" *ngIf="!getRoles(user).length">Nenhuma permissão</span>
   </div>
 
-  <button mat-raised-button color="primary" (click)="saveAll()">
-    Salvar tudo
-  </button>
-</form>
+  <div class="user-bottom">
+    <div class="add-perm">
+      <select (change)="addPermission(user, $event)">
+        <option value="">Adicionar permissão</option>
+        <optgroup *ngFor="let g of catalogGroups" [label]="g.group">
+          <option *ngFor="let item of g.items"
+            [value]="item.key"
+            [disabled]="hasRole(user, item.key)">
+            {{ item.label }}
+          </option>
+        </optgroup>
+      </select>
+    </div>
+    <button class="btn-text" (click)="copyCSV(user)">Copiar CSV</button>
+  </div>
+</div>
+
+<div class="empty-state" *ngIf="!filteredUsuarios.length">
+  <mat-icon>search_off</mat-icon>
+  <p>Nenhum usuário encontrado.</p>
+</div>

@@ -1,0 +1,245 @@
+<div class="page-header">
+  <p class="page-tag">RECURSOS HUMANOS</p>
+  <h1>Avaliação de desempenho</h1>
+  <p class="page-desc">
+    Dashboard 9-Box — ciclo ativo:
+    <strong *ngIf="cicloAtivo">{{ cicloAtivo.nome }} {{ cicloAtivo.ano }}</strong>
+    <span *ngIf="!cicloAtivo" class="warn">Nenhum ciclo ativo</span>
+  </p>
+</div>
+
+<!-- Abas -->
+<div class="abas">
+  <button class="aba" [class.ativa]="abaSelecionada === 'matriz'" (click)="abaSelecionada = 'matriz'">
+    <mat-icon>grid_on</mat-icon> Matriz 9-Box
+  </button>
+  <button class="aba" [class.ativa]="abaSelecionada === 'macro'" (click)="abaSelecionada = 'macro'">
+    <mat-icon>business</mat-icon> Visão por filial
+  </button>
+</div>
+
+<!-- ════════ ABA MATRIZ ════════ -->
+<div *ngIf="abaSelecionada === 'matriz'">
+
+  <!-- Filtros -->
+  <div class="filtros-bar">
+    <div class="filtro-group">
+      <label>Filial</label>
+      <select [(ngModel)]="filialFiltro" (change)="aplicarFiltro()">
+        <option value="">Todas</option>
+        <option *ngFor="let f of filiais" [value]="f">{{ f }}</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>Setor</label>
+      <input type="text" [(ngModel)]="setorFiltro" (ngModelChange)="aplicarFiltro()" placeholder="Buscar setor..." />
+    </div>
+    <button class="btn-limpar" (click)="limparFiltros()">
+      <mat-icon>clear</mat-icon> Limpar
+    </button>
+  </div>
+
+  <!-- Métricas -->
+  <div class="metricas-row">
+    <div class="metrica-card">
+      <span class="metrica-label">Total avaliados</span>
+      <span class="metrica-val">{{ totalAvaliados }}</span>
+    </div>
+    <div class="metrica-card">
+      <span class="metrica-label">Média desempenho</span>
+      <span class="metrica-val" [class]="corMedia(mediaGeralDesemp)">{{ mediaGeralDesemp }}</span>
+    </div>
+    <div class="metrica-card">
+      <span class="metrica-label">Média potencial</span>
+      <span class="metrica-val" [class]="corMedia(mediaGeralPot)">{{ mediaGeralPot }}</span>
+    </div>
+    <div class="metrica-card destaque">
+      <span class="metrica-label">Alto potencial</span>
+      <span class="metrica-val">{{ countBox('Alto potencial') }}</span>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="carregando">
+    <mat-icon>hourglass_top</mat-icon><p>Carregando...</p>
+  </div>
+  <div class="empty-state" *ngIf="!carregando && !totalAvaliados">
+    <mat-icon>info</mat-icon><p>Nenhuma avaliação encontrada para o ciclo atual.</p>
+  </div>
+
+  <div class="dashboard-layout" *ngIf="!carregando && totalAvaliados > 0">
+
+    <!-- 9-Box -->
+    <div class="nine-box-section">
+      <div class="section-title">
+        <h2>Matriz 9-Box</h2>
+        <p>Clique em um quadrante para ver os colaboradores</p>
+      </div>
+      <div class="nine-box-wrap">
+        <div class="y-label"><span>P O T E N C I A L</span></div>
+        <div class="nine-box-inner">
+          <div class="y-ticks">
+            <span>Alto</span><span>Médio</span><span>Baixo</span>
+          </div>
+          <div class="nine-box-grid">
+            <div *ngFor="let box of boxes"
+              class="box-cell {{ box.classe }}"
+              [class.ativo]="boxSelecionado === box.key"
+              (click)="toggleBox(box.key)">
+              <div class="box-label">{{ box.key }}</div>
+              <div class="box-count">{{ countBox(box.key) }}</div>
+            </div>
+          </div>
+          <div class="x-ticks">
+            <span>Baixo</span><span>Médio</span><span>Alto</span>
+          </div>
+        </div>
+      </div>
+      <div class="x-label">D E S E M P E N H O</div>
+    </div>
+
+    <!-- Painel lateral -->
+    <div class="side-panel">
+      <div class="panel-card" *ngIf="boxSelecionado">
+        <div class="panel-header">
+          <mat-icon>people</mat-icon>
+          <div><h3>{{ boxSelecionado }}</h3><p>{{ countBox(boxSelecionado) }} colaborador(es)</p></div>
+          <button class="btn-fechar" (click)="boxSelecionado = null"><mat-icon>close</mat-icon></button>
+        </div>
+        <div class="colab-list">
+          <div class="colab-item" *ngFor="let p of pessoasBox(boxSelecionado)">
+            <div class="colab-avatar">{{ p.nome.charAt(0) }}</div>
+            <div class="colab-info">
+              <span class="colab-nome">{{ p.nome }}</span>
+              <span class="colab-meta">{{ p.cargo }} · {{ p.filial }}</span>
+            </div>
+            <div class="colab-notas">
+              <span class="nota-badge desemp">D {{ p.media_desempenho }}</span>
+              <span class="nota-badge pot">P {{ p.media_potencial }}</span>
+            </div>
+          </div>
+          <div class="empty-list" *ngIf="!pessoasBox(boxSelecionado).length">Nenhum colaborador neste quadrante.</div>
+        </div>
+      </div>
+
+      <div class="panel-card" *ngIf="!boxSelecionado">
+        <div class="panel-header">
+          <mat-icon>star</mat-icon>
+          <div><h3>Top talentos</h3><p>Maiores médias combinadas</p></div>
+        </div>
+        <div class="colab-list">
+          <div class="colab-item" *ngFor="let p of topTalentos; let i = index">
+            <div class="colab-rank">{{ i + 1 }}</div>
+            <div class="colab-info">
+              <span class="colab-nome">{{ p.nome }}</span>
+              <span class="colab-meta">{{ p.titulo_9box }} · {{ p.filial }}</span>
+            </div>
+            <div class="colab-notas">
+              <span class="nota-badge desemp">D {{ p.media_desempenho }}</span>
+              <span class="nota-badge pot">P {{ p.media_potencial }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-header"><mat-icon>bar_chart</mat-icon><div><h3>Distribuição</h3></div></div>
+        <div class="distrib-list">
+          <div class="distrib-item" *ngFor="let box of boxes">
+            <span class="distrib-dot {{ box.classe }}-dot"></span>
+            <span class="distrib-nome">{{ box.key }}</span>
+            <span class="distrib-count">{{ countBox(box.key) }}</span>
+            <div class="distrib-bar-wrap">
+              <div class="distrib-bar {{ box.classe }}-bar"
+                [style.width.%]="totalAvaliados ? (countBox(box.key) / totalAvaliados * 100) : 0">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ ABA VISÃO POR FILIAL ════════ -->
+<div *ngIf="abaSelecionada === 'macro'">
+
+  <div class="empty-state" *ngIf="carregando">
+    <mat-icon>hourglass_top</mat-icon><p>Carregando...</p>
+  </div>
+  <div class="empty-state" *ngIf="!carregando && !dados.length">
+    <mat-icon>info</mat-icon><p>Nenhuma avaliação encontrada.</p>
+  </div>
+
+  <div *ngIf="!carregando && dados.length">
+
+    <!-- Cards de resumo por filial -->
+    <div class="section-title" style="margin-bottom: 1rem;">
+      <h2>Resumo por filial</h2>
+      <p>Clique em uma filial para filtrar a matriz 9-Box</p>
+    </div>
+
+    <div class="filiais-grid">
+      <div class="filial-card" *ngFor="let r of resumoPorFilial" (click)="selecionarFilial(r.filial)">
+        <div class="filial-nome">{{ r.filial }}</div>
+        <div class="filial-metricas">
+          <div class="filial-metrica">
+            <span class="fm-label">Avaliados</span>
+            <span class="fm-val">{{ r.total }}</span>
+          </div>
+          <div class="filial-metrica">
+            <span class="fm-label">Desemp.</span>
+            <span class="fm-val" [class]="corMedia(r.mediaDesemp.toString())">{{ r.mediaDesemp }}</span>
+          </div>
+          <div class="filial-metrica">
+            <span class="fm-label">Potencial</span>
+            <span class="fm-val" [class]="corMedia(r.mediaPot.toString())">{{ r.mediaPot }}</span>
+          </div>
+          <div class="filial-metrica destaque">
+            <span class="fm-label">Alto pot.</span>
+            <span class="fm-val">{{ r.altosPotenciais }}</span>
+          </div>
+        </div>
+        <!-- Mini 9-box da filial -->
+        <div class="mini-9box">
+          <div *ngFor="let box of boxes"
+            class="mini-cell {{ box.classe }}"
+            [title]="box.key + ': ' + countBoxFilial(r.filial, box.key)">
+            {{ countBoxFilial(r.filial, box.key) }}
+          </div>
+        </div>
+        <div class="filial-ver-btn">Ver matriz completa →</div>
+      </div>
+    </div>
+
+    <!-- Tabela comparativa -->
+    <div class="section-title" style="margin-top: 2rem; margin-bottom: 1rem;">
+      <h2>Comparativo consolidado</h2>
+      <p>Distribuição de quadrantes por filial</p>
+    </div>
+
+    <div class="tabela-wrap">
+      <table class="tabela-macro">
+        <thead>
+          <tr>
+            <th>Filial</th>
+            <th>Total</th>
+            <th *ngFor="let box of boxes" class="th-box {{ box.classe }}-th">{{ box.key }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of resumoPorFilial">
+            <td class="td-filial">{{ r.filial }}</td>
+            <td class="td-total">{{ r.total }}</td>
+            <td *ngFor="let box of boxes" class="td-num">
+              <span *ngIf="countBoxFilial(r.filial, box.key) > 0" class="box-pill {{ box.classe }}">
+                {{ countBoxFilial(r.filial, box.key) }}
+              </span>
+              <span *ngIf="countBoxFilial(r.filial, box.key) === 0" class="zero">—</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
