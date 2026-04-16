@@ -4,6 +4,25 @@
   <p class="page-desc">Avaliação de competências técnicas e comportamentais</p>
 </div>
 
+<!-- LACRE COLABORADOR -->
+<div class="lacre-confirmado" *ngIf="autoConfirmada">
+  <mat-icon>verified</mat-icon>
+  <div>
+    <strong>Autoavaliação confirmada e assinada</strong>
+    <span>por {{ autoConfirmadaPor }} em {{ autoConfirmadaEm | date:'dd/MM/yyyy HH:mm' }}</span>
+  </div>
+</div>
+
+<!-- LACRE GESTOR -->
+<div class="lacre-confirmado lacre-gestor" *ngIf="gestorConfirmado">
+  <mat-icon>admin_panel_settings</mat-icon>
+  <div>
+    <strong>Avaliação do gestor confirmada e assinada</strong>
+    <span>por {{ gestorConfirmadoPor }} em {{ gestorConfirmadoEm | date:'dd/MM/yyyy HH:mm' }}</span>
+  </div>
+</div>
+
+<!-- info-bar -->
 <div class="info-bar">
   <div class="info-group autocomplete-wrapper">
     <label>Colaborador</label>
@@ -22,35 +41,24 @@
     </div>
   </div>
 
-  <div class="info-group sm">
+  <div class="info-group">
     <label>Matrícula</label>
-    <input type="text" [(ngModel)]="form.matricula" placeholder="0000" />
+    <div class="campo-readonly" [class.vazio]="!form.matricula">{{ form.matricula || '—' }}</div>
   </div>
 
   <div class="info-group">
     <label>Cargo</label>
-    <select [(ngModel)]="form.cargo" (change)="onCargoChange()">
-      <option value="">Selecione o cargo</option>
-      <option *ngFor="let c of cargos" [value]="c">{{ c }}</option>
-    </select>
+    <div class="campo-readonly" [class.vazio]="!form.cargo">{{ form.cargo || 'Selecione o colaborador' }}</div>
   </div>
 
-  <div class="info-group sm">
+  <div class="info-group">
     <label>Filial</label>
-    <select [(ngModel)]="form.filial">
-      <option value="HCAB">HCAB</option>
-      <option value="HCAM">HCAM</option>
-      <option value="HCVR">HCVR</option>
-      <option value="CDAM">CDAM</option>
-      <option value="CDAT">CDAT</option>
-      <option value="BENJAMIN">BENJAMIN</option>
-      <option value="CONCEPT">CONCEPT</option>
-    </select>
+    <div class="campo-readonly" [class.vazio]="!form.filial">{{ form.filial || '—' }}</div>
   </div>
 
-  <div class="info-group sm">
+  <div class="info-group">
     <label>Setor</label>
-    <input type="text" [(ngModel)]="form.setor" placeholder="Setor" />
+    <div class="campo-readonly" [class.vazio]="!form.setor">{{ form.setor || '—' }}</div>
   </div>
 </div>
 
@@ -71,7 +79,7 @@
 </div>
 
 <!-- TÉCNICAS -->
-<div class="section-card" *ngIf="tecnicas.length">
+<div class="section-card" *ngIf="tecnicas.length" [class.form-bloqueado]="avaliacaoConfirmada">
   <div class="section-header">
     <mat-icon>school</mat-icon>
     <div>
@@ -92,7 +100,8 @@
           <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
             [class.selected]="comp.notaAuto === n"
             [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
-            (click)="comp.notaAuto = n">{{ n }}</button>
+            [disabled]="autoConfirmada"
+            (click)="!autoConfirmada && (comp.notaAuto = n)">{{ n }}</button>
         </div>
       </div>
       <div class="comp-notas" *ngIf="modoGestor">
@@ -100,7 +109,8 @@
           <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
             [class.selected]="comp.notaGestor === n"
             [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
-            (click)="comp.notaGestor = n">{{ n }}</button>
+            [disabled]="gestorConfirmado"
+            (click)="!gestorConfirmado && (comp.notaGestor = n)">{{ n }}</button>
         </div>
       </div>
     </div>
@@ -113,7 +123,7 @@
 </div>
 
 <!-- COMPORTAMENTAIS -->
-<div class="section-card" *ngIf="comportamentais.length">
+<div class="section-card" *ngIf="comportamentais.length" [class.form-bloqueado]="avaliacaoConfirmada">
   <div class="section-header">
     <mat-icon>psychology</mat-icon>
     <div>
@@ -134,7 +144,8 @@
           <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
             [class.selected]="comp.notaAuto === n"
             [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
-            (click)="comp.notaAuto = n">{{ n }}</button>
+            [disabled]="autoConfirmada"
+            (click)="!autoConfirmada && (comp.notaAuto = n)">{{ n }}</button>
         </div>
       </div>
       <div class="comp-notas" *ngIf="modoGestor">
@@ -142,7 +153,8 @@
           <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
             [class.selected]="comp.notaGestor === n"
             [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
-            (click)="comp.notaGestor = n">{{ n }}</button>
+            [disabled]="gestorConfirmado"
+            (click)="!gestorConfirmado && (comp.notaGestor = n)">{{ n }}</button>
         </div>
       </div>
     </div>
@@ -155,15 +167,13 @@
 </div>
 
 <!-- Observações -->
-<div class="section-card">
+<div class="section-card" [class.form-bloqueado]="avaliacaoConfirmada">
   <div class="section-header">
     <mat-icon>comment</mat-icon>
-    <div>
-      <h2>Observações</h2>
-      <p>Comentários gerais sobre o colaborador</p>
-    </div>
+    <div><h2>Observações</h2><p>Comentários gerais sobre o colaborador</p></div>
   </div>
   <textarea [(ngModel)]="observacoes" rows="4"
+    [disabled]="avaliacaoConfirmada"
     placeholder="Comentários do avaliador (obrigatório para gestor)..."></textarea>
 </div>
 
@@ -186,20 +196,66 @@
 
 <!-- Ações -->
 <div class="actions">
-  <label class="toggle-gestor">
+  <!-- Toggle só aparece para quem tem RH_GESTOR ou ADMIN -->
+  <label class="toggle-gestor" *ngIf="temPermissaoGestor">
     <input type="checkbox" [(ngModel)]="modoGestor" />
-    <span>Modo gestor (habilitar coluna gestor)</span>
+    <span>Modo gestor</span>
+    <span class="toggle-status" *ngIf="autoConfirmada && !modoGestor">
+      <mat-icon>lock</mat-icon> Auto confirmada
+    </span>
+    <span class="toggle-status gestor" *ngIf="gestorConfirmado && modoGestor">
+      <mat-icon>lock</mat-icon> Gestor confirmado
+    </span>
   </label>
+
   <div class="action-btns">
     <button class="btn-secondary" (click)="limpar()">Limpar</button>
-    <button class="btn-primary" (click)="salvar()">
-      <mat-icon>save</mat-icon>
-      Salvar avaliação
+
+    <!-- Salvar: aparece se o modo atual NÃO está confirmado -->
+    <button class="btn-primary" (click)="salvar()" *ngIf="!avaliacaoConfirmada">
+      <mat-icon>save</mat-icon> Salvar avaliação
     </button>
+
+    <!-- Confirmar: aparece se salvou E modo atual não está confirmado -->
+    <button class="btn-confirmar" (click)="abrirModalConfirmacao()"
+      *ngIf="avaliacaoSalva && !avaliacaoConfirmada">
+      <mat-icon>verified</mat-icon> Confirmar e Assinar
+    </button>
+
+    <!-- Quando modo atual já confirmado -->
+    <span class="modo-confirmado-badge" *ngIf="avaliacaoConfirmada">
+      <mat-icon>verified</mat-icon>
+      {{ modoGestor ? 'Avaliação do gestor confirmada' : 'Autoavaliação confirmada' }}
+    </span>
   </div>
 </div>
 
 <div class="empty-state" *ngIf="!tecnicas.length && !comportamentais.length && form.cargo">
   <mat-icon>info</mat-icon>
   <p>Nenhuma competência cadastrada para <strong>{{ form.cargo }}</strong>.</p>
+</div>
+
+<!-- ════════ MODAL ════════ -->
+<div class="modal-overlay" *ngIf="mostrarModalConfirmacao" (click)="fecharModalConfirmacao()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-icon-warn"><mat-icon>warning</mat-icon></div>
+    <h2>Confirmar e Assinar {{ modoGestor ? 'Avaliação do Gestor' : 'Autoavaliação' }}</h2>
+    <p class="modal-desc">
+      Ao confirmar, sua avaliação será registrada com <strong>data, hora e seu usuário</strong>.
+    </p>
+    <div class="modal-alert">
+      ⚠️ <strong>Esta ação é irreversível.</strong> Não será possível alterar as notas após a confirmação.
+      Qualquer correção necessária deverá ser solicitada ao RH com justificativa.
+    </div>
+    <div class="modal-colab">
+      <mat-icon>person</mat-icon>
+      <span><strong>{{ form.nome }}</strong> · {{ form.cargo }} · {{ form.filial }}</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="fecharModalConfirmacao()">Cancelar</button>
+      <button class="btn-confirmar-modal" (click)="confirmarAssinatura()">
+        <mat-icon>verified</mat-icon> Confirmar definitivamente
+      </button>
+    </div>
+  </div>
 </div>

@@ -5,6 +5,53 @@
 h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px; color: #1e1e2f; }
 .page-desc { font-size: 14px; color: #6b7280; margin: 0; }
 
+/* ── Lacre de confirmação ── */
+.lacre-confirmado {
+  display: flex; align-items: center; gap: 12px;
+  background: #ECFDF5; border: 1px solid #6EE7B7; border-radius: 10px;
+  padding: 12px 16px; margin-bottom: 1.25rem;
+  color: #065F46;
+}
+.lacre-confirmado mat-icon { color: #059669; font-size: 22px; width: 22px; height: 22px; flex-shrink: 0; }
+.lacre-confirmado strong { display: block; font-size: 13px; font-weight: 600; }
+.lacre-confirmado span { font-size: 12px; color: #047857; }
+
+.lacre-gestor {
+  background: #EFF6FF; border-color: #93C5FD; color: #1E40AF; margin-top: 6px;
+}
+.lacre-gestor mat-icon { color: #2563EB; }
+.lacre-gestor span { color: #1D4ED8; }
+
+.toggle-status {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: 11px; color: #6b7280; margin-left: 8px;
+}
+.toggle-status mat-icon { font-size: 13px; width: 13px; height: 13px; }
+.toggle-status.gestor { color: #2563EB; }
+
+.modo-confirmado-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; color: #059669; font-weight: 500;
+  padding: 8px 14px; background: #ECFDF5; border: 1px solid #6EE7B7; border-radius: 8px;
+}
+.modo-confirmado-badge mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+/* ── Form bloqueado ── */
+.form-bloqueado {
+  pointer-events: none;
+  opacity: 0.7;
+  user-select: none;
+}
+
+/* ── Campo readonly (cargo, filial, setor) ── */
+.campo-readonly {
+  padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 8px;
+  font-size: 13px; background: #f9fafb; color: #1e1e2f;
+  min-height: 36px; display: flex; align-items: center;
+  font-weight: 500;
+}
+.campo-readonly.vazio { color: #9ca3af; font-weight: 400; }
+
 .ciclo-badge {
   display: inline-block; font-size: 12px; padding: 4px 12px;
   border-radius: 6px; background: #EAF3DE; color: #27500A;
@@ -13,16 +60,26 @@ h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px; color: #1e1e2f; }
 .ciclo-badge.warn { background: #FAEEDA; color: #633806; }
 
 /* Info bar */
-.info-bar { display: flex; gap: 12px; margin-bottom: 1rem; flex-wrap: wrap; align-items: flex-end; }
-.info-group { display: flex; flex-direction: column; flex: 1; min-width: 160px; position: relative; }
-.info-group.sm { flex: 0 0 120px; min-width: 100px; }
-.info-group label { font-size: 11px; font-weight: 600; color: #6b7280; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+.info-bar {
+  display: grid;
+  grid-template-columns: 2fr 90px 1.5fr 100px 120px;
+  gap: 12px;
+  margin-bottom: 1rem;
+  align-items: end;
+}
+.info-group { display: flex; flex-direction: column; position: relative; }
+.info-group label {
+  font-size: 11px; font-weight: 600; color: #6b7280;
+  margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.04em;
+}
 .info-group input, .info-group select {
   padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 8px;
   font-size: 13px; background: #fff; color: #1e1e2f;
+  height: 36px; box-sizing: border-box;
 }
-.info-group input:focus, .info-group select:focus {
-  outline: none; border-color: #7F77DD;
+.info-group input:focus, .info-group select:focus { outline: none; border-color: #7F77DD; }
+.info-group input:disabled, .info-group select:disabled {
+  background: #f9fafb; color: #6b7280; cursor: default;
 }
 
 /* Autocomplete */
@@ -55,6 +112,7 @@ h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px; color: #1e1e2f; }
 .section-card {
   background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
   padding: 1.25rem; margin-bottom: 1rem;
+  transition: opacity 0.2s;
 }
 .section-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 1rem; }
 .section-header mat-icon { color: #7F77DD; margin-top: 2px; }
@@ -70,7 +128,6 @@ h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px; color: #1e1e2f; }
 }
 .comp-header.three-col, .comp-row.three-col { grid-template-columns: 1fr 200px 200px; }
 .comp-col-nota { text-align: center; }
-
 .comp-row {
   display: grid; grid-template-columns: 1fr 200px;
   padding: 10px 0; border-bottom: 1px solid #f3f4f6; align-items: center;
@@ -85,7 +142,8 @@ h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px; color: #1e1e2f; }
   background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
   color: #9ca3af; transition: all 0.15s;
 }
-.nota-btn:hover { border-color: #7F77DD; color: #7F77DD; }
+.nota-btn:hover:not(:disabled) { border-color: #7F77DD; color: #7F77DD; }
+.nota-btn:disabled { cursor: not-allowed; opacity: 0.6; }
 .nota-btn.selected.s1 { background: #FECACA; color: #7F1D1D; border-color: #F87171; }
 .nota-btn.selected.s2 { background: #FED7AA; color: #9A3412; border-color: #FB923C; }
 .nota-btn.selected.s3 { background: #FEF3C7; color: #92400E; border-color: #FBBF24; }
@@ -105,6 +163,7 @@ textarea {
   width: 100%; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px;
   font-size: 13px; font-family: inherit; resize: vertical; color: #1e1e2f; box-sizing: border-box;
 }
+textarea:disabled { background: #f9fafb; color: #9ca3af; cursor: not-allowed; }
 
 /* Resultado */
 .resultado-bar { display: flex; gap: 12px; margin-bottom: 1rem; }
@@ -124,10 +183,12 @@ textarea {
 }
 .toggle-gestor { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #6b7280; cursor: pointer; }
 .toggle-gestor input { accent-color: #7F77DD; }
-.action-btns { display: flex; gap: 8px; }
+.action-btns { display: flex; gap: 8px; align-items: center; }
+
 .btn-secondary {
   padding: 8px 16px; border: 1px solid #e5e7eb; border-radius: 8px;
   background: #fff; font-size: 13px; cursor: pointer; color: #6b7280;
+  display: flex; align-items: center; gap: 6px;
 }
 .btn-primary {
   padding: 8px 20px; border: none; border-radius: 8px;
@@ -137,7 +198,93 @@ textarea {
 .btn-primary mat-icon { font-size: 16px; width: 16px; height: 16px; }
 .btn-primary:hover { background: #3C3489; }
 
+/* Botão confirmar — verde destaque */
+.btn-confirmar {
+  padding: 8px 20px; border: none; border-radius: 8px;
+  background: #059669; color: #fff; font-size: 13px; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: background 0.15s;
+}
+.btn-confirmar mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.btn-confirmar:hover { background: #047857; }
+
 /* Empty */
 .empty-state { text-align: center; padding: 3rem; color: #6b7280; }
 .empty-state mat-icon { font-size: 40px; width: 40px; height: 40px; color: #d1d5db; }
 .empty-state p { font-size: 14px; margin: 8px 0 0; }
+
+/* ════════ MODAL DE CONFIRMAÇÃO ════════ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;                        /* cobre a tela toda */
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.modal-icon-warn {
+  display: flex; justify-content: center;
+}
+.modal-icon-warn mat-icon {
+  font-size: 48px; width: 48px; height: 48px;
+  color: #D97706;
+}
+
+.modal-box h2 {
+  text-align: center;
+  font-size: 18px; font-weight: 700;
+  color: #1e1e2f; margin: 0;
+}
+
+.modal-desc {
+  text-align: center; font-size: 14px; color: #374151; margin: 0;
+}
+
+.modal-alert {
+  background: #FEF3C7; border: 1px solid #FCD34D;
+  border-radius: 8px; padding: 12px 14px;
+  font-size: 13px; color: #92400E; line-height: 1.5;
+}
+
+.modal-colab {
+  display: flex; align-items: center; gap: 8px;
+  background: #f9fafb; border: 1px solid #e5e7eb;
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 13px; color: #1e1e2f;
+}
+.modal-colab mat-icon { color: #7F77DD; font-size: 18px; width: 18px; height: 18px; }
+
+.modal-actions {
+  display: flex; gap: 10px; justify-content: flex-end; margin-top: 0.5rem;
+}
+
+.btn-confirmar-modal {
+  padding: 10px 20px; border: none; border-radius: 8px;
+  background: #059669; color: #fff;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: background 0.15s;
+}
+.btn-confirmar-modal mat-icon { font-size: 16px; width: 16px; height: 16px; }
+.btn-confirmar-modal:hover { background: #047857; }

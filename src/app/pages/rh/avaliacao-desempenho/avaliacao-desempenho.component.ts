@@ -59,6 +59,7 @@ export class AvaliacaoDesempenhoComponent {
   ];
 
   boxSelecionado: string | null = null;
+  buscaColaborador = '';
 
   constructor(private avalSvc: AvaliacaoService, private http: HttpClient) {
     afterNextRender(() => {
@@ -95,49 +96,66 @@ export class AvaliacaoDesempenhoComponent {
   }
 
   aplicarFiltro() {
-    this.dadosFiltrados = this.dados.filter(d =>
-      (!this.filialFiltro || d.filial === this.filialFiltro) &&
-      (!this.setorFiltro || d.setor === this.setorFiltro)
-    );
-    this.cdr.detectChanges();
-  }
+  this.dadosFiltrados = this.dados.filter(d =>
+    (!this.filialFiltro || d.filial === this.filialFiltro) &&
+    (!this.setorFiltro  || d.setor  === this.setorFiltro)
+  );
+  this.cdr.detectChanges();
+}
+ 
+get dadosFiltradosComBusca() {
+  if (!this.buscaColaborador.trim()) return this.dadosFiltrados;
+  const q = this.buscaColaborador.toLowerCase();
+  return this.dadosFiltrados.filter(d =>
+    d.nome?.toLowerCase().includes(q) ||
+    d.matricula?.toLowerCase().includes(q)
+  );
+}
 
-  countBox(key: string): number {
-    return this.dadosFiltrados.filter(d =>
-      d.titulo_9box?.toLowerCase() === key.toLowerCase()
-    ).length;
-  }
-
-  pessoasBox(key: string): Box9Item[] {
-    return this.dadosFiltrados.filter(d =>
-      d.titulo_9box?.toLowerCase() === key.toLowerCase()
-    );
-  }
-
-  toggleBox(key: string) {
+toggleBox(key: string) {
     this.boxSelecionado = this.boxSelecionado === key ? null : key;
   }
 
-  get totalAvaliados(): number { return this.dadosFiltrados.length; }
-
-  get mediaGeralDesemp(): string {
-    if (!this.dadosFiltrados.length) return '-';
-    const m = this.dadosFiltrados.reduce((s, d) => s + Number(d.media_desempenho), 0) / this.dadosFiltrados.length;
-    return m.toFixed(1);
-  }
-
-  get mediaGeralPot(): string {
-    if (!this.dadosFiltrados.length) return '-';
-    const m = this.dadosFiltrados.reduce((s, d) => s + Number(d.media_potencial), 0) / this.dadosFiltrados.length;
-    return m.toFixed(1);
-  }
-
-  get topTalentos(): Box9Item[] {
-    return [...this.dadosFiltrados]
-      .sort((a, b) => (Number(b.media_desempenho) + Number(b.media_potencial)) -
-                      (Number(a.media_desempenho) + Number(a.media_potencial)))
-      .slice(0, 5);
-  }
+  countBox(key: string): number {
+  return this.dadosFiltradosComBusca.filter(d =>
+    d.titulo_9box?.toLowerCase() === key.toLowerCase()
+  ).length;
+}
+ 
+pessoasBox(key: string): Box9Item[] {
+  return this.dadosFiltradosComBusca.filter(d =>
+    d.titulo_9box?.toLowerCase() === key.toLowerCase()
+  );
+}
+ 
+get totalAvaliados(): number { return this.dadosFiltradosComBusca.length; }
+ 
+get mediaGeralDesemp(): string {
+  const lista = this.dadosFiltradosComBusca;
+  if (!lista.length) return '-';
+  return (lista.reduce((s, d) => s + Number(d.media_desempenho), 0) / lista.length).toFixed(1);
+}
+ 
+get mediaGeralPot(): string {
+  const lista = this.dadosFiltradosComBusca;
+  if (!lista.length) return '-';
+  return (lista.reduce((s, d) => s + Number(d.media_potencial), 0) / lista.length).toFixed(1);
+}
+ 
+get topTalentos(): Box9Item[] {
+  return [...this.dadosFiltradosComBusca]
+    .sort((a, b) => (Number(b.media_desempenho) + Number(b.media_potencial)) -
+                    (Number(a.media_desempenho) + Number(a.media_potencial)))
+    .slice(0, 5);
+}
+ 
+limparFiltros() {
+  this.filialFiltro = '';
+  this.setorFiltro  = '';
+  this.buscaColaborador = '';
+  this.boxSelecionado = null;
+  this.aplicarFiltro();
+}
 
   // ── VISÃO MACRO: resumo por filial ──
   get resumoPorFilial(): ResumoFilial[] {
@@ -164,13 +182,6 @@ export class AvaliacaoDesempenhoComponent {
   selecionarFilial(filial: string) {
     this.filialFiltro = filial;
     this.abaSelecionada = 'matriz';
-    this.aplicarFiltro();
-  }
-
-  limparFiltros() {
-    this.filialFiltro = '';
-    this.setorFiltro = '';
-    this.boxSelecionado = null;
     this.aplicarFiltro();
   }
 

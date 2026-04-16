@@ -22,27 +22,43 @@
 <div *ngIf="abaSelecionada === 'matriz'">
 
   <!-- Filtros -->
-  <div class="filtros-bar">
-    <div class="filtro-group">
-      <label>Filial</label>
-      <select [(ngModel)]="filialFiltro" (change)="aplicarFiltro()">
-        <option value="">Todas</option>
-        <option *ngFor="let f of filiais" [value]="f">{{ f }}</option>
-      </select>
-    </div>
-    <div class="filtro-group">
-      <label>Setor</label>
-      <select [(ngModel)]="setorFiltro" (ngModelChange)="aplicarFiltro()">
-        <option value="">Todos</option>
-        @for (s of setores; track s) {
-          <option [value]="s">{{ s }}</option>
-        }
-      </select>
-    </div>
-    <button class="btn-limpar" (click)="limparFiltros()">
-      <mat-icon>clear</mat-icon> Limpar
-    </button>
+<div class="filtros-bar">
+  <div class="filtro-group">
+    <label>Filial</label>
+    <select [(ngModel)]="filialFiltro" (change)="aplicarFiltro()">
+      <option value="">Todas</option>
+      <option *ngFor="let f of filiais" [value]="f">{{ f }}</option>
+    </select>
   </div>
+  <div class="filtro-group">
+    <label>Setor</label>
+    <select [(ngModel)]="setorFiltro" (ngModelChange)="aplicarFiltro()">
+      <option value="">Todos</option>
+      @for (s of setores; track s) {
+        <option [value]="s">{{ s }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- NOVO: busca por colaborador -->
+  <div class="filtro-group filtro-busca">
+    <label>Colaborador</label>
+    <div class="busca-wrap">
+      <mat-icon>search</mat-icon>
+      <input type="text"
+        [(ngModel)]="buscaColaborador"
+        placeholder="Buscar por nome ou matrícula..." />
+      <button *ngIf="buscaColaborador" class="busca-clear" (click)="buscaColaborador = ''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <button class="btn-limpar" (click)="limparFiltros()">
+    <mat-icon>clear</mat-icon> Limpar
+  </button>
+</div>
+
 
   <!-- Métricas -->
   <div class="metricas-row">

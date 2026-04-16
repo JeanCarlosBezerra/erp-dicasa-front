@@ -1,11 +1,8 @@
 import { Component, afterNextRender, inject, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { AvaliacaoService } from '../../../services/avaliacao.service';
-
-
 
 interface Competencia {
   id_competencia: number;
@@ -20,6 +17,7 @@ interface Colaborador {
   nome: string;
   cargo: string;
   filial: string;
+  setor: string;
 }
 
 @Component({
@@ -31,9 +29,10 @@ interface Colaborador {
 })
 export class FormularioAvaliacaoComponent {
   private platformId = inject(PLATFORM_ID);
-
-  form = { nome: '', matricula: '', cargo: '', filial: 'HCAB', setor: '' };
   private cdr = inject(ChangeDetectorRef);
+
+  form = { nome: '', matricula: '', cargo: '', filial: '', setor: '' };
+
   cargos: string[] = [];
   colaboradores: Colaborador[] = [];
   colaboradoresFiltrados: Colaborador[] = [];
@@ -45,52 +44,73 @@ export class FormularioAvaliacaoComponent {
   modoGestor = false;
   cicloAtivo: any = null;
 
+  // ── Permissão de gestor (lida do JWT) ──
+  temPermissaoGestor = false;
+
+  // ── Confirmação separada por tipo ──
+  avaliacaoSalva = false;
+  autoConfirmada = false;
+  gestorConfirmado = false;
+  autoConfirmadaEm: string | null = null;
+  autoConfirmadaPor: string | null = null;
+  gestorConfirmadoEm: string | null = null;
+  gestorConfirmadoPor: string | null = null;
+  mostrarModalConfirmacao = false;
+
+  get avaliacaoConfirmada(): boolean {
+    return this.modoGestor ? this.gestorConfirmado : this.autoConfirmada;
+  }
+  get confirmadoEm(): string | null {
+    return this.modoGestor ? this.gestorConfirmadoEm : this.autoConfirmadaEm;
+  }
+  get confirmadoPor(): string | null {
+    return this.modoGestor ? this.gestorConfirmadoPor : this.autoConfirmadaPor;
+  }
+
   constructor(private avalSvc: AvaliacaoService) {
     afterNextRender(() => {
+      this.verificarPermissaoGestor();
       this.carregarCargos();
       this.carregarColaboradores();
       this.carregarCicloAtivo();
     });
   }
 
-
-  // Atualize carregarCicloAtivo:
-carregarCicloAtivo() {
-  this.avalSvc.getCicloAtivo().subscribe({
-    next: (ciclos: any[]) => {
-      this.cicloAtivo = ciclos?.[0] ?? null;
-      this.cdr.detectChanges(); // ← força atualização
-    }
-  });
-}
-
-carregarNotas() {
-  if (!this.cicloAtivo || !this.form.matricula) return;
-  this.avalSvc.getNotas(this.cicloAtivo.id_ciclo, this.form.matricula).subscribe({
-    next: (notas: any[]) => {
-      notas.forEach(n => {
-        const comp = [...this.tecnicas, ...this.comportamentais]
-          .find(c => Number(c.id_competencia) === Number(n.id_competencia)); // ← Number() nos dois
-        if (comp) {
-          if (n.tipo_avaliador === 'AUTO')   comp.notaAuto   = Number(n.nota);
-          if (n.tipo_avaliador === 'GESTOR') comp.notaGestor = Number(n.nota);
-        }
-      });
+  // ── Lê as roles do JWT e verifica RH_GESTOR ──
+  private verificarPermissaoGestor() {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) return;
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      // roles pode vir como string separada por vírgula: "RH_GESTOR,RH_ADMIN"
+      // ou como array, dependendo de como o backend monta
+      const roles: string[] = Array.isArray(payload.roles)
+        ? payload.roles
+        : (payload.roles || '').split(',').map((r: string) => r.trim());
+      this.temPermissaoGestor = roles.includes('RH_GESTOR') || roles.includes('ADMIN');
       this.cdr.detectChanges();
+    } catch {
+      this.temPermissaoGestor = false;
     }
-  });
-}
+  }
 
-// Atualize carregarCargos:
-carregarCargos() {
-  this.avalSvc.getCargos().subscribe({
-    next: (res: any[]) => {
-      this.cargos = res.map((r: any) => r.cargo).sort();
-      this.cdr.detectChanges(); // ← força atualização
-    }
-  });
-}
+  carregarCicloAtivo() {
+    this.avalSvc.getCicloAtivo().subscribe({
+      next: (ciclos: any[]) => {
+        this.cicloAtivo = ciclos?.[0] ?? null;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
+  carregarCargos() {
+    this.avalSvc.getCargos().subscribe({
+      next: (res: any[]) => {
+        this.cargos = res.map((r: any) => r.cargo).sort();
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   carregarColaboradores() {
     this.avalSvc.getColaboradores().subscribe({
@@ -98,7 +118,6 @@ carregarCargos() {
     });
   }
 
-  // Autocomplete colaborador
   onNomeInput() {
     const q = this.form.nome.toLowerCase();
     if (q.length < 2) { this.mostrarSugestoes = false; return; }
@@ -108,38 +127,100 @@ carregarCargos() {
     this.mostrarSugestoes = this.colaboradoresFiltrados.length > 0;
   }
 
-selecionarColaborador(c: Colaborador) {
-  this.form.nome = c.nome;
-  this.form.matricula = c.matricula;
-  this.form.filial = c.filial;
-  this.mostrarSugestoes = false;
-
-  const cargoMatch = this.cargos.find(
-    cargo => cargo.trim().toUpperCase() === (c.cargo || '').trim().toUpperCase()
-  );
-  if (cargoMatch) {
-    this.form.cargo = cargoMatch;
+  selecionarColaborador(c: Colaborador) {
+    this.form.nome      = c.nome;
+    this.form.matricula = c.matricula;
+    this.form.filial    = c.filial;
+    this.form.setor     = c.setor || '';
+    this.form.cargo     = '';
+    this.tecnicas = [];
+    this.comportamentais = [];
+    this.mostrarSugestoes = false;
+    this.avaliacaoSalva = false;
+    this.autoConfirmada = false;
+    this.gestorConfirmado = false;
+    this.autoConfirmadaEm = null; this.autoConfirmadaPor = null;
+    this.gestorConfirmadoEm = null; this.gestorConfirmadoPor = null;
+    // Se não tem permissão de gestor, garante modo normal
+    if (!this.temPermissaoGestor) this.modoGestor = false;
     this.cdr.detectChanges();
-    this.onCargoChange(); // ← onCargoChange já chama carregarNotas internamente
-    // ← REMOVA o this.carregarNotas() daqui
+
+    if (this.cicloAtivo) {
+      this.avalSvc.getConfirmacao(this.cicloAtivo.id_ciclo, c.matricula).subscribe({
+        next: (res: any) => {
+          if (res?.confirmado_colaborador_em) {
+            this.autoConfirmada = true;
+            this.autoConfirmadaEm  = res.confirmado_colaborador_em;
+            this.autoConfirmadaPor = res.confirmado_colaborador_por;
+          }
+          if (res?.confirmado_gestor_em) {
+            this.gestorConfirmado = true;
+            this.gestorConfirmadoEm  = res.confirmado_gestor_em;
+            this.gestorConfirmadoPor = res.confirmado_gestor_por;
+          }
+          if (this.autoConfirmada || this.gestorConfirmado) {
+            this.avaliacaoSalva = true;
+          }
+          this.cdr.detectChanges();
+          this.carregarCargoPeloColaborador(c);
+        },
+        error: () => this.carregarCargoPeloColaborador(c)
+      });
+    } else {
+      this.carregarCargoPeloColaborador(c);
+    }
   }
-}
+
+  private carregarCargoPeloColaborador(c: Colaborador) {
+    if (!c.cargo) return;
+    this.form.cargo = c.cargo;
+    this.cdr.detectChanges();
+    this.avalSvc.getCompetencias(c.cargo).subscribe({
+      next: (comps: any[]) => {
+        this.tecnicas = comps
+          .filter((x: any) => x.tipo === 'TECNICA')
+          .map((x: any) => ({ ...x, notaAuto: null, notaGestor: null }));
+        this.comportamentais = comps
+          .filter((x: any) => x.tipo === 'COMPORTAMENTAL')
+          .map((x: any) => ({ ...x, notaAuto: null, notaGestor: null }));
+        this.cdr.detectChanges();
+        this.carregarNotas();
+      }
+    });
+  }
 
   onCargoChange() {
-  if (!this.form.cargo) return;
-  this.avalSvc.getCompetencias(this.form.cargo).subscribe({
-    next: (comps: any[]) => {
-      this.tecnicas = comps
-        .filter((c: any) => c.tipo === 'TECNICA')
-        .map((c: any) => ({ ...c, notaAuto: null, notaGestor: null }));
-      this.comportamentais = comps
-        .filter((c: any) => c.tipo === 'COMPORTAMENTAL')
-        .map((c: any) => ({ ...c, notaAuto: null, notaGestor: null }));
-      this.cdr.detectChanges();
-      this.carregarNotas(); // ← adicione essa linha
-    }
-  });
-}
+    if (!this.form.cargo) return;
+    this.avalSvc.getCompetencias(this.form.cargo).subscribe({
+      next: (comps: any[]) => {
+        this.tecnicas = comps
+          .filter((c: any) => c.tipo === 'TECNICA')
+          .map((c: any) => ({ ...c, notaAuto: null, notaGestor: null }));
+        this.comportamentais = comps
+          .filter((c: any) => c.tipo === 'COMPORTAMENTAL')
+          .map((c: any) => ({ ...c, notaAuto: null, notaGestor: null }));
+        this.cdr.detectChanges();
+        this.carregarNotas();
+      }
+    });
+  }
+
+  carregarNotas() {
+    if (!this.cicloAtivo || !this.form.matricula) return;
+    this.avalSvc.getNotas(this.cicloAtivo.id_ciclo, this.form.matricula).subscribe({
+      next: (notas: any[]) => {
+        notas.forEach(n => {
+          const comp = [...this.tecnicas, ...this.comportamentais]
+            .find(c => Number(c.id_competencia) === Number(n.id_competencia));
+          if (comp) {
+            if (n.tipo_avaliador === 'AUTO')   comp.notaAuto   = Number(n.nota);
+            if (n.tipo_avaliador === 'GESTOR') comp.notaGestor = Number(n.nota);
+          }
+        });
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   mediaAuto(lista: Competencia[]): string {
     const notas = lista.filter(c => c.notaAuto !== null).map(c => c.notaAuto!);
@@ -158,18 +239,24 @@ selecionarColaborador(c: Colaborador) {
     const p = parseFloat(this.mediaGestor(this.comportamentais));
     if (isNaN(d) || isNaN(p)) return '-';
     const cd = d >= 4 ? 'EXCEPCIONAL' : d >= 3 ? 'MEDIANO' : 'INSUFICIENTE';
-    const cp = p >= 4 ? 'MUITO BOM' : p >= 3 ? 'ACEITÁVEL' : 'BAIXO';
+    const cp = p >= 4 ? 'MUITO BOM'   : p >= 3 ? 'ACEITÁVEL' : 'BAIXO';
     const map: Record<string, Record<string, string>> = {
-      'BAIXO':     { 'INSUFICIENTE': 'Insuficiente',    'MEDIANO': 'Eficaz',          'EXCEPCIONAL': 'Comprometido' },
-      'ACEITÁVEL': { 'INSUFICIENTE': 'Questionável',    'MEDIANO': 'Mantenedor',       'EXCEPCIONAL': 'Forte desempenho' },
-      'MUITO BOM': { 'INSUFICIENTE': 'Enigma',          'MEDIANO': 'Forte potencial',  'EXCEPCIONAL': 'Alto potencial' },
+      'BAIXO':     { 'INSUFICIENTE': 'Insuficiente',   'MEDIANO': 'Eficaz',         'EXCEPCIONAL': 'Comprometido' },
+      'ACEITÁVEL': { 'INSUFICIENTE': 'Questionável',   'MEDIANO': 'Mantenedor',     'EXCEPCIONAL': 'Forte desempenho' },
+      'MUITO BOM': { 'INSUFICIENTE': 'Enigma',         'MEDIANO': 'Forte potencial','EXCEPCIONAL': 'Alto potencial' },
     };
     return map[cp]?.[cd] ?? '-';
   }
 
   salvar() {
+    if (this.avaliacaoConfirmada) return;
+    // Bloqueia modo gestor sem permissão
+    if (this.modoGestor && !this.temPermissaoGestor) {
+      alert('Você não tem permissão para avaliar como gestor.');
+      return;
+    }
     if (!this.cicloAtivo) { alert('Nenhum ciclo de avaliação ativo.'); return; }
-    if (!this.form.matricula || !this.form.cargo) { alert('Preencha o colaborador e o cargo.'); return; }
+    if (!this.form.matricula || !this.form.cargo) { alert('Preencha o colaborador.'); return; }
 
     const notas = [
       ...this.tecnicas.filter(c => c.notaAuto !== null).map(c => ({ id_competencia: c.id_competencia, nota: c.notaAuto! })),
@@ -177,40 +264,67 @@ selecionarColaborador(c: Colaborador) {
     ];
 
     this.avalSvc.salvarNotas({
-      id_ciclo: this.cicloAtivo.id_ciclo,
-      matricula: this.form.matricula,
-      nome: this.form.nome,
-      cargo: this.form.cargo,
-      setor: this.form.setor,
-      filial: this.form.filial,
-      tipo_avaliador: this.modoGestor ? 'GESTOR' : 'AUTO',
-      avaliador: localStorage.getItem('usuario') || this.form.nome,
-      notas,
+      id_ciclo: this.cicloAtivo.id_ciclo, matricula: this.form.matricula,
+      nome: this.form.nome, cargo: this.form.cargo, setor: this.form.setor,
+      filial: this.form.filial, tipo_avaliador: this.modoGestor ? 'GESTOR' : 'AUTO',
+      avaliador: localStorage.getItem('usuario') || this.form.nome, notas,
     }).subscribe({
-    next: () => {
-      // Se modo gestor, calcula 9-Box automaticamente
-      if (this.modoGestor) {
-        this.avalSvc.calcular9Box(
-          this.cicloAtivo.id_ciclo,
-          this.form.matricula
-        ).subscribe({
-          next: (res) => {
-            alert(`Avaliação salva! Classificação 9-Box: ${res?.titulo}`);
-          }
-        });
-      } else {
-        alert('Avaliação salva com sucesso!');
-      }
-    },
-    error: () => alert('Erro ao salvar avaliação.'),
-  });
-}
+      next: () => {
+        this.avaliacaoSalva = true;
+        if (this.modoGestor) {
+          this.avalSvc.calcular9Box(this.cicloAtivo.id_ciclo, this.form.matricula).subscribe({
+            next: (res) => { alert(`Avaliação salva! Classificação 9-Box: ${res?.titulo}`); this.cdr.detectChanges(); }
+          });
+        } else {
+          alert('Avaliação salva! Agora você pode confirmar e assinar.');
+          this.cdr.detectChanges();
+        }
+      },
+      error: () => alert('Erro ao salvar avaliação.'),
+    });
+  }
+
+  abrirModalConfirmacao() {
+    if (this.avaliacaoConfirmada) return;
+    if (this.modoGestor && !this.temPermissaoGestor) return;
+    this.mostrarModalConfirmacao = true;
+  }
+
+  fecharModalConfirmacao() {
+    this.mostrarModalConfirmacao = false;
+  }
+
+  confirmarAssinatura() {
+    const tipo    = this.modoGestor ? 'GESTOR' : 'AUTO';
+    const usuario = localStorage.getItem('usuario') || this.form.nome;
+    this.avalSvc.confirmarAvaliacao(this.cicloAtivo.id_ciclo, this.form.matricula, tipo, usuario).subscribe({
+      next: (res: any) => {
+        const em = res?.confirmado_em || new Date().toISOString();
+        if (this.modoGestor) {
+          this.gestorConfirmado    = true;
+          this.gestorConfirmadoEm  = em;
+          this.gestorConfirmadoPor = usuario;
+        } else {
+          this.autoConfirmada    = true;
+          this.autoConfirmadaEm  = em;
+          this.autoConfirmadaPor = usuario;
+        }
+        this.mostrarModalConfirmacao = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { alert('Erro ao confirmar. Tente novamente.'); this.mostrarModalConfirmacao = false; }
+    });
+  }
 
   limpar() {
-    this.form = { nome: '', matricula: '', cargo: '', filial: 'HCAB', setor: '' };
-    this.tecnicas = [];
-    this.comportamentais = [];
+    this.form = { nome: '', matricula: '', cargo: '', filial: '', setor: '' };
+    this.tecnicas = []; this.comportamentais = [];
     this.observacoes = '';
-    this.modoGestor = false;
+    if (!this.temPermissaoGestor) this.modoGestor = false;
+    this.avaliacaoSalva = false;
+    this.autoConfirmada = false; this.gestorConfirmado = false;
+    this.autoConfirmadaEm = null; this.autoConfirmadaPor = null;
+    this.gestorConfirmadoEm = null; this.gestorConfirmadoPor = null;
+    this.mostrarModalConfirmacao = false;
   }
 }
