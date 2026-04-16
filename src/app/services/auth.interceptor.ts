@@ -9,8 +9,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
   const router = inject(Router);
 
-  console.log('🔐 Interceptor chamado:', req.url, 'browser?', isPlatformBrowser(platformId));
-
   if (isPlatformBrowser(platformId)) {
     const token = localStorage.getItem('access_token');
     console.log('🎫 Token:', token ? 'ENCONTRADO' : 'NULL');
@@ -25,8 +23,11 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(req).pipe(
     catchError((err: HttpErrorResponse) => {
       if (err.status === 401 && isPlatformBrowser(platformId)) {
-        localStorage.removeItem('access_token');
-        router.navigate(['/login']);
+        // Só redireciona se for rota autenticada, não rota de login
+        if (!req.url.includes('/auth/')) {
+          localStorage.removeItem('access_token');
+          router.navigate(['/login']);
+        }
       }
       return throwError(() => err);
     })
