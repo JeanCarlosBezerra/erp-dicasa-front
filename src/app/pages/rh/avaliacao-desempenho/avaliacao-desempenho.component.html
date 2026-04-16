@@ -32,7 +32,12 @@
     </div>
     <div class="filtro-group">
       <label>Setor</label>
-      <input type="text" [(ngModel)]="setorFiltro" (ngModelChange)="aplicarFiltro()" placeholder="Buscar setor..." />
+      <select [(ngModel)]="setorFiltro" (ngModelChange)="aplicarFiltro()">
+        <option value="">Todos</option>
+        @for (s of setores; track s) {
+          <option [value]="s">{{ s }}</option>
+        }
+      </select>
     </div>
     <button class="btn-limpar" (click)="limparFiltros()">
       <mat-icon>clear</mat-icon> Limpar

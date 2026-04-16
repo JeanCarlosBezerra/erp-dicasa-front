@@ -1,0 +1,303 @@
+<!-- gestao-rh.component.html -->
+<div class="gestao-rh">
+  <div class="page-header">
+    <h2>Gestão de RH</h2>
+    <p>Administre colaboradores, cargos, competências, ciclos e setores</p>
+  </div>
+
+  <!-- Abas -->
+  <div class="abas">
+    <button [class.ativa]="abaAtiva==='colaboradores'" (click)="trocarAba('colaboradores')">👥 Colaboradores</button>
+    <button [class.ativa]="abaAtiva==='cargos'" (click)="trocarAba('cargos')">💼 Cargos</button>
+    <button [class.ativa]="abaAtiva==='competencias'" (click)="trocarAba('competencias')">⭐ Competências</button>
+    <button [class.ativa]="abaAtiva==='ciclos'" (click)="trocarAba('ciclos')">🔄 Ciclos</button>
+    <button [class.ativa]="abaAtiva==='setores'" (click)="trocarAba('setores')">🏢 Setores</button>
+  </div>
+
+  <!-- ABA COLABORADORES -->
+  @if (abaAtiva === 'colaboradores') {
+    <div class="aba-content">
+      <div class="toolbar">
+        <input placeholder="Buscar colaborador..." [(ngModel)]="buscaColaborador" (input)="filtrarColaboradores()" />
+        <select [(ngModel)]="filtroEmpresa" (ngModelChange)="loadColaboradores()">
+          <option value="">Todas as empresas</option>
+          @for (e of empresas; track e.id) {
+            <option [value]="e.id">{{ e.nome }}</option>
+          }
+        </select>
+        <button class="btn-novo" (click)="abrirNovoColaborador()">+ Novo</button>
+      </div>
+
+      <div class="tabela-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID ERP</th><th>Nome</th><th>Empresa</th><th>Cargo</th>
+              <th>Setor</th><th>Admissão</th><th>Status</th><th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of colaboradoresFiltrados; track c.id) {
+              <tr>
+                <td>{{ c.id_erp }}</td>
+                <td>{{ c.nome }}</td>
+                <td>{{ c.empresa_nome || c.empresa }}</td>
+                <td>{{ c.cargo }}</td>
+                <td>{{ c.setor_nome || '-' }}</td>
+                <td>{{ c.dt_admissao | date:'dd/MM/yyyy' }}</td>
+                <td><span [class]="c.ativo ? 'badge-ativo' : 'badge-inativo'">{{ c.ativo ? 'Ativo' : 'Inativo' }}</span></td>
+                <td><button class="btn-edit" (click)="editarColaborador(c)">✏️</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- ABA CARGOS -->
+  @if (abaAtiva === 'cargos') {
+    <div class="aba-content">
+      <div class="toolbar">
+        <button class="btn-novo" (click)="abrirNovoCargo()">+ Novo Cargo</button>
+      </div>
+      <div class="tabela-wrapper">
+        <table>
+          <thead>
+            <tr><th>Nome</th><th>CBO</th><th>Nível</th><th>Formação</th><th>Status</th><th>Ações</th></tr>
+          </thead>
+          <tbody>
+            @for (c of cargos; track c.id) {
+              <tr>
+                <td>{{ c.nome_cargo }}</td>
+                <td>{{ c.cbo }}</td>
+                <td>{{ c.nivel }}</td>
+                <td>{{ c.formacao }}</td>
+                <td><span [class]="c.ativo ? 'badge-ativo' : 'badge-inativo'">{{ c.ativo ? 'Ativo' : 'Inativo' }}</span></td>
+                <td>
+                  <button class="btn-edit" (click)="editarCargo(c)">✏️</button>
+                  <button class="btn-comp" (click)="selecionarCargoComp(c); trocarAba('competencias')">⭐</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- ABA COMPETÊNCIAS -->
+@if (abaAtiva === 'competencias') {
+  <div class="aba-content">
+    <div class="toolbar">
+      <select [(ngModel)]="cargoSelecionadoComp" (change)="cargoSelecionadoComp && loadCompetencias(cargoSelecionadoComp.id)">
+        <option [ngValue]="null">Selecione um cargo...</option>
+        @for (c of cargos; track c.id) {
+          <option [ngValue]="c">{{ c.nome_cargo }}</option>
+        }
+      </select>
+      @if (cargoSelecionadoComp) {
+        <button class="btn-novo" (click)="abrirNovaCompetencia()">+ Nova Competência</button>
+      }
+    </div>
+
+    @if (cargoSelecionadoComp) {
+      <div class="tabela-wrapper">
+        <table>
+          <thead>
+            <tr><th>Descrição</th><th>Tipo</th><th>Ações</th></tr>
+          </thead>
+          <tbody>
+            @for (comp of competencias; track comp.id) {
+              <tr>
+                <td>{{ comp.descricao }}</td>
+                <td><span [class]="comp.tipo === 'TECNICA' ? 'badge-tec' : 'badge-comp'">{{ comp.tipo }}</span></td>
+                <td><button class="btn-edit" (click)="editarCompetencia(comp)">✏️</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
+
+<!-- ABA CICLOS -->
+@if (abaAtiva === 'ciclos') {
+  <div class="aba-content">
+    <div class="toolbar">
+      <button class="btn-novo" (click)="abrirNovoCiclo()">+ Novo Ciclo</button>
+    </div>
+    <div class="tabela-wrapper">
+      <table>
+        <thead>
+          <tr><th>Nome</th><th>Ano</th><th>Início</th><th>Fim</th><th>Status</th><th>Ações</th></tr>
+        </thead>
+        <tbody>
+          @for (c of ciclos; track c.id_ciclo) {
+            <tr>
+              <td>{{ c.nome }}</td>
+              <td>{{ c.ano }}</td>
+              <td>{{ c.data_inicio | date:'dd/MM/yyyy' }}</td>
+              <td>{{ c.data_fim | date:'dd/MM/yyyy' }}</td>
+              <td><span [class]="c.ativo ? 'badge-ativo' : 'badge-inativo'">{{ c.ativo ? 'Ativo' : 'Inativo' }}</span></td>
+              <td><button class="btn-edit" (click)="editarCiclo(c)">✏️</button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+  <!-- ABA SETORES -->
+  @if (abaAtiva === 'setores') {
+    <div class="aba-content">
+      <div class="toolbar">
+        <button class="btn-novo" (click)="abrirNovoSetor()">+ Novo Setor</button>
+      </div>
+      <div class="tabela-wrapper">
+        <table>
+          <thead>
+            <tr><th>Nome</th><th>Status</th><th>Ações</th></tr>
+          </thead>
+          <tbody>
+            @for (s of setores; track s.id) {
+              <tr>
+                <td>{{ s.nome }}</td>
+                <td><span [class]="s.ativo ? 'badge-ativo' : 'badge-inativo'">{{ s.ativo ? 'Ativo' : 'Inativo' }}</span></td>
+                <td><button class="btn-edit" (click)="editarSetor(s)">✏️</button></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- MODAL COLABORADOR -->
+@if (modalColaborador) {
+  <div class="modal-overlay" (click)="modalColaborador=false">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <h3>{{ editandoId ? 'Editar' : 'Novo' }} Colaborador</h3>
+      <div class="form-grid">
+        <label>Nome<input [(ngModel)]="formColaborador.nome" /></label>
+        <label>ID ERP<input type="number" [(ngModel)]="formColaborador.id_erp" /></label>
+        <label>Empresa
+          <select [(ngModel)]="formColaborador.id_empresa">
+            <option value="">Selecione...</option>
+            @for (e of empresas; track e.id) {
+              <option [value]="e.id">{{ e.nome }}</option>
+            }
+          </select>
+        </label>
+        <label>Cargo
+          <select [(ngModel)]="formColaborador.id_cargo">
+            <option value="">Selecione...</option>
+            @for (c of cargos; track c.id) {
+              <option [value]="c.id">{{ c.nome_cargo }}</option>
+            }
+          </select>
+        </label>
+        <label>Setor
+          <select [(ngModel)]="formColaborador.id_setor">
+            <option value="">Sem setor</option>
+            @for (s of setores; track s.id) {
+              <option [value]="s.id">{{ s.nome }}</option>
+            }
+          </select>
+        </label>
+        <label>Admissão<input type="date" [(ngModel)]="formColaborador.dt_admissao" /></label>
+        <label class="full">
+          <input type="checkbox" [(ngModel)]="formColaborador.ativo" /> Ativo
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="modalColaborador=false">Cancelar</button>
+        <button class="btn-save" (click)="salvarColaborador()">Salvar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL CARGO -->
+@if (modalCargo) {
+  <div class="modal-overlay" (click)="modalCargo=false">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <h3>{{ editandoId ? 'Editar' : 'Novo' }} Cargo</h3>
+      <div class="form-grid">
+        <label class="full">Nome do Cargo<input [(ngModel)]="formCargo.nome_cargo" /></label>
+        <label>CBO<input [(ngModel)]="formCargo.cbo" /></label>
+        <label>Nível<input [(ngModel)]="formCargo.nivel" /></label>
+        <label class="full">Formação<textarea [(ngModel)]="formCargo.formacao" rows="2"></textarea></label>
+        <label class="full">Experiência<textarea [(ngModel)]="formCargo.experiencia" rows="2"></textarea></label>
+        <label class="full">Atribuições<textarea [(ngModel)]="formCargo.atribuicoes" rows="3"></textarea></label>
+        <label class="full"><input type="checkbox" [(ngModel)]="formCargo.ativo" /> Ativo</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="modalCargo=false">Cancelar</button>
+        <button class="btn-save" (click)="salvarCargo()">Salvar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL COMPETÊNCIA -->
+@if (modalCompetencia) {
+  <div class="modal-overlay" (click)="modalCompetencia=false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>{{ editandoId ? 'Editar' : 'Nova' }} Competência</h3>
+      <div class="form-grid">
+        <label class="full">Descrição<input [(ngModel)]="formCompetencia.descricao" /></label>
+        <label>Tipo
+          <select [(ngModel)]="formCompetencia.tipo">
+            <option value="TECNICA">Técnica</option>
+            <option value="COMPORTAMENTAL">Comportamental</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="modalCompetencia=false">Cancelar</button>
+        <button class="btn-save" (click)="salvarCompetencia()">Salvar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL CICLO -->
+@if (modalCiclo) {
+  <div class="modal-overlay" (click)="modalCiclo=false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>{{ editandoId ? 'Editar' : 'Novo' }} Ciclo</h3>
+      <div class="form-grid">
+        <label class="full">Nome<input [(ngModel)]="formCiclo.nome" /></label>
+        <label>Ano<input type="number" [(ngModel)]="formCiclo.ano" /></label>
+        <label>Início<input type="date" [(ngModel)]="formCiclo.data_inicio" /></label>
+        <label>Fim<input type="date" [(ngModel)]="formCiclo.data_fim" /></label>
+        <label class="full"><input type="checkbox" [(ngModel)]="formCiclo.ativo" /> Ciclo Ativo</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="modalCiclo=false">Cancelar</button>
+        <button class="btn-save" (click)="salvarCiclo()">Salvar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- MODAL SETOR -->
+@if (modalSetor) {
+  <div class="modal-overlay" (click)="modalSetor=false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h3>{{ editandoId ? 'Editar' : 'Novo' }} Setor</h3>
+      <div class="form-grid">
+        <label class="full">Nome<input [(ngModel)]="formSetor.nome" /></label>
+        <label class="full"><input type="checkbox" [(ngModel)]="formSetor.ativo" /> Ativo</label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" (click)="modalSetor=false">Cancelar</button>
+        <button class="btn-save" (click)="salvarSetor()">Salvar</button>
+      </div>
+    </div>
+  </div>
+}

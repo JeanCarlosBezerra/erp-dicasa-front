@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { AvaliacaoService } from '../../../services/avaliacao.service';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface Box9Item {
   matricula: string;
@@ -39,6 +41,7 @@ export class AvaliacaoDesempenhoComponent {
   filialFiltro = '';
   setorFiltro = '';
   carregando = true;
+  setores: string[] = [];
   abaSelecionada: 'matriz' | 'macro' = 'matriz';
 
   filiais = ['HCAB','HCAM','HCVR','CDAM','CDAT','BENJAMIN','CONCEPT'];
@@ -57,7 +60,7 @@ export class AvaliacaoDesempenhoComponent {
 
   boxSelecionado: string | null = null;
 
-  constructor(private avalSvc: AvaliacaoService) {
+  constructor(private avalSvc: AvaliacaoService, private http: HttpClient) {
     afterNextRender(() => {
       this.avalSvc.getCicloAtivo().subscribe({
         next: (ciclos: any[]) => {
@@ -66,8 +69,17 @@ export class AvaliacaoDesempenhoComponent {
           else { this.carregando = false; this.cdr.detectChanges(); }
         }
       });
+    
+      // ← ADICIONA AQUI, depois do subscribe acima fechar
+      this.http.get<any[]>(`${environment.apiUrl}/rh/gestao/setores`).subscribe({
+        next: s => { 
+          this.setores = s.filter(x => x.ativo).map(x => x.nome); 
+          this.cdr.detectChanges(); 
+        }
+      });
     });
   }
+  
 
   carregarDados() {
     this.carregando = true;
@@ -85,7 +97,7 @@ export class AvaliacaoDesempenhoComponent {
   aplicarFiltro() {
     this.dadosFiltrados = this.dados.filter(d =>
       (!this.filialFiltro || d.filial === this.filialFiltro) &&
-      (!this.setorFiltro  || (d.setor || '').toLowerCase().includes(this.setorFiltro.toLowerCase()))
+      (!this.setorFiltro || d.setor === this.setorFiltro)
     );
     this.cdr.detectChanges();
   }

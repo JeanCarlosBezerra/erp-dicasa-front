@@ -20,6 +20,7 @@ import { PedidosListComponent } from './pages/pedidos-list/pedidos-list.componen
 import { FaturamentoComponent } from './pages/comercial/faturamento/faturamento.component';
 import { AvaliacaoDesempenhoComponent } from './pages/rh/avaliacao-desempenho/avaliacao-desempenho.component';
 import { FormularioAvaliacaoComponent } from './pages/rh/formulario-avaliacao/formulario-avaliacao.component';
+import { GestaoRhComponent } from './pages/rh/gestao-rh/gestao-rh.component';
 
 // Guard reutilizável
 const guard = (role: string) => () => {
@@ -76,6 +77,7 @@ export const routes: Routes = [
       { path: 'rh/formulario-avaliacao', component: FormularioAvaliacaoComponent,  canActivate: [guard('RH_AVALIACAO')] },
       { path: 'rh/avaliacao-desempenho', component: AvaliacaoDesempenhoComponent, canActivate: [guard('RH_DASHBOARD')] },
       { path: 'rh/formulario-avaliacao', component: FormularioAvaliacaoComponent,  canActivate: [guard('RH_AVALIACAO')] },
+      { path: 'rh/gestao', component: GestaoRhComponent, canActivate: [guard('RH_GESTAO')] },
 
       // Settings
       {
