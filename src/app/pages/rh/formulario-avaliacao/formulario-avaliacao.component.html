@@ -22,9 +22,16 @@
   </div>
 </div>
 
-<!-- info-bar -->
-<div class="info-bar">
-  <div class="info-group autocomplete-wrapper">
+<!-- Loading enquanto identifica o colaborador logado -->
+<div class="carregando-proprio" *ngIf="carregandoProprio && !temPermissaoGestor">
+  <mat-icon>hourglass_top</mat-icon> Carregando sua avaliação...
+</div>
+
+<!-- Info bar -->
+<div class="info-bar" *ngIf="!carregandoProprio">
+
+  <!-- Campo colaborador — busca só para gestor, readonly para colaborador -->
+  <div class="info-group autocomplete-wrapper" *ngIf="temPermissaoGestor">
     <label>Colaborador</label>
     <input type="text"
       [(ngModel)]="form.nome"
@@ -41,6 +48,12 @@
     </div>
   </div>
 
+  <!-- Colaborador readonly quando não é gestor -->
+  <div class="info-group" *ngIf="!temPermissaoGestor">
+    <label>Colaborador</label>
+    <div class="campo-readonly" [class.vazio]="!form.nome">{{ form.nome || '—' }}</div>
+  </div>
+
   <div class="info-group">
     <label>Matrícula</label>
     <div class="campo-readonly" [class.vazio]="!form.matricula">{{ form.matricula || '—' }}</div>
@@ -48,7 +61,7 @@
 
   <div class="info-group">
     <label>Cargo</label>
-    <div class="campo-readonly" [class.vazio]="!form.cargo">{{ form.cargo || 'Selecione o colaborador' }}</div>
+    <div class="campo-readonly" [class.vazio]="!form.cargo">{{ form.cargo || 'Aguardando...' }}</div>
   </div>
 
   <div class="info-group">
@@ -62,7 +75,7 @@
   </div>
 </div>
 
-<div class="escala-ref">
+<div class="escala-ref" *ngIf="!carregandoProprio">
   <span class="escala-title">Escala:</span>
   <span class="escala-item s1">1 Não atingiu</span>
   <span class="escala-item s2">2 Parcial</span>
@@ -71,11 +84,17 @@
   <span class="escala-item s5">5 Superou muito</span>
 </div>
 
-<div class="ciclo-badge" *ngIf="cicloAtivo">
+<div class="ciclo-badge" *ngIf="cicloAtivo && !carregandoProprio">
   Ciclo ativo: <strong>{{ cicloAtivo.nome }} {{ cicloAtivo.ano }}</strong>
 </div>
 <div class="ciclo-badge warn" *ngIf="!cicloAtivo">
   Nenhum ciclo de avaliação ativo. Contate o RH.
+</div>
+
+<!-- Aviso quando colaborador não encontrado -->
+<div class="empty-state" *ngIf="!carregandoProprio && !temPermissaoGestor && !form.matricula">
+  <mat-icon>person_search</mat-icon>
+  <p>Seu cadastro não foi encontrado. Entre em contato com o RH.</p>
 </div>
 
 <!-- TÉCNICAS -->
@@ -167,7 +186,7 @@
 </div>
 
 <!-- Observações -->
-<div class="section-card" [class.form-bloqueado]="avaliacaoConfirmada">
+<div class="section-card" *ngIf="form.matricula" [class.form-bloqueado]="avaliacaoConfirmada">
   <div class="section-header">
     <mat-icon>comment</mat-icon>
     <div><h2>Observações</h2><p>Comentários gerais sobre o colaborador</p></div>
@@ -195,8 +214,7 @@
 </div>
 
 <!-- Ações -->
-<div class="actions">
-  <!-- Toggle só aparece para quem tem RH_GESTOR ou ADMIN -->
+<div class="actions" *ngIf="form.matricula && !carregandoProprio">
   <label class="toggle-gestor" *ngIf="temPermissaoGestor">
     <input type="checkbox" [(ngModel)]="modoGestor" />
     <span>Modo gestor</span>
@@ -208,25 +226,29 @@
     </span>
   </label>
 
-  <div class="action-btns">
-    <button class="btn-secondary" (click)="limpar()">Limpar</button>
+  <!-- Espaço vazio no lado esquerdo quando não é gestor -->
+  <div *ngIf="!temPermissaoGestor"></div>
 
-    <!-- Salvar: aparece se o modo atual NÃO está confirmado -->
+  <div class="action-btns">
+    <button class="btn-secondary" (click)="limpar()" *ngIf="temPermissaoGestor">Limpar</button>
+
     <button class="btn-primary" (click)="salvar()" *ngIf="!avaliacaoConfirmada">
       <mat-icon>save</mat-icon> Salvar avaliação
     </button>
 
-    <!-- Confirmar: aparece se salvou E modo atual não está confirmado -->
     <button class="btn-confirmar" (click)="abrirModalConfirmacao()"
       *ngIf="avaliacaoSalva && !avaliacaoConfirmada">
       <mat-icon>verified</mat-icon> Confirmar e Assinar
     </button>
 
-    <!-- Quando modo atual já confirmado -->
     <span class="modo-confirmado-badge" *ngIf="avaliacaoConfirmada">
       <mat-icon>verified</mat-icon>
       {{ modoGestor ? 'Avaliação do gestor confirmada' : 'Autoavaliação confirmada' }}
     </span>
+
+    <button class="btn-pdi" (click)="irParaPdi()" *ngIf="mostrarBotaoPdi">
+      <mat-icon>rocket_launch</mat-icon> Cadastrar PDI
+    </button>
   </div>
 </div>
 

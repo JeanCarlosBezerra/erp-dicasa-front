@@ -75,6 +75,28 @@ export class AvaliacaoService {
     return this.http.put(`${this.api}/rh/avaliacao/pdi/${id}/status`, { status });
   }
 
+  editarPdi(id: number, dados: {
+  tipo_competencia: string; item: string; descricao: string;
+  prazo: string; qtde_meses: number;
+  }): Observable<any> {
+    return this.http.put(`${this.api}/rh/avaliacao/pdi/${id}`, dados);
+  }
+  
+  deletarPdi(id: number): Observable<any> {
+    return this.http.delete(`${this.api}/rh/avaliacao/pdi/${id}`);
+  }
+
+  getTodosPdis(idCiclo?: number, filial?: string, setor?: string, status?: string): Observable<any[]> {
+  let url = `${this.api}/rh/avaliacao/pdi/todos`;
+  const params: string[] = [];
+  if (idCiclo) params.push(`ciclo=${idCiclo}`);
+  if (filial)  params.push(`filial=${filial}`);
+  if (setor)   params.push(`setor=${setor}`);
+  if (status)  params.push(`status=${status}`);
+  if (params.length) url += '?' + params.join('&');
+  return this.http.get<any[]>(url);
+}
+
   // ── CONFIRMAÇÃO / ASSINATURA ──
   getConfirmacao(ciclo: number, matricula: string): Observable<any> {
     return this.http.get<any>(`${this.api}/rh/avaliacao/confirmacao/${ciclo}/${matricula}`);

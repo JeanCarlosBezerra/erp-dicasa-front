@@ -169,6 +169,11 @@
                   <mat-icon>assignment_ind</mat-icon> Formulário de Avaliação
                 </button>
               }
+              @if (auth.hasRole('RH_PDI')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/rh/pdi" routerLinkActive="active-submenu">
+                  <mat-icon>rocket_launch</mat-icon> PDI
+                </button>
+              }
               @if (auth.hasRole('RH_GESTAO')) {
                 <button mat-button class="submenu-btn" routerLink="/menu/rh/gestao" routerLinkActive="active-submenu">
                   <mat-icon>manage_accounts</mat-icon> Gestão RH

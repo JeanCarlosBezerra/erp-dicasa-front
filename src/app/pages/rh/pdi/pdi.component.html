@@ -1,0 +1,300 @@
+<div class="page-header">
+  <p class="page-tag">RECURSOS HUMANOS</p>
+  <h1>Plano de Desenvolvimento Individual</h1>
+  <p class="page-desc">
+    Acompanhe e gerencie os planos de desenvolvimento dos colaboradores
+    <span *ngIf="cicloAtivo"> — ciclo ativo: <strong>{{ cicloAtivo.nome }} {{ cicloAtivo.ano }}</strong></span>
+  </p>
+</div>
+
+<!-- ════════ VISÃO GESTOR ════════ -->
+<div *ngIf="temPermissaoGestor">
+
+  <div class="painel-topo">
+    <div class="busca-colab autocomplete-wrapper">
+      <label>Colaborador</label>
+      <div class="busca-wrap">
+        <mat-icon>search</mat-icon>
+        <input type="text" [(ngModel)]="buscaNome"
+          (ngModelChange)="onBuscaInput()"
+          (blur)="mostrarSugestoes = false"
+          placeholder="Buscar colaborador para cadastrar PDI..." />
+      </div>
+      <div class="sugestoes" *ngIf="mostrarSugestoes">
+        <div class="sugestao-item" *ngFor="let c of colaboradoresFiltrados"
+          (mousedown)="selecionarColaborador(c)">
+          <span class="sug-nome">{{ c.nome }}</span>
+          <span class="sug-meta">{{ c.matricula }} · {{ c.cargo }} · {{ c.filial }}</span>
+        </div>
+      </div>
+    </div>
+    <div class="filtros">
+      <div class="filtro-group">
+        <label>Filial</label>
+        <select [(ngModel)]="filialFiltro" (change)="aplicarFiltroGestor()">
+          <option value="">Todas</option>
+          <option *ngFor="let f of filiais" [value]="f">{{ f }}</option>
+        </select>
+      </div>
+      <div class="filtro-group">
+        <label>Status</label>
+        <select [(ngModel)]="statusFiltro" (change)="aplicarFiltroGestor()">
+          <option value="">Todos</option>
+          <option *ngFor="let s of statusOpcoes" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- Painel colaborador selecionado -->
+  <div class="colab-pdi-panel" *ngIf="colaboradorSelecionado">
+    <div class="colab-pdi-header">
+      <div class="colab-pdi-info">
+        <div class="colab-avatar-lg">{{ colaboradorSelecionado.nome.charAt(0) }}</div>
+        <div>
+          <h2>{{ colaboradorSelecionado.nome }}</h2>
+          <span>{{ colaboradorSelecionado.cargo }} · {{ colaboradorSelecionado.filial }} · {{ colaboradorSelecionado.setor }}</span>
+        </div>
+      </div>
+      <button class="btn-novo-pdi" (click)="abrirFormNovo()">
+        <mat-icon>add</mat-icon> Novo item PDI
+      </button>
+    </div>
+
+    <!-- Formulário novo PDI -->
+    <div class="form-novo-pdi" *ngIf="mostrarFormNovo">
+      <h3><mat-icon>edit_note</mat-icon> Novo Item de Desenvolvimento</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Tipo de Competência</label>
+          <select [(ngModel)]="novoItem.tipo_competencia">
+            <option value="Técnica">Técnica</option>
+            <option value="Comportamental">Comportamental</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prazo</label>
+          <input type="date" [(ngModel)]="novoItem.prazo" />
+        </div>
+        <div class="form-group">
+          <label>Qtde. Meses</label>
+          <input type="number" [(ngModel)]="novoItem.qtde_meses" min="1" max="24" />
+        </div>
+        <div class="form-group full">
+          <label>Item de desenvolvimento</label>
+          <input type="text" [(ngModel)]="novoItem.item" placeholder="Ex: Realizar curso de liderança" />
+        </div>
+        <div class="form-group full">
+          <label>Descrição / Ação concreta</label>
+          <textarea [(ngModel)]="novoItem.descricao" rows="3"
+            placeholder="Ex: Efetuar curso de oratória na plataforma Alura — módulo comunicação assertiva"></textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="fecharFormNovo()">Cancelar</button>
+        <button class="btn-save" (click)="salvarNovoPdi()">
+          <mat-icon>save</mat-icon> Salvar PDI
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista PDIs do colaborador -->
+    <div class="pdi-lista" *ngIf="!carregando">
+      <div class="pdi-vazio" *ngIf="!pdis.length">
+        <mat-icon>assignment_late</mat-icon>
+        <p>Nenhum item de PDI cadastrado para este colaborador neste ciclo.</p>
+        <button class="btn-novo-pdi" (click)="abrirFormNovo()"><mat-icon>add</mat-icon> Cadastrar primeiro item</button>
+      </div>
+
+      <div class="pdi-item" *ngFor="let p of pdis" [class]="'pdi-item-' + statusConfig[p.status]?.cor">
+
+        <!-- Modo edição -->
+        <div class="form-edicao" *ngIf="p._editando">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Tipo</label>
+              <select [(ngModel)]="p._editTipo">
+                <option value="Técnica">Técnica</option>
+                <option value="Comportamental">Comportamental</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Prazo</label>
+              <input type="date" [(ngModel)]="p._editPrazo" />
+            </div>
+            <div class="form-group">
+              <label>Meses</label>
+              <input type="number" [(ngModel)]="p._editMeses" min="1" max="24" />
+            </div>
+            <div class="form-group full">
+              <label>Item</label>
+              <input type="text" [(ngModel)]="p._editItem" />
+            </div>
+            <div class="form-group full">
+              <label>Descrição</label>
+              <textarea [(ngModel)]="p._editDescricao" rows="2"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button class="btn-cancel" (click)="cancelarEdicao(p)">Cancelar</button>
+            <button class="btn-save" (click)="salvarEdicao(p)">
+              <mat-icon>save</mat-icon> Salvar edição
+            </button>
+          </div>
+        </div>
+
+        <!-- Modo visualização -->
+        <div *ngIf="!p._editando">
+          <div class="pdi-item-header">
+            <div class="pdi-tipo-badge" [class]="p.tipo_competencia === 'Técnica' ? 'tecnica' : 'comportamental'">
+              {{ p.tipo_competencia }}
+            </div>
+            <span class="pdi-item-nome">{{ p.item }}</span>
+            <div class="pdi-acoes-gestor">
+              <button class="btn-icon" title="Editar" (click)="abrirEdicao(p)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button class="btn-icon danger" title="Excluir" (click)="confirmarExclusao(p)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <div class="pdi-status-wrap">
+              <select class="status-select" [class]="statusConfig[p.status]?.cor"
+                [(ngModel)]="p.status" (change)="alterarStatus(p, p.status)">
+                <option *ngFor="let s of statusOpcoes" [value]="s">{{ s }}</option>
+              </select>
+            </div>
+          </div>
+          <p class="pdi-descricao" *ngIf="p.descricao">{{ p.descricao }}</p>
+          <div class="pdi-item-footer">
+            <span class="pdi-prazo" [class.vencido]="prazoVencido(p.prazo)" [class.proximo]="prazoProximo(p.prazo)">
+              <mat-icon>event</mat-icon>
+              {{ p.prazo | date:'dd/MM/yyyy' }}
+              <span *ngIf="prazoVencido(p.prazo) && p.status !== 'Concluída'"> · Vencido</span>
+              <span *ngIf="prazoProximo(p.prazo) && p.status !== 'Concluída'"> · Vence em breve</span>
+            </span>
+            <span class="pdi-meses">{{ p.qtde_meses }} meses</span>
+            <span class="pdi-avaliador"><mat-icon>person_outline</mat-icon> {{ p.avaliador }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="loading" *ngIf="carregando"><mat-icon>hourglass_top</mat-icon> Carregando...</div>
+  </div>
+
+  <!-- Visão geral todos os colaboradores -->
+  <div class="secao-todos" *ngIf="!colaboradorSelecionado && todosPdis.length">
+    <div class="secao-titulo">
+      <h2>Visão geral — PDIs por colaborador</h2>
+      <p>{{ colaboradoresComPdi.length }} colaborador(es) com PDI no ciclo atual</p>
+    </div>
+    <div class="colab-cards">
+      <div class="colab-card" *ngFor="let c of colaboradoresComPdi"
+        (click)="selecionarColaborador({matricula: c.matricula, nome: c.nome, filial: c.filial, cargo: c.cargo, setor: ''})">
+        <div class="colab-card-header">
+          <div class="colab-avatar-sm">{{ c.nome.charAt(0) }}</div>
+          <div class="colab-card-info">
+            <strong>{{ c.nome }}</strong>
+            <span>{{ c.cargo }} · {{ c.filial }}</span>
+          </div>
+          <div class="colab-progresso-pct">{{ progressoColaborador(c.pdis) }}%</div>
+        </div>
+        <div class="progresso-bar-wrap">
+          <div class="progresso-bar" [style.width.%]="progressoColaborador(c.pdis)"></div>
+        </div>
+        <div class="colab-status-mini">
+          <span class="status-mini-badge aguardando">{{ c.pdis | pdisStatus:'Aguardando Início' }} ag.</span>
+          <span class="status-mini-badge andamento">{{ c.pdis | pdisStatus:'Em andamento' }} and.</span>
+          <span class="status-mini-badge concluida">{{ c.pdis | pdisStatus:'Concluída' }} conc.</span>
+          <span class="status-mini-badge nao-concluida">{{ c.pdis | pdisStatus:'Não concluída' }} n/c</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="empty-state" *ngIf="!colaboradorSelecionado && !todosPdis.length">
+    <mat-icon>assignment_late</mat-icon>
+    <p>Nenhum PDI cadastrado ainda no ciclo atual.</p>
+    <p class="empty-hint">Busque um colaborador acima para cadastrar o primeiro PDI.</p>
+  </div>
+
+</div>
+
+<!-- ════════ VISÃO COLABORADOR ════════ -->
+<div *ngIf="!temPermissaoGestor">
+  <div class="loading" *ngIf="carregando"><mat-icon>hourglass_top</mat-icon> Carregando seu PDI...</div>
+
+  <div class="meu-pdi" *ngIf="!carregando">
+
+    <div class="colab-pdi-panel" *ngIf="colaboradorSelecionado">
+      <div class="colab-pdi-header">
+        <div class="colab-pdi-info">
+          <div class="colab-avatar-lg">{{ colaboradorSelecionado.nome.charAt(0) }}</div>
+          <div>
+            <h2>{{ colaboradorSelecionado.nome }}</h2>
+            <span>{{ colaboradorSelecionado.cargo }} · {{ colaboradorSelecionado.filial }}</span>
+          </div>
+        </div>
+        <!-- Barra de progresso pessoal -->
+        <div class="progresso-pessoal" *ngIf="pdis.length">
+          <span class="progresso-pct-lg">{{ progressoColaborador(pdis) }}%</span>
+          <span class="progresso-label">concluído</span>
+        </div>
+      </div>
+
+      <div class="progresso-bar-wrap" *ngIf="pdis.length" style="margin: 0 0 1.25rem;">
+        <div class="progresso-bar" [style.width.%]="progressoColaborador(pdis)"></div>
+      </div>
+
+      <div class="pdi-vazio" *ngIf="!pdis.length">
+        <mat-icon>assignment_late</mat-icon>
+        <p>Seu gestor ainda não cadastrou itens de PDI para você neste ciclo.</p>
+      </div>
+
+      <div class="pdi-item" *ngFor="let p of pdis" [class]="'pdi-item-' + statusConfig[p.status]?.cor">
+        <div class="pdi-item-header">
+          <div class="pdi-tipo-badge" [class]="p.tipo_competencia === 'Técnica' ? 'tecnica' : 'comportamental'">
+            {{ p.tipo_competencia }}
+          </div>
+          <span class="pdi-item-nome">{{ p.item }}</span>
+          <div class="status-badge" [class]="statusConfig[p.status]?.cor">
+            <mat-icon>{{ statusConfig[p.status]?.icone }}</mat-icon>
+            {{ p.status }}
+          </div>
+        </div>
+        <p class="pdi-descricao" *ngIf="p.descricao">{{ p.descricao }}</p>
+        <div class="pdi-item-footer">
+          <span class="pdi-prazo" [class.vencido]="prazoVencido(p.prazo)" [class.proximo]="prazoProximo(p.prazo)">
+            <mat-icon>event</mat-icon> {{ p.prazo | date:'dd/MM/yyyy' }}
+          </span>
+          <span class="pdi-meses">{{ p.qtde_meses }} meses</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!colaboradorSelecionado">
+      <mat-icon>assignment_late</mat-icon>
+      <p>Seu PDI não foi encontrado. Entre em contato com o RH.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MODAL EXCLUIR ════════ -->
+<div class="modal-overlay" *ngIf="mostrarModalExcluir" (click)="cancelarExclusao()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-icon-danger"><mat-icon>delete_forever</mat-icon></div>
+    <h2>Excluir item do PDI</h2>
+    <p class="modal-desc">Tem certeza que deseja excluir este item?</p>
+    <div class="modal-alert" *ngIf="pdiParaExcluir">
+      <strong>{{ pdiParaExcluir.item }}</strong>
+    </div>
+    <p class="modal-warn">⚠️ Esta ação não pode ser desfeita.</p>
+    <div class="modal-actions">
+      <button class="btn-cancel" (click)="cancelarExclusao()">Cancelar</button>
+      <button class="btn-excluir-modal" (click)="executarExclusao()">
+        <mat-icon>delete</mat-icon> Excluir definitivamente
+      </button>
+    </div>
+  </div>
+</div>

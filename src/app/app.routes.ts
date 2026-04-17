@@ -21,16 +21,15 @@ import { FaturamentoComponent } from './pages/comercial/faturamento/faturamento.
 import { AvaliacaoDesempenhoComponent } from './pages/rh/avaliacao-desempenho/avaliacao-desempenho.component';
 import { FormularioAvaliacaoComponent } from './pages/rh/formulario-avaliacao/formulario-avaliacao.component';
 import { GestaoRhComponent } from './pages/rh/gestao-rh/gestao-rh.component';
+import { PdiComponent } from './pages/rh/pdi/pdi.component';
 
-// Guard reutilizável
 const guard = (role: string) => () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (auth.hasRole(role)) return true;
-  return router.createUrlTree(['/menu/home']); // redireciona sem permissão
+  return router.createUrlTree(['/menu/home']);
 };
 
-// Guard de login
 const loginGuard = () => {
   const auth = inject(AuthService);
   const router = inject(Router);
@@ -45,7 +44,7 @@ export const routes: Routes = [
   {
     path: 'menu',
     component: Menu,
-    canActivate: [loginGuard], // ← protege tudo dentro de menu
+    canActivate: [loginGuard],
     children: [
       { path: 'home', component: HomeComponent },
 
@@ -66,18 +65,17 @@ export const routes: Routes = [
       // Estoque
       { path: 'estoque/produtos', component: ProdutosComponent, canActivate: [guard('MOD_ESTOQUE')] },
 
-      // Compras Estratégicas — todas protegidas por MOD_COMPRAS
-      { path: 'compras-estrategicas/resumo-executivo',   component: ResumoExecutivoComponent,    canActivate: [guard('MOD_COMPRAS')] },
+      // Compras Estratégicas
+      { path: 'compras-estrategicas/resumo-executivo',     component: ResumoExecutivoComponent,    canActivate: [guard('MOD_COMPRAS')] },
       { path: 'compras-estrategicas/analise-fornecedores', component: AnaliseFornecedoresComponent, canActivate: [guard('MOD_COMPRAS')] },
-      { path: 'compras-estrategicas/analise-produtos',   component: AnaliseProdutosComponent,    canActivate: [guard('MOD_COMPRAS')] },
-      { path: 'compras-estrategicas/analise-spend-abc',  component: AnaliseSpendAbcComponent,    canActivate: [guard('MOD_COMPRAS')] },
+      { path: 'compras-estrategicas/analise-produtos',     component: AnaliseProdutosComponent,    canActivate: [guard('MOD_COMPRAS')] },
+      { path: 'compras-estrategicas/analise-spend-abc',    component: AnaliseSpendAbcComponent,    canActivate: [guard('MOD_COMPRAS')] },
 
       // RH
-      { path: 'rh/avaliacao-desempenho', component: AvaliacaoDesempenhoComponent, canActivate: [guard('RH_AVALIACAO')] },
-      { path: 'rh/formulario-avaliacao', component: FormularioAvaliacaoComponent,  canActivate: [guard('RH_AVALIACAO')] },
       { path: 'rh/avaliacao-desempenho', component: AvaliacaoDesempenhoComponent, canActivate: [guard('RH_DASHBOARD')] },
       { path: 'rh/formulario-avaliacao', component: FormularioAvaliacaoComponent,  canActivate: [guard('RH_AVALIACAO')] },
-      { path: 'rh/gestao', component: GestaoRhComponent, canActivate: [guard('RH_GESTAO')] },
+      { path: 'rh/gestao',               component: GestaoRhComponent,             canActivate: [guard('RH_GESTAO')] },
+      { path: 'rh/pdi',                  component: PdiComponent,                  canActivate: [guard('RH_PDI')] },
 
       // Settings
       {
