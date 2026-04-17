@@ -177,14 +177,14 @@ export class PdiComponent {
         const token = localStorage.getItem('access_token');
         if (!token) return;
         const payload = JSON.parse(atob(token.split('.')[1]));
-        
+
         // Se tem matrícula no JWT, usa direto
         if (payload.matricula) {
           const c = this.colaboradores.find(x => x.matricula == payload.matricula);
           if (c) { this.colaboradorSelecionado = c; this.carregarPdiPorMatricula(c.matricula); }
           return;
         }
-        
+
         // Fallback: busca pelo username (já existente)
         const termos = (payload.username || '').toLowerCase()
           .replace(/[._-]/g, ' ').split(' ').filter((t: string) => t.length > 1);
@@ -265,6 +265,45 @@ export class PdiComponent {
       return Math.round(pdis.filter(p => p.status === 'Concluída').length / pdis.length * 100);
     };
   }
+
+  get totalPdis(): number {
+  return this.todosPdis.length;
+}
+ 
+get totalPorStatus(): Record<string, number> {
+  return {
+    'Aguardando Início': this.todosPdis.filter(p => p.status === 'Aguardando Início').length,
+    'Em andamento':      this.todosPdis.filter(p => p.status === 'Em andamento').length,
+    'Concluída':         this.todosPdis.filter(p => p.status === 'Concluída').length,
+    'Não concluída':     this.todosPdis.filter(p => p.status === 'Não concluída').length,
+  };
+}
+ 
+get totalVencidos(): number {
+  return this.todosPdis.filter(p =>
+    p.status !== 'Concluída' && !!p.prazo && new Date(p.prazo) < new Date()
+  ).length;
+}
+ 
+get totalVencendoEmBreve(): number {
+  return this.todosPdis.filter(p => {
+    if (p.status === 'Concluída' || !p.prazo) return false;
+    const diff = (new Date(p.prazo).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+    return diff >= 0 && diff <= 30;
+  }).length;
+}
+ 
+get progressoGeral(): number {
+  if (!this.todosPdis.length) return 0;
+  return Math.round(
+    this.todosPdis.filter(p => p.status === 'Concluída').length / this.todosPdis.length * 100
+  );
+}
+ 
+get totalColaboradoresComPdi(): number {
+  return new Set(this.todosPdis.map(p => p.matricula)).size;
+}
+ 
 
   abrirFormNovo() {
     this.novoItem = this.itemVazio();

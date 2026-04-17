@@ -9,7 +9,82 @@
 
 <!-- ════════ VISÃO GESTOR ════════ -->
 <div *ngIf="temPermissaoGestor">
+  
+   <!-- Dashboard de totais — só aparece quando não há colaborador selecionado -->
+<div class="dashboard-pdi" *ngIf="!colaboradorSelecionado && todosPdis.length">
 
+  <!-- Cards de métricas -->
+  <div class="dash-cards">
+    <div class="dash-card">
+      <div class="dash-card-icon total"><mat-icon>assignment</mat-icon></div>
+      <div class="dash-card-info">
+        <span class="dash-card-val">{{ totalPdis }}</span>
+        <span class="dash-card-label">Total de itens</span>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-card-icon aguardando"><mat-icon>schedule</mat-icon></div>
+      <div class="dash-card-info">
+        <span class="dash-card-val">{{ totalPorStatus['Aguardando Início'] }}</span>
+        <span class="dash-card-label">Aguardando início</span>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-card-icon andamento"><mat-icon>autorenew</mat-icon></div>
+      <div class="dash-card-info">
+        <span class="dash-card-val">{{ totalPorStatus['Em andamento'] }}</span>
+        <span class="dash-card-label">Em andamento</span>
+      </div>
+    </div>
+
+    <div class="dash-card">
+      <div class="dash-card-icon concluida"><mat-icon>check_circle</mat-icon></div>
+      <div class="dash-card-info">
+        <span class="dash-card-val">{{ totalPorStatus['Concluída'] }}</span>
+        <span class="dash-card-label">Concluídos</span>
+      </div>
+    </div>
+
+    <div class="dash-card" [class.dash-card-alerta]="totalVencidos > 0">
+      <div class="dash-card-icon vencido"><mat-icon>warning</mat-icon></div>
+      <div class="dash-card-info">
+        <span class="dash-card-val">{{ totalVencidos }}</span>
+        <span class="dash-card-label">Prazo vencido</span>
+      </div>
+    </div>
+
+    <div class="dash-card" [class.dash-card-aviso]="totalVencendoEmBreve > 0">
+      <div class="dash-card-icon proximo"><mat-icon>event_upcoming</mat-icon></div>
+      <div class="dash-card-info">
+        <span class="dash-card-val">{{ totalVencendoEmBreve }}</span>
+        <span class="dash-card-label">Vencem em 30 dias</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Barra de progresso geral -->
+  <div class="dash-progresso-geral">
+    <div class="dash-progresso-header">
+      <span>Progresso geral do ciclo</span>
+      <span class="dash-progresso-pct">{{ progressoGeral }}% concluído</span>
+    </div>
+    <div class="dash-progresso-bar-wrap">
+      <div class="dash-progresso-bar" [style.width.%]="progressoGeral"
+        [class.bar-baixo]="progressoGeral < 30"
+        [class.bar-medio]="progressoGeral >= 30 && progressoGeral < 70"
+        [class.bar-alto]="progressoGeral >= 70">
+      </div>
+    </div>
+    <div class="dash-progresso-info">
+      <span>{{ totalColaboradoresComPdi }} colaborador(es) com PDI</span>
+      <span>{{ totalPorStatus['Concluída'] }} de {{ totalPdis }} itens concluídos</span>
+    </div>
+  </div>
+
+</div>
+ 
   <div class="painel-topo">
     <div class="busca-colab autocomplete-wrapper">
       <label>Colaborador</label>

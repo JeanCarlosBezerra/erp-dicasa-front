@@ -235,3 +235,72 @@ h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px; color: #1e1e2f; }
 }
 .btn-excluir-modal mat-icon { font-size: 16px; width: 16px; height: 16px; }
 .btn-excluir-modal:hover { background: #DC2626; }
+
+/* Dashboard cards */
+.dashboard-pdi { margin-bottom: 1.5rem; }
+ 
+.dash-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  margin-bottom: 1rem;
+}
+ 
+.dash-card {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+  padding: 1rem; display: flex; align-items: center; gap: 12px;
+  transition: box-shadow 0.15s;
+}
+.dash-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+ 
+.dash-card-alerta {
+  border-color: #FCA5A5; background: #FFF5F5;
+}
+.dash-card-aviso {
+  border-color: #FCD34D; background: #FFFBEB;
+}
+ 
+.dash-card-icon {
+  width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.dash-card-icon mat-icon { font-size: 20px; width: 20px; height: 20px; }
+ 
+.dash-card-icon.total     { background: #EDE9FE; color: #5B21B6; }
+.dash-card-icon.aguardando { background: #FEF3C7; color: #92400E; }
+.dash-card-icon.andamento  { background: #DBEAFE; color: #1E40AF; }
+.dash-card-icon.concluida  { background: #D1FAE5; color: #065F46; }
+.dash-card-icon.vencido    { background: #FEE2E2; color: #991B1B; }
+.dash-card-icon.proximo    { background: #FEF3C7; color: #92400E; }
+ 
+.dash-card-info { display: flex; flex-direction: column; }
+.dash-card-val  { font-size: 22px; font-weight: 700; color: #1e1e2f; line-height: 1; }
+.dash-card-label { font-size: 11px; color: #6b7280; margin-top: 2px; }
+ 
+.dash-card-alerta .dash-card-val  { color: #EF4444; }
+.dash-card-aviso .dash-card-val   { color: #D97706; }
+ 
+/* Barra de progresso geral */
+.dash-progresso-geral {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1rem 1.25rem;
+}
+.dash-progresso-header {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 10px;
+}
+.dash-progresso-pct { font-weight: 700; color: #534AB7; font-size: 15px; }
+ 
+.dash-progresso-bar-wrap {
+  height: 10px; background: #f3f4f6; border-radius: 5px; overflow: hidden; margin-bottom: 8px;
+}
+.dash-progresso-bar {
+  height: 100%; border-radius: 5px; transition: width 0.5s ease;
+}
+.bar-baixo  { background: #F87171; }
+.bar-medio  { background: #FBBF24; }
+.bar-alto   { background: #34D399; }
+ 
+.dash-progresso-info {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: #9ca3af;
+}
