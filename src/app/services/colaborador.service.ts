@@ -12,6 +12,8 @@ export interface ColaboradorProdutividade {
   lucro:      number;
   margem:     number;
   devolucoes: number;
+  descontoValor: number;  // ← adicionar
+  descontoPerc: number;   // ← adicionar
 }
 
 @Injectable({ providedIn: 'root' })

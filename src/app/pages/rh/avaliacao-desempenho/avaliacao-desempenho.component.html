@@ -16,6 +16,10 @@
   <button class="aba" [class.ativa]="abaSelecionada === 'macro'" (click)="abaSelecionada = 'macro'">
     <mat-icon>business</mat-icon> Visão por filial
   </button>
+  <button class="aba" [class.ativa]="abaSelecionada === 'setores'"
+    (click)="abaSelecionada = 'setores'">
+    <mat-icon>bar_chart</mat-icon> Visão por setor
+  </button>
 </div>
 
 <!-- ════════ ABA MATRIZ ════════ -->
@@ -263,4 +267,120 @@
     </div>
 
   </div>
+</div>
+<!-- ════════ ABA SETORES ════════ -->
+<div *ngIf="abaSelecionada === 'setores'" class="aba-setores">
+
+  <!-- GRÁFICO DE BARRAS AGRUPADAS -->
+  <div class="setor-card">
+    <div class="setor-card-header">
+      <mat-icon>bar_chart</mat-icon>
+      <div>
+        <h3>Comparativo de médias por setor</h3>
+        <p>Desempenho (técnico) vs Potencial (comportamental)</p>
+      </div>
+    </div>
+
+    <div class="barras-legenda">
+      <span class="leg-item"><span class="leg-dot desemp"></span>Desempenho</span>
+      <span class="leg-item"><span class="leg-dot pot"></span>Potencial</span>
+    </div>
+
+    <div class="barras-container">
+      <div class="barra-grupo" *ngFor="let s of resumoPorSetor"
+        (click)="selecionarSetor(s.setor)" title="Filtrar por {{ s.setor }}">
+        <div class="barra-pair">
+          <!-- Barra desempenho -->
+          <div class="barra-wrap">
+            <span class="barra-val">{{ s.mediaDesemp }}</span>
+            <div class="barra desemp" [style.height.%]="barWidth(s.mediaDesemp)"></div>
+          </div>
+          <!-- Barra potencial -->
+          <div class="barra-wrap">
+            <span class="barra-val">{{ s.mediaPot }}</span>
+            <div class="barra pot" [style.height.%]="barWidth(s.mediaPot)"></div>
+          </div>
+        </div>
+        <span class="barra-label">{{ s.setor }}</span>
+        <span class="barra-total">{{ s.total }} avaliado{{ s.total !== 1 ? 's' : '' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HEATMAP DE QUADRANTES -->
+  <div class="setor-card">
+    <div class="setor-card-header">
+      <mat-icon>grid_view</mat-icon>
+      <div>
+        <h3>Distribuição 9-Box por setor</h3>
+        <p>Número de colaboradores em cada quadrante</p>
+      </div>
+    </div>
+
+    <div class="heatmap-wrapper">
+      <table class="heatmap-table">
+        <thead>
+          <tr>
+            <th class="heatmap-setor-col">Setor</th>
+            <th *ngFor="let b of boxes" class="heatmap-box-col" [title]="b.key">
+              {{ b.key }}
+            </th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of resumoPorSetor" (click)="selecionarSetor(s.setor)">
+            <td class="heatmap-setor-nome">{{ s.setor }}</td>
+            <td *ngFor="let b of boxes" class="heatmap-cell"
+              [class.cell-vazio]="countBoxSetor(s.setor, b.key) === 0"
+              [class.cell-baixo]="countBoxSetor(s.setor, b.key) === 1"
+              [class.cell-medio]="countBoxSetor(s.setor, b.key) >= 2 && countBoxSetor(s.setor, b.key) <= 3"
+              [class.cell-alto]="countBoxSetor(s.setor, b.key) >= 4">
+              <span *ngIf="countBoxSetor(s.setor, b.key) > 0">
+                {{ countBoxSetor(s.setor, b.key) }}
+              </span>
+              <span *ngIf="countBoxSetor(s.setor, b.key) === 0" class="cell-zero">—</span>
+            </td>
+            <td class="heatmap-total">{{ s.total }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RANKING DE SETORES -->
+  <div class="setor-card">
+    <div class="setor-card-header">
+      <mat-icon>emoji_events</mat-icon>
+      <div>
+        <h3>Ranking de setores</h3>
+        <p>Ordenado por média geral (desempenho + potencial)</p>
+      </div>
+    </div>
+
+    <div class="ranking-grid">
+      <div class="ranking-item" *ngFor="let s of resumoPorSetor; let i = index"
+        (click)="selecionarSetor(s.setor)">
+        <div class="ranking-pos" [class.pos-ouro]="i===0" [class.pos-prata]="i===1" [class.pos-bronze]="i===2">
+          {{ i + 1 }}º
+        </div>
+        <div class="ranking-info">
+          <strong>{{ s.setor }}</strong>
+          <span class="ranking-sub">{{ s.total }} avaliados · {{ s.altosPotenciais }} alto potencial</span>
+        </div>
+        <div class="ranking-medias">
+          <span class="ranking-media" [class.verde]="s.mediaDesemp >= 4" [class.amarelo]="s.mediaDesemp >= 3 && s.mediaDesemp < 4" [class.vermelho]="s.mediaDesemp < 3">
+            <mat-icon>school</mat-icon> {{ s.mediaDesemp }}
+          </span>
+          <span class="ranking-media" [class.verde]="s.mediaPot >= 4" [class.amarelo]="s.mediaPot >= 3 && s.mediaPot < 4" [class.vermelho]="s.mediaPot < 3">
+            <mat-icon>psychology</mat-icon> {{ s.mediaPot }}
+          </span>
+        </div>
+        <span class="badge-9box {{ corBadge9Box(s.quadrantePredominante) }}">
+          {{ s.quadrantePredominante }}
+        </span>
+      </div>
+    </div>
+  </div>
+
 </div>

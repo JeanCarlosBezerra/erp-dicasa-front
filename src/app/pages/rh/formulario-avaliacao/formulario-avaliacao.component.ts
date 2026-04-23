@@ -11,6 +11,10 @@ interface Competencia {
   descricao: string;
   notaAuto: number | null;
   notaGestor: number | null;
+  obsAuto?: string;       // observação do colaborador
+  obsGestor?: string;     // observação do gestor
+  showObsAuto?: boolean;  // controle de UI — não persiste
+  showObsGestor?: boolean;
 }
 
 interface Colaborador {
@@ -49,7 +53,8 @@ export class FormularioAvaliacaoComponent {
   temPermissaoGestor = false;
   carregandoProprio = false; // spinner enquanto carrega o colaborador logado
 
-  avaliacaoSalva = false;
+  autoAvaliacaoSalva = false;
+  gestorAvaliacaoSalva = false;
   autoConfirmada = false;
   gestorConfirmado = false;
   autoConfirmadaEm: string | null = null;
@@ -68,7 +73,7 @@ export class FormularioAvaliacaoComponent {
     return this.modoGestor ? this.gestorConfirmadoPor : this.autoConfirmadaPor;
   }
   get mostrarBotaoPdi(): boolean {
-    return this.temPermissaoGestor && !!this.form.matricula && this.avaliacaoSalva;
+    return this.temPermissaoGestor && !!this.form.matricula && this.autoAvaliacaoSalva;
   }
 
   constructor(private avalSvc: AvaliacaoService) {
@@ -175,7 +180,10 @@ export class FormularioAvaliacaoComponent {
           this.gestorConfirmadoEm  = res.confirmado_gestor_em;
           this.gestorConfirmadoPor = res.confirmado_gestor_por;
         }
-        if (this.autoConfirmada || this.gestorConfirmado) this.avaliacaoSalva = true;
+        if (this.autoConfirmada || this.gestorConfirmado) {
+          this.autoAvaliacaoSalva   = this.autoConfirmada;
+          this.gestorAvaliacaoSalva = this.gestorConfirmado;
+        }
         this.cdr.detectChanges();
         this.carregarCargoPeloColaborador(c);
       },
@@ -217,8 +225,10 @@ export class FormularioAvaliacaoComponent {
     this.tecnicas = [];
     this.comportamentais = [];
     this.mostrarSugestoes = false;
-    this.avaliacaoSalva = false;
-    this.autoConfirmada = false; this.gestorConfirmado = false;
+    this.autoAvaliacaoSalva   = false;
+    this.gestorAvaliacaoSalva = false;
+    this.autoConfirmada   = false;
+    this.gestorConfirmado = false;
     this.autoConfirmadaEm = null; this.autoConfirmadaPor = null;
     this.gestorConfirmadoEm = null; this.gestorConfirmadoPor = null;
     if (!this.temPermissaoGestor) this.modoGestor = false;
@@ -237,7 +247,10 @@ export class FormularioAvaliacaoComponent {
             this.gestorConfirmadoEm  = res.confirmado_gestor_em;
             this.gestorConfirmadoPor = res.confirmado_gestor_por;
           }
-          if (this.autoConfirmada || this.gestorConfirmado) this.avaliacaoSalva = true;
+         if (this.autoConfirmada || this.gestorConfirmado) {
+            this.autoAvaliacaoSalva   = this.autoConfirmada;
+            this.gestorAvaliacaoSalva = this.gestorConfirmado;
+          }
           this.cdr.detectChanges();
           this.carregarCargoPeloColaborador(c);
         },
@@ -282,22 +295,34 @@ export class FormularioAvaliacaoComponent {
     });
   }
 
-  carregarNotas() {
-    if (!this.cicloAtivo || !this.form.matricula) return;
-    this.avalSvc.getNotas(this.cicloAtivo.id_ciclo, this.form.matricula).subscribe({
-      next: (notas: any[]) => {
-        notas.forEach(n => {
-          const comp = [...this.tecnicas, ...this.comportamentais]
-            .find(c => Number(c.id_competencia) === Number(n.id_competencia));
-          if (comp) {
-            if (n.tipo_avaliador === 'AUTO')   comp.notaAuto   = Number(n.nota);
-            if (n.tipo_avaliador === 'GESTOR') comp.notaGestor = Number(n.nota);
+carregarNotas() {
+  if (!this.cicloAtivo || !this.form.matricula) return;
+  this.avalSvc.getNotas(this.cicloAtivo.id_ciclo, this.form.matricula).subscribe({
+    next: (notas: any[]) => {
+      notas.forEach(n => {
+        const comp = [...this.tecnicas, ...this.comportamentais]
+          .find(c => Number(c.id_competencia) === Number(n.id_competencia));
+        if (comp) {
+          if (n.tipo_avaliador === 'AUTO') {
+            comp.notaAuto    = Number(n.nota);
+            comp.obsAuto     = n.observacao || '';
+            comp.showObsAuto = !!n.observacao; // ← abre automaticamente se tiver obs
           }
-        });
-        this.cdr.detectChanges();
-      }
-    });
-  }
+          if (n.tipo_avaliador === 'GESTOR') {
+            comp.notaGestor    = Number(n.nota);
+            comp.obsGestor     = n.observacao || '';
+            comp.showObsGestor = !!n.observacao; // ← idem
+          }
+        }
+      });
+      const temAuto   = notas.some(n => n.tipo_avaliador === 'AUTO');
+      const temGestor = notas.some(n => n.tipo_avaliador === 'GESTOR');
+      if (temAuto)   this.autoAvaliacaoSalva   = true;
+      if (temGestor) this.gestorAvaliacaoSalva = true;
+      this.cdr.detectChanges();
+    }
+  });
+}
 
   mediaAuto(lista: Competencia[]): string {
     const notas = lista.filter(c => c.notaAuto !== null).map(c => c.notaAuto!);
@@ -331,24 +356,43 @@ export class FormularioAvaliacaoComponent {
     if (!this.cicloAtivo) { alert('Nenhum ciclo ativo.'); return; }
     if (!this.form.matricula || !this.form.cargo) { alert('Preencha o colaborador.'); return; }
 
-    const notas = [
-      ...this.tecnicas.filter(c => c.notaAuto !== null).map(c => ({ id_competencia: c.id_competencia, nota: c.notaAuto! })),
-      ...this.comportamentais.filter(c => c.notaAuto !== null).map(c => ({ id_competencia: c.id_competencia, nota: c.notaAuto! })),
-    ];
+    const todasComps = [...this.tecnicas, ...this.comportamentais];
+
+    const notas = this.modoGestor
+      ? todasComps
+          .filter(c => c.notaGestor !== null)
+          .map(c => ({
+            id_competencia: c.id_competencia,
+            nota: c.notaGestor!,
+            observacao: c.obsGestor || null,
+          }))
+      : todasComps
+          .filter(c => c.notaAuto !== null)
+          .map(c => ({
+            id_competencia: c.id_competencia,
+            nota: c.notaAuto!,
+            observacao: c.obsAuto || null,
+          }));
 
     this.avalSvc.salvarNotas({
-      id_ciclo: this.cicloAtivo.id_ciclo, matricula: this.form.matricula,
-      nome: this.form.nome, cargo: this.form.cargo, setor: this.form.setor,
-      filial: this.form.filial, tipo_avaliador: this.modoGestor ? 'GESTOR' : 'AUTO',
-      avaliador: localStorage.getItem('usuario') || this.form.nome, notas,
+      id_ciclo: this.cicloAtivo.id_ciclo,
+      matricula: this.form.matricula,
+      nome: this.form.nome,
+      cargo: this.form.cargo,
+      setor: this.form.setor,
+      filial: this.form.filial,
+      tipo_avaliador: this.modoGestor ? 'GESTOR' : 'AUTO',
+      avaliador: localStorage.getItem('usuario') || this.form.nome,
+      notas,
     }).subscribe({
       next: () => {
-        this.avaliacaoSalva = true;
         if (this.modoGestor) {
+          this.gestorAvaliacaoSalva = true;  // ← era avaliacaoSalva = true
           this.avalSvc.calcular9Box(this.cicloAtivo.id_ciclo, this.form.matricula).subscribe({
             next: (res) => { alert(`Avaliação salva! 9-Box: ${res?.titulo}`); this.cdr.detectChanges(); }
           });
         } else {
+          this.autoAvaliacaoSalva = true;    // ← era avaliacaoSalva = true
           alert('Avaliação salva! Agora você pode confirmar e assinar.');
           this.cdr.detectChanges();
         }
@@ -398,7 +442,8 @@ export class FormularioAvaliacaoComponent {
     this.form = { nome: '', matricula: '', cargo: '', filial: '', setor: '' };
     this.tecnicas = []; this.comportamentais = [];
     this.observacoes = ''; this.modoGestor = false;
-    this.avaliacaoSalva = false;
+    this.autoAvaliacaoSalva   = false;
+    this.gestorAvaliacaoSalva = false;
     this.autoConfirmada = false; this.gestorConfirmado = false;
     this.autoConfirmadaEm = null; this.autoConfirmadaPor = null;
     this.gestorConfirmadoEm = null; this.gestorConfirmadoPor = null;

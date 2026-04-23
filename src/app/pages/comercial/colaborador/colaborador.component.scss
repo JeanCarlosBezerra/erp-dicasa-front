@@ -202,6 +202,9 @@
   gap: 10px;
 }
 
+.desconto-alto  { color: #EF4444; font-weight: 600; }  // > 5% — vermelho
+.desconto-medio { color: #F59E0B; font-weight: 500; }  // 2-5% — amarelo
+
 .export-actions button {
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
 }

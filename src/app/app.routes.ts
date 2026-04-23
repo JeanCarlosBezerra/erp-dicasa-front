@@ -21,6 +21,7 @@ import { FaturamentoComponent } from './pages/comercial/faturamento/faturamento.
 import { AvaliacaoDesempenhoComponent } from './pages/rh/avaliacao-desempenho/avaliacao-desempenho.component';
 import { FormularioAvaliacaoComponent } from './pages/rh/formulario-avaliacao/formulario-avaliacao.component';
 import { GestaoRhComponent } from './pages/rh/gestao-rh/gestao-rh.component';
+import { MetasComponent } from './pages/comercial/metas/metas.component';
 import { PdiComponent } from './pages/rh/pdi/pdi.component';
 
 const guard = (role: string) => () => {
@@ -61,6 +62,7 @@ export const routes: Routes = [
       { path: 'comercial/dashboard',   component: DashboardComercialComponent, canActivate: [guard('COM_DASHBOARD')] },
       { path: 'comercial/colaborador', component: ColaboradorComponent,         canActivate: [guard('COM_COLABORADOR')] },
       { path: 'comercial/faturamento', component: FaturamentoComponent,         canActivate: [guard('COM_FATURAMENTO')] },
+      { path: 'comercial/metas', component: MetasComponent, canActivate: [guard('COM_METAS')] },
 
       // Estoque
       { path: 'estoque/produtos', component: ProdutosComponent, canActivate: [guard('MOD_ESTOQUE')] },

@@ -5,11 +5,10 @@
       <span class="eyebrow">Comercial</span>
       <h1>Produtividade por Colaborador</h1>
       <p>
-        Consulte vendas, faturamento líquido, lucro, margem e devoluções dos colaboradores
+        Consulte vendas, faturamento líquido, lucro, margem, descontos e devoluções dos colaboradores
         ativos por período e empresa.
       </p>
     </div>
-
     <div class="hero-right">
       <div class="hero-meta-card">
         <span class="meta-label">Módulo</span>
@@ -41,14 +40,10 @@
         [(ngModel)]="empresasSelecionadas"
         multiple
         panelClass="empresas-panel"
-        (selectionChange)="onEmpresasChange()"
-      >
+        (selectionChange)="onEmpresasChange()">
         <mat-select-trigger>
-          <span class="trigger-text">
-            {{ empresasSelecionadasResumo }}
-          </span>
+          <span class="trigger-text">{{ empresasSelecionadasResumo }}</span>
         </mat-select-trigger>
-
         <mat-option *ngFor="let e of empresas" [value]="e.id">
           <div class="option-row">
             <span class="option-id">{{ e.id }}</span>
@@ -59,8 +54,7 @@
     </mat-form-field>
 
     <button mat-flat-button color="primary" class="btn-filtrar" (click)="carregar()">
-      <mat-icon>filter_alt</mat-icon>
-      Filtrar
+      <mat-icon>filter_alt</mat-icon> Filtrar
     </button>
   </section>
 
@@ -71,23 +65,11 @@
         <span class="section-eyebrow">Resultado analítico</span>
         <h2>Colaboradores</h2>
       </div>
-
       <div class="export-actions">
-        <button
-          mat-mini-fab
-          color="primary"
-          matTooltip="Exportar Excel"
-          (click)="exportarExcel()"
-        >
+        <button mat-mini-fab color="primary" matTooltip="Exportar Excel" (click)="exportarExcel()">
           <mat-icon>grid_on</mat-icon>
         </button>
-
-        <button
-          mat-mini-fab
-          color="accent"
-          matTooltip="Exportar PDF"
-          (click)="exportarPDF()"
-        >
+        <button mat-mini-fab color="accent" matTooltip="Exportar PDF" (click)="exportarPDF()">
           <mat-icon>picture_as_pdf</mat-icon>
         </button>
       </div>
@@ -96,6 +78,7 @@
     <div class="table-card">
       <div class="table-container">
         <table mat-table [dataSource]="dataSource" class="full-width">
+
           <ng-container matColumnDef="idVendedor">
             <th mat-header-cell *matHeaderCellDef>#</th>
             <td mat-cell *matCellDef="let row">{{ row.idVendedor }}</td>
@@ -124,6 +107,31 @@
           <ng-container matColumnDef="margem">
             <th mat-header-cell *matHeaderCellDef>%MG</th>
             <td mat-cell *matCellDef="let row">{{ row.margem | number:'1.2-2' }}%</td>
+          </ng-container>
+
+          <!-- ── NOVAS COLUNAS DE DESCONTO ── -->
+          <ng-container matColumnDef="descontoValor">
+            <th mat-header-cell *matHeaderCellDef
+              matTooltip="Soma de desconto por produto + desconto financeiro concedido no período">
+              Desc. R$
+            </th>
+            <td mat-cell *matCellDef="let row"
+              [class.desconto-alto]="row.descontoPerc > 5"
+              [class.desconto-medio]="row.descontoPerc > 2 && row.descontoPerc <= 5">
+              {{ row.descontoValor | number:'1.2-2' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="descontoPerc">
+            <th mat-header-cell *matHeaderCellDef
+              matTooltip="Percentual de desconto sobre o faturamento bruto (antes do desconto)">
+              Desc. %
+            </th>
+            <td mat-cell *matCellDef="let row"
+              [class.desconto-alto]="row.descontoPerc > 5"
+              [class.desconto-medio]="row.descontoPerc > 2 && row.descontoPerc <= 5">
+              {{ row.descontoPerc | number:'1.2-2' }}%
+            </td>
           </ng-container>
 
           <ng-container matColumnDef="devolucoes">

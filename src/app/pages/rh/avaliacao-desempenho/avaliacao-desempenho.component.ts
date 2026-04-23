@@ -25,6 +25,15 @@ interface ResumoFilial {
   altosPotenciais: number;
 }
 
+interface ResumoSetor {
+  setor: string;
+  total: number;
+  mediaDesemp: number;
+  mediaPot: number;
+  altosPotenciais: number;
+  quadrantePredominante: string;
+}
+
 @Component({
   selector: 'app-avaliacao-desempenho',
   standalone: true,
@@ -42,7 +51,7 @@ export class AvaliacaoDesempenhoComponent {
   setorFiltro = '';
   carregando = true;
   setores: string[] = [];
-  abaSelecionada: 'matriz' | 'macro' = 'matriz';
+  abaSelecionada: 'matriz' | 'macro' | 'setores' = 'matriz';
 
   filiais = ['HCAB','HCAM','HCVR','CDAM','CDAT','BENJAMIN','CONCEPT'];
 
@@ -194,4 +203,63 @@ limparFiltros() {
       return 'vermelho';
     };
   }
+  get resumoPorSetor(): ResumoSetor[] {
+  const map = new Map<string, Box9Item[]>();
+  this.dadosFiltradosComBusca.forEach(d => {
+    const s = d.setor || 'Sem setor';
+    if (!map.has(s)) map.set(s, []);
+    map.get(s)!.push(d);
+  });
+  return Array.from(map.entries())
+    .map(([setor, itens]) => {
+      // quadrante predominante
+      const contagem = new Map<string, number>();
+      itens.forEach(i => {
+        const t = i.titulo_9box || '-';
+        contagem.set(t, (contagem.get(t) || 0) + 1);
+      });
+      const predominante = [...contagem.entries()]
+        .sort((a, b) => b[1] - a[1])[0]?.[0] ?? '-';
+      return {
+        setor,
+        total: itens.length,
+        mediaDesemp: Number((itens.reduce((s, i) => s + Number(i.media_desempenho), 0) / itens.length).toFixed(1)),
+        mediaPot:    Number((itens.reduce((s, i) => s + Number(i.media_potencial),   0) / itens.length).toFixed(1)),
+        altosPotenciais: itens.filter(i => i.titulo_9box?.toLowerCase() === 'alto potencial').length,
+        quadrantePredominante: predominante,
+      };
+    })
+    .sort((a, b) => b.total - a.total);
+}
+
+get maxMediaSetor(): number {
+  const vals = this.resumoPorSetor.flatMap(s => [s.mediaDesemp, s.mediaPot]);
+  return Math.max(...vals, 5);
+}
+
+countBoxSetor(setor: string, key: string): number {
+  return this.dadosFiltradosComBusca.filter(d =>
+    (d.setor || 'Sem setor') === setor &&
+    d.titulo_9box?.toLowerCase() === key.toLowerCase()
+  ).length;
+}
+
+barWidth(val: number): number {
+  return Math.round((val / this.maxMediaSetor) * 100);
+}
+
+corBadge9Box(titulo: string): string {
+  const t = titulo?.toLowerCase();
+  if (t === 'alto potencial' || t === 'forte potencial') return 'badge-verde';
+  if (t === 'forte desempenho' || t === 'comprometido')  return 'badge-azul';
+  if (t === 'mantenedor')                                return 'badge-roxo';
+  if (t === 'enigma' || t === 'questionável')            return 'badge-amarelo';
+  return 'badge-vermelho';
+}
+
+selecionarSetor(setor: string) {
+  this.setorFiltro = setor;
+  this.abaSelecionada = 'matriz';
+  this.aplicarFiltro();
+}
 }

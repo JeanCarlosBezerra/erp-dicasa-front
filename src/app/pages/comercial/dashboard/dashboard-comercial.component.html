@@ -1,15 +1,15 @@
 <div class="dashboard-shell">
-  <!-- HERO / TOPO -->
+  <!-- HERO -->
   <section class="hero">
     <div class="hero-left">
       <span class="eyebrow">Comercial</span>
       <h1>Metas por Empresa</h1>
-      <p>
-        Acompanhe faturamento, lucro, margem e evolução por empresa em uma visão consolidada.
-        Ajuste metas e compare o desempenho real no mesmo painel.
-      </p>
+      <p>Acompanhe faturamento, lucro, margem e evolução por empresa. Metas proporcionais calculadas automaticamente pelo período selecionado.</p>
+      <div class="modo-toggle" [class.ativo]="modoCompartilhamento" (click)="toggleModoCompartilhamento()">
+        <mat-icon>{{ modoCompartilhamento ? 'share' : 'visibility' }}</mat-icon>
+        <span>{{ modoCompartilhamento ? 'Modo compartilhamento ativo — clique para sair' : 'Modo compartilhamento' }}</span>
+      </div>
     </div>
-
     <div class="hero-right">
       <div class="filters-card">
         <mat-form-field class="filter-field" appearance="outline" floatLabel="always">
@@ -18,14 +18,12 @@
           <mat-datepicker-toggle matSuffix [for]="dp1"></mat-datepicker-toggle>
           <mat-datepicker #dp1></mat-datepicker>
         </mat-form-field>
-
         <mat-form-field class="filter-field" appearance="outline" floatLabel="always">
           <mat-label>Data Fim</mat-label>
           <input matInput [matDatepicker]="dp2" [(ngModel)]="dataFim">
           <mat-datepicker-toggle matSuffix [for]="dp2"></mat-datepicker-toggle>
           <mat-datepicker #dp2></mat-datepicker>
         </mat-form-field>
-
         <button mat-flat-button color="primary" class="btn-calcular" (click)="buscar()" [disabled]="carregando">
           <mat-icon>calculate</mat-icon>
           {{ carregando ? 'Carregando...' : 'Calcular' }}
@@ -34,103 +32,73 @@
     </div>
   </section>
 
+  <!-- AVISO sem meta -->
+  <div class="aviso-sem-meta" *ngIf="!carregando && metaFatTotalProp === 0">
+    <mat-icon>info_outline</mat-icon>
+    <span>Nenhuma meta cadastrada para este mês. Acesse <strong>Comercial > Metas</strong> para cadastrar.</span>
+  </div>
+
   <!-- RESUMO GERAL -->
   <section class="summary-section">
-    <div class="summary-card">
+    <div class="summary-card" [class.modo-compartilhamento]="modoCompartilhamento">
       <div class="summary-header">
         <div>
           <span class="section-eyebrow">Visão consolidada</span>
           <h2>Empresa (Geral)</h2>
         </div>
       </div>
-
       <div class="summary-grid">
-        <!-- reais -->
-        <div class="summary-item highlight">
+        <div class="summary-item highlight" *ngIf="!modoCompartilhamento">
           <div class="kpi-label">Faturamento Real</div>
           <div class="kpi-value">R$ {{ moeda(faturamentoTotal) }}</div>
         </div>
-
-        <div class="summary-item highlight">
+        <div class="summary-item highlight" *ngIf="!modoCompartilhamento">
           <div class="kpi-label">Lucro Real</div>
           <div class="kpi-value">R$ {{ moeda(lucroTotal) }}</div>
         </div>
-
-        <!-- metas -->
-        <mat-form-field appearance="outline" class="compact summary-input">
-          <mat-label>Meta Faturamento</mat-label>
-          <input
-            matInput type="text"
-            [value]="formatMoney(metaGeral.metaFat)"
-            (focus)="selectAll($event)"
-            (input)="onMetaGeralFatInput($any($event.target).value)"
-            (blur)="onMetaGeralFatBlur()"
-          />
-          <span matSuffix>R$</span>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="compact summary-input">
-          <mat-label>Meta Margem (%)</mat-label>
-          <input
-            matInput
-            type="text"
-            inputmode="decimal"
-            [value]="(metaGeral.metaMargemPct || 0).toLocaleString('pt-BR', { useGrouping: false, maximumFractionDigits: 6 })"
-            (focus)="selectAll($event)"
-            (input)="onMetaGeralMargemInput($any($event.target).value)"
-            (blur)="onMetaGeralMargemBlur()"
-          />
-          <span matSuffix>%</span>
-        </mat-form-field>
-
-        <!-- indicadores -->
+        <div class="summary-item" *ngIf="!modoCompartilhamento">
+          <div class="kpi-label">Meta Fat. (proporcional)</div>
+          <div class="kpi-value meta-val">R$ {{ moeda(metaFatTotalProp) }}</div>
+        </div>
         <div class="summary-item">
           <div class="kpi-label">% Faturamento</div>
-          <div class="kpi-value" [class.pos]="percFatGeral>=100" [class.neg]="percFatGeral<100">
-            {{ pct(percFatGeral) }}
-          </div>
+          <div class="kpi-value" [class.pos]="percFatGeral>=100" [class.neg]="percFatGeral<100">{{ pct(percFatGeral) }}</div>
         </div>
-
-        <div class="summary-item">
+        <div class="summary-item" *ngIf="!modoCompartilhamento">
           <div class="kpi-label">Saldo Faturamento</div>
-          <div class="kpi-value" [ngClass]="corNum(saldoFatGeral)">
-            R$ {{ moeda(saldoFatGeral) }}
-          </div>
+          <div class="kpi-value" [ngClass]="corNum(saldoFatGeral)">R$ {{ moeda(saldoFatGeral) }}</div>
         </div>
-
         <div class="summary-item">
           <div class="kpi-label">Variação</div>
-          <div class="kpi-value" [ngClass]="corNum(variacaoFatGeral)">
-            {{ signo(variacaoFatGeral) }}{{ pct(variacaoFatGeral) }}
-          </div>
+          <div class="kpi-value" [ngClass]="corNum(variacaoFatGeral)">{{ signo(variacaoFatGeral) }}{{ pct(variacaoFatGeral) }}</div>
         </div>
-
         <div class="summary-item">
           <div class="kpi-label">% Lucro (vs meta)</div>
-          <div class="kpi-value" [class.pos]="percLucroGeral>=100" [class.neg]="percLucroGeral<100">
-            {{ pct(percLucroGeral) }}
-          </div>
+          <div class="kpi-value" [ngClass]="corNum(percLucroGeralVsMeta)">{{ signo(percLucroGeralVsMeta) }}{{ pct(percLucroGeralVsMeta) }}</div>
         </div>
-
-        <div class="summary-item">
+        <div class="summary-item" *ngIf="!modoCompartilhamento">
           <div class="kpi-label">Saldo Lucro</div>
-          <div class="kpi-value" [ngClass]="corNum(saldoLucroGeral)">
-            R$ {{ moeda(saldoLucroGeral) }}
-          </div>
+          <div class="kpi-value" [ngClass]="corNum(saldoLucroGeral)">R$ {{ moeda(saldoLucroGeral) }}</div>
         </div>
-
         <div class="summary-item">
           <div class="kpi-label">Margem Real</div>
-          <div class="kpi-value">
-            {{ pct(margemRealGeralPct) }}
-          </div>
+          <div class="kpi-value">{{ pct(margemRealGeralPct) }}</div>
         </div>
-
         <div class="summary-item">
           <div class="kpi-label">Diferença Margem</div>
-          <div class="kpi-value" [ngClass]="corNum(diffMargemGeral)">
-            {{ signo(diffMargemGeral) }}{{ pct(diffMargemGeral) }}
-          </div>
+          <div class="kpi-value" [ngClass]="corNum(diffMargemGeral)">{{ signo(diffMargemGeral) }}{{ pct(diffMargemGeral) }}</div>
+        </div>
+        <div class="summary-item" *ngIf="!modoCompartilhamento">
+          <div class="kpi-label">Desconto Total</div>
+          <div class="kpi-value" [class.bad]="descontoTotalPerc > 5" [class.warn]="descontoTotalPerc > 2 && descontoTotalPerc <= 5">R$ {{ moeda(descontoTotalValor) }}</div>
+        </div>
+        <div class="summary-item">
+          <div class="kpi-label">Desconto %</div>
+          <div class="kpi-value" [class.bad]="descontoTotalPerc > 5" [class.warn]="descontoTotalPerc > 2 && descontoTotalPerc <= 5">{{ pct(descontoTotalPerc) }}</div>
+        </div>
+        <div class="summary-item" *ngIf="!modoCompartilhamento">
+          <div class="kpi-label">Devoluções</div>
+          <div class="kpi-value bad">R$ {{ moeda(devolucoesTotal) }}</div>
         </div>
       </div>
     </div>
@@ -142,55 +110,34 @@
       <span class="section-eyebrow">Empresas ativas</span>
       <h2>Detalhamento por empresa</h2>
     </div>
-
     <div class="cards-grid">
-      <div class="card" *ngFor="let c of cards; trackBy: trackById">
+      <div class="card" *ngFor="let c of cards; trackBy: trackById" [class.modo-compartilhamento]="modoCompartilhamento">
         <div class="card-head">
           <div class="card-head-left">
             <mat-icon class="pin">grid_view</mat-icon>
             <div class="apelido">{{ c.apelido }}</div>
           </div>
+          <div class="meta-badge" [class.meta-ok]="c.metaFatProp > 0" [class.meta-zero]="c.metaFatProp === 0" [matTooltip]="c.metaFatProp > 0 ? 'Meta cadastrada' : 'Sem meta cadastrada'">
+            <mat-icon>flag</mat-icon>
+          </div>
         </div>
 
-        <div class="meta-grid">
-          <mat-form-field appearance="outline" class="compact card-input">
-            <mat-label>Meta Faturamento</mat-label>
-            <input
-              matInput
-              type="text"
-              [value]="formatMoney(meta(c.idEmpresa ?? -1).metaFat)"
-              (focus)="selectAll($event)"
-              (input)="onMetaFatInput(c.idEmpresa ?? -1, $any($event.target).value)"
-              (blur)="onMetaFatBlur(c.idEmpresa ?? -1)"
-            />
-            <span matSuffix>R$</span>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="compact card-input">
-            <mat-label>Meta Margem (%)</mat-label>
-            <input
-              matInput
-              type="text"
-              inputmode="decimal"
-              [value]="((meta(c.idEmpresa ?? -1).metaMargem || 0) * 100).toLocaleString('pt-BR', { useGrouping: false, maximumFractionDigits: 6 })"
-              (focus)="selectAll($event)"
-              (input)="setMetaMargem(c.idEmpresa ?? -1, $any($event.target).value)"
-            />
-            <span matSuffix>%</span>
-          </mat-form-field>
+        <div class="meta-readonly" *ngIf="!modoCompartilhamento">
+          <span class="meta-readonly-label">Meta proporcional</span>
+          <span class="meta-readonly-val" [class.sem-meta]="c.metaFatProp === 0">
+            {{ c.metaFatProp > 0 ? 'R$ ' + moeda(c.metaFatProp) : 'Sem meta' }}
+          </span>
         </div>
 
-        <div class="metric highlight-row">
+        <div class="metric highlight-row" *ngIf="!modoCompartilhamento">
           <label>Faturamento Real</label>
           <div class="value">R$ {{ moeda(c.faturamento) }}</div>
         </div>
-
-        <div class="metric highlight-row">
+        <div class="metric highlight-row" *ngIf="!modoCompartilhamento">
           <label>Lucro Real</label>
           <div class="value">R$ {{ moeda(c.lucro) }}</div>
         </div>
-
-        <div class="metric">
+        <div class="metric" [class.metric-top]="modoCompartilhamento">
           <label>% Lucro</label>
           <div class="value">{{ pct(margemReal(c) * 100) }}</div>
         </div>
@@ -198,49 +145,43 @@
         <div class="panel">
           <div class="row">
             <span>% Faturamento</span>
-            <strong [ngClass]="corNum(percFaturamento(c) - 100)">
-              {{ pct(percFaturamento(c)) }}
-            </strong>
+            <strong [ngClass]="corNum(percFaturamento(c) - 100)">{{ pct(percFaturamento(c)) }}</strong>
           </div>
-
-          <div class="row">
+          <div class="row" *ngIf="!modoCompartilhamento">
             <span>Saldo Faturamento</span>
-            <strong [ngClass]="corNum(saldoFaturamento(c))">
-              R$ {{ moeda(saldoFaturamento(c)) }}
-            </strong>
+            <strong [ngClass]="corNum(saldoFaturamento(c))">R$ {{ moeda(saldoFaturamento(c)) }}</strong>
           </div>
-
           <div class="row">
             <span>Variação</span>
-            <strong [ngClass]="corNum(variacaoFaturamento(c))">
-              {{ signo(variacaoFaturamento(c)) }}{{ pct(variacaoFaturamento(c)) }}
-            </strong>
+            <strong [ngClass]="corNum(variacaoFaturamento(c))">{{ signo(variacaoFaturamento(c)) }}{{ pct(variacaoFaturamento(c)) }}</strong>
           </div>
-
           <div class="row">
             <span>% Lucro (vs meta)</span>
-            <strong [ngClass]="corNum(percLucro(c) - 100)">
-              {{ pct(percLucro(c)) }}
-            </strong>
+            <strong [ngClass]="corNum(percLucroVsMeta(c))">{{ signo(percLucroVsMeta(c)) }}{{ pct(percLucroVsMeta(c)) }}</strong>
           </div>
-
-          <div class="row">
+          <div class="row" *ngIf="!modoCompartilhamento">
             <span>Saldo Lucro</span>
-            <strong [ngClass]="corNum(saldoLucro(c))">
-              R$ {{ moeda(saldoLucro(c)) }}
-            </strong>
+            <strong [ngClass]="corNum(saldoLucro(c))">R$ {{ moeda(saldoLucro(c)) }}</strong>
           </div>
-
           <div class="row">
             <span>Margem Real</span>
             <strong>{{ pct(margemReal(c) * 100) }}</strong>
           </div>
-
           <div class="row">
             <span>Diferença Margem</span>
-            <strong [ngClass]="corNum(margemVar(c) * 100)">
-              {{ signo(margemVar(c) * 100) }}{{ pct(margemVar(c) * 100) }}
-            </strong>
+            <strong [ngClass]="corNum(margemVar(c) * 100)">{{ signo(margemVar(c) * 100) }}{{ pct(margemVar(c) * 100) }}</strong>
+          </div>
+          <div class="row row-sep" *ngIf="!modoCompartilhamento">
+            <span>Desconto R$</span>
+            <strong [class.bad]="c.descontoPerc > 5" [class.warn]="c.descontoPerc > 2 && c.descontoPerc <= 5">R$ {{ moeda(c.descontoValor) }}</strong>
+          </div>
+          <div class="row" [class.row-sep]="modoCompartilhamento">
+            <span>Desconto %</span>
+            <strong [class.bad]="c.descontoPerc > 5" [class.warn]="c.descontoPerc > 2 && c.descontoPerc <= 5">{{ pct(c.descontoPerc) }}</strong>
+          </div>
+          <div class="row" *ngIf="!modoCompartilhamento">
+            <span>Devoluções</span>
+            <strong class="bad">R$ {{ moeda(c.devolucoes) }}</strong>
           </div>
         </div>
       </div>

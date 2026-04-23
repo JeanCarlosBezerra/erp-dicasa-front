@@ -1,0 +1,147 @@
+<div class="metas-shell">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <span class="eyebrow">Comercial</span>
+      <h1>Cadastro de Metas</h1>
+      <p>Defina a meta mensal de faturamento e margem por empresa. A meta diária é calculada automaticamente dividindo pelo número de dias úteis do mês.</p>
+    </div>
+    <div class="hero-right">
+      <div class="hero-info-card">
+        <div class="info-item">
+          <span class="info-label">Dias úteis</span>
+          <span class="info-val">{{ diasUteisMes }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Meta diária total</span>
+          <span class="info-val">R$ {{ formatMoney(metaDiaria) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Meta mensal total</span>
+          <span class="info-val destaque">R$ {{ formatMoney(totalMetaFat) }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILTROS -->
+  <section class="filtros-card">
+    <mat-form-field appearance="outline" class="filtro-field">
+      <mat-label>Mês</mat-label>
+      <mat-select [(ngModel)]="mesSelecionado" (selectionChange)="carregar()">
+        <mat-option *ngFor="let m of meses" [value]="m.num">{{ m.nome }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filtro-field">
+      <mat-label>Ano</mat-label>
+      <mat-select [(ngModel)]="anoSelecionado" (selectionChange)="carregar()">
+        <mat-option *ngFor="let a of anos" [value]="a">{{ a }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button class="btn-salvar-todas" (click)="salvarTodas()" matTooltip="Salvar todas as empresas de uma vez">
+      <mat-icon>save_all</mat-icon> Salvar todas
+    </button>
+  </section>
+
+  <!-- INFO DIARIZAÇÃO -->
+  <div class="diarizacao-info" *ngIf="diasUteisMes > 0">
+    <mat-icon>info_outline</mat-icon>
+    <span>
+      <strong>{{ nomeMes(mesSelecionado) }}/{{ anoSelecionado }}</strong> tem
+      <strong>{{ diasUteisMes }} dias úteis</strong> (excluindo domingos).
+      A meta diária é calculada dividindo a meta mensal por esses dias.
+    </span>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-state" *ngIf="carregando">
+    <mat-icon>hourglass_top</mat-icon> Carregando metas...
+  </div>
+
+  <!-- TABELA DE METAS -->
+  <section class="tabela-section" *ngIf="!carregando">
+    <div class="tabela-header">
+      <span class="section-eyebrow">Empresas ativas</span>
+      <h2>Metas — {{ nomeMes(mesSelecionado) }} / {{ anoSelecionado }}</h2>
+    </div>
+
+    <div class="tabela-card">
+      <table class="metas-table">
+        <thead>
+          <tr>
+            <th class="col-empresa">Empresa</th>
+            <th class="col-meta">Meta Faturamento (R$)</th>
+            <th class="col-meta">Meta Margem (%)</th>
+            <th class="col-diaria">Meta Diária</th>
+            <th class="col-acao">Salvar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of metas" [class.row-salvo]="row._salvo">
+            <td class="col-empresa">
+              <div class="empresa-cell">
+                <mat-icon class="empresa-icon">grid_view</mat-icon>
+                <span>{{ row.apelido }}</span>
+              </div>
+            </td>
+
+            <td class="col-meta">
+              <div class="input-wrap">
+                <input class="meta-input"
+                  type="text"
+                  inputmode="decimal"
+                  [value]="row._editFat"
+                  (focus)="selectAll($event)"
+                  (input)="onFatInput(row, $any($event.target).value)"
+                  (blur)="onFatBlur(row)"
+                  placeholder="0,00" />
+                <span class="input-suffix">R$</span>
+              </div>
+            </td>
+
+            <td class="col-meta">
+              <div class="input-wrap">
+                <input class="meta-input"
+                  type="text"
+                  inputmode="decimal"
+                  [(ngModel)]="row._editMargem"
+                  (focus)="selectAll($event)"
+                  (blur)="onMargemBlur(row)"
+                  placeholder="0,00" />
+                <span class="input-suffix">%</span>
+              </div>
+            </td>
+
+            <td class="col-diaria">
+              <span class="meta-diaria-val">
+                R$ {{ formatMoney(diasUteisMes ? row.meta_fat / diasUteisMes : 0) }}
+              </span>
+            </td>
+
+            <td class="col-acao">
+              <button class="btn-salvar" (click)="salvar(row)"
+                [class.salvando]="row._salvando"
+                [class.salvo]="row._salvo"
+                [disabled]="row._salvando">
+                <mat-icon>{{ row._salvo ? 'check_circle' : (row._salvando ? 'hourglass_top' : 'save') }}</mat-icon>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="totais-row">
+            <td><strong>TOTAL</strong></td>
+            <td><strong>R$ {{ formatMoney(totalMetaFat) }}</strong></td>
+            <td>—</td>
+            <td><strong>R$ {{ formatMoney(metaDiaria) }}</strong></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+</div>

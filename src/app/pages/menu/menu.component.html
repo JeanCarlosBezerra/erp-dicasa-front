@@ -119,6 +119,11 @@
                   <mat-icon>bar_chart</mat-icon> Análise de Faturamento
                 </button>
               }
+              @if (auth.hasRole('COM_METAS')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/comercial/metas" routerLinkActive="active-submenu">
+                  <mat-icon>flag</mat-icon> Metas
+                </button>
+              }
             </div>
           </mat-expansion-panel>
         }

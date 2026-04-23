@@ -112,27 +112,77 @@
       <span class="comp-col-nota">Autoavaliação</span>
       <span class="comp-col-nota" *ngIf="modoGestor">Gestor</span>
     </div>
-    <div class="comp-row" [class.three-col]="modoGestor" *ngFor="let comp of tecnicas">
-      <span class="comp-desc">{{ comp.descricao }}</span>
-      <div class="comp-notas">
-        <div class="nota-group">
-          <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
-            [class.selected]="comp.notaAuto === n"
-            [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+
+    <ng-container *ngFor="let comp of tecnicas">
+      <!-- linha principal -->
+      <div class="comp-row" [class.three-col]="modoGestor" [class.comp-row-has-obs]="comp.showObsAuto || comp.showObsGestor">
+
+        <span class="comp-desc">{{ comp.descricao }}</span>
+
+        <!-- AUTOAVALIAÇÃO -->
+        <div class="comp-notas">
+          <div class="nota-group">
+            <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
+              [class.selected]="comp.notaAuto === n"
+              [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+              [disabled]="autoConfirmada"
+              (click)="!autoConfirmada && (comp.notaAuto = n)">{{ n }}</button>
+          </div>
+          <!-- Botão obs auto -->
+          <button class="obs-toggle-btn"
+            [class.obs-active]="comp.obsAuto"
             [disabled]="autoConfirmada"
-            (click)="!autoConfirmada && (comp.notaAuto = n)">{{ n }}</button>
+            [title]="comp.showObsAuto ? 'Fechar observação' : 'Adicionar observação'"
+            (click)="comp.showObsAuto = !comp.showObsAuto">
+            <mat-icon>{{ comp.obsAuto ? 'chat' : 'chat_bubble_outline' }}</mat-icon>
+          </button>
         </div>
-      </div>
-      <div class="comp-notas" *ngIf="modoGestor">
-        <div class="nota-group">
-          <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
-            [class.selected]="comp.notaGestor === n"
-            [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+
+        <!-- GESTOR -->
+        <div class="comp-notas" *ngIf="modoGestor">
+          <div class="nota-group">
+            <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
+              [class.selected]="comp.notaGestor === n"
+              [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+              [disabled]="gestorConfirmado"
+              (click)="!gestorConfirmado && (comp.notaGestor = n)">{{ n }}</button>
+          </div>
+          <!-- Botão obs gestor -->
+          <button class="obs-toggle-btn obs-toggle-gestor"
+            [class.obs-active]="comp.obsGestor"
             [disabled]="gestorConfirmado"
-            (click)="!gestorConfirmado && (comp.notaGestor = n)">{{ n }}</button>
+            [title]="comp.showObsGestor ? 'Fechar observação' : 'Adicionar observação'"
+            (click)="comp.showObsGestor = !comp.showObsGestor">
+            <mat-icon>{{ comp.obsGestor ? 'chat' : 'chat_bubble_outline' }}</mat-icon>
+          </button>
         </div>
       </div>
-    </div>
+
+      <!-- Linha de obs autoavaliação -->
+      <div class="obs-inline-row" *ngIf="comp.showObsAuto">
+        <mat-icon class="obs-inline-icon">person</mat-icon>
+        <textarea
+          [(ngModel)]="comp.obsAuto"
+          [disabled]="autoConfirmada"
+          rows="2"
+          maxlength="500"
+          placeholder="Justifique sua avaliação (opcional)...">
+        </textarea>
+      </div>
+
+      <!-- Linha de obs gestor -->
+      <div class="obs-inline-row obs-inline-gestor" *ngIf="comp.showObsGestor && modoGestor">
+        <mat-icon class="obs-inline-icon">admin_panel_settings</mat-icon>
+        <textarea
+          [(ngModel)]="comp.obsGestor"
+          [disabled]="gestorConfirmado"
+          rows="2"
+          maxlength="500"
+          placeholder="Observação do gestor (opcional)...">
+        </textarea>
+      </div>
+    </ng-container>
+
     <div class="comp-footer" [class.three-col]="modoGestor">
       <span>Média técnica</span>
       <span class="media-val">{{ mediaAuto(tecnicas) }}</span>
@@ -156,27 +206,59 @@
       <span class="comp-col-nota">Autoavaliação</span>
       <span class="comp-col-nota" *ngIf="modoGestor">Gestor</span>
     </div>
-    <div class="comp-row" [class.three-col]="modoGestor" *ngFor="let comp of comportamentais">
-      <span class="comp-desc">{{ comp.descricao }}</span>
-      <div class="comp-notas">
-        <div class="nota-group">
-          <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
-            [class.selected]="comp.notaAuto === n"
-            [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+
+    <ng-container *ngFor="let comp of comportamentais">
+      <div class="comp-row" [class.three-col]="modoGestor" [class.comp-row-has-obs]="comp.showObsAuto || comp.showObsGestor">
+        <span class="comp-desc">{{ comp.descricao }}</span>
+        <div class="comp-notas">
+          <div class="nota-group">
+            <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
+              [class.selected]="comp.notaAuto === n"
+              [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+              [disabled]="autoConfirmada"
+              (click)="!autoConfirmada && (comp.notaAuto = n)">{{ n }}</button>
+          </div>
+          <button class="obs-toggle-btn"
+            [class.obs-active]="comp.obsAuto"
             [disabled]="autoConfirmada"
-            (click)="!autoConfirmada && (comp.notaAuto = n)">{{ n }}</button>
+            [title]="comp.showObsAuto ? 'Fechar observação' : 'Adicionar observação'"
+            (click)="comp.showObsAuto = !comp.showObsAuto">
+            <mat-icon>{{ comp.obsAuto ? 'chat' : 'chat_bubble_outline' }}</mat-icon>
+          </button>
         </div>
-      </div>
-      <div class="comp-notas" *ngIf="modoGestor">
-        <div class="nota-group">
-          <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
-            [class.selected]="comp.notaGestor === n"
-            [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+        <div class="comp-notas" *ngIf="modoGestor">
+          <div class="nota-group">
+            <button *ngFor="let n of [1,2,3,4,5]" class="nota-btn"
+              [class.selected]="comp.notaGestor === n"
+              [class.s1]="n===1" [class.s2]="n===2" [class.s3]="n===3" [class.s4]="n===4" [class.s5]="n===5"
+              [disabled]="gestorConfirmado"
+              (click)="!gestorConfirmado && (comp.notaGestor = n)">{{ n }}</button>
+          </div>
+          <button class="obs-toggle-btn obs-toggle-gestor"
+            [class.obs-active]="comp.obsGestor"
             [disabled]="gestorConfirmado"
-            (click)="!gestorConfirmado && (comp.notaGestor = n)">{{ n }}</button>
+            [title]="comp.showObsGestor ? 'Fechar observação' : 'Adicionar observação'"
+            (click)="comp.showObsGestor = !comp.showObsGestor">
+            <mat-icon>{{ comp.obsGestor ? 'chat' : 'chat_bubble_outline' }}</mat-icon>
+          </button>
         </div>
       </div>
-    </div>
+
+      <div class="obs-inline-row" *ngIf="comp.showObsAuto">
+        <mat-icon class="obs-inline-icon">person</mat-icon>
+        <textarea [(ngModel)]="comp.obsAuto" [disabled]="autoConfirmada"
+          rows="2" maxlength="500"
+          placeholder="Justifique sua avaliação (opcional)..."></textarea>
+      </div>
+
+      <div class="obs-inline-row obs-inline-gestor" *ngIf="comp.showObsGestor && modoGestor">
+        <mat-icon class="obs-inline-icon">admin_panel_settings</mat-icon>
+        <textarea [(ngModel)]="comp.obsGestor" [disabled]="gestorConfirmado"
+          rows="2" maxlength="500"
+          placeholder="Observação do gestor (opcional)..."></textarea>
+      </div>
+    </ng-container>
+
     <div class="comp-footer" [class.three-col]="modoGestor">
       <span>Média comportamental</span>
       <span class="media-val">{{ mediaAuto(comportamentais) }}</span>
@@ -237,7 +319,7 @@
     </button>
 
     <button class="btn-confirmar" (click)="abrirModalConfirmacao()"
-      *ngIf="avaliacaoSalva && !avaliacaoConfirmada">
+      *ngIf="(modoGestor ? gestorAvaliacaoSalva : autoAvaliacaoSalva) && !avaliacaoConfirmada">
       <mat-icon>verified</mat-icon> Confirmar e Assinar
     </button>
 
