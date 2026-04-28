@@ -1,3 +1,34 @@
+<!-- CABEÇALHO APENAS PARA IMPRESSÃO -->
+<div class="print-header">
+  <div class="print-logo">
+    <strong>DiCasa</strong>
+    <span>Sistema de Gestão</span>
+  </div>
+  <div class="print-titulo">
+    <h2>Relatório de Avaliação de Desempenho</h2>
+    <span>{{ cicloAtivo?.nome }} {{ cicloAtivo?.ano }}</span>
+  </div>
+  <div class="print-data">
+    Emitido em {{ hoje | date:'dd/MM/yyyy HH:mm' }}
+  </div>
+</div>
+
+<!-- RESULTADO 9-BOX PARA IMPRESSÃO (sempre visível no PDF) -->
+<div class="print-9box" *ngIf="gestorConfirmado">
+  <div class="print-9box-item">
+    <span>Desempenho (técnico)</span>
+    <strong>{{ mediaGestor(tecnicas) }}</strong>
+  </div>
+  <div class="print-9box-item">
+    <span>Potencial (comportamental)</span>
+    <strong>{{ mediaGestor(comportamentais) }}</strong>
+  </div>
+  <div class="print-9box-item destaque">
+    <span>Classificação 9-Box</span>
+    <strong>{{ classificacao9Box() }}</strong>
+  </div>
+</div>
+
 <div class="page-header">
   <p class="page-tag">RECURSOS HUMANOS</p>
   <h1>Formulário de avaliação</h1>
@@ -330,6 +361,11 @@
 
     <button class="btn-pdi" (click)="irParaPdi()" *ngIf="mostrarBotaoPdi">
       <mat-icon>rocket_launch</mat-icon> Cadastrar PDI
+    </button>
+
+    <button class="btn-exportar" (click)="exportarPdf()"
+      *ngIf="autoConfirmada || gestorConfirmado">
+      <mat-icon>picture_as_pdf</mat-icon> Exportar PDF
     </button>
   </div>
 </div>

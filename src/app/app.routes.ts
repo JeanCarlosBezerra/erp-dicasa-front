@@ -23,6 +23,8 @@ import { FormularioAvaliacaoComponent } from './pages/rh/formulario-avaliacao/fo
 import { GestaoRhComponent } from './pages/rh/gestao-rh/gestao-rh.component';
 import { MetasComponent } from './pages/comercial/metas/metas.component';
 import { PdiComponent } from './pages/rh/pdi/pdi.component';
+import { AlertasComponent } from './pages/estoque/alertas/alertas.component';
+import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 
 const guard = (role: string) => () => {
   const auth = inject(AuthService);
@@ -65,7 +67,7 @@ export const routes: Routes = [
       { path: 'comercial/metas', component: MetasComponent, canActivate: [guard('COM_METAS')] },
 
       // Estoque
-      { path: 'estoque/produtos', component: ProdutosComponent, canActivate: [guard('MOD_ESTOQUE')] },
+      { path: 'estoque/alertas', component: AlertasComponent, canActivate: [guard('MOD_ESTOQUE')] },
 
       // Compras Estratégicas
       { path: 'compras-estrategicas/resumo-executivo',     component: ResumoExecutivoComponent,    canActivate: [guard('MOD_COMPRAS')] },
@@ -78,6 +80,8 @@ export const routes: Routes = [
       { path: 'rh/formulario-avaliacao', component: FormularioAvaliacaoComponent,  canActivate: [guard('RH_AVALIACAO')] },
       { path: 'rh/gestao',               component: GestaoRhComponent,             canActivate: [guard('RH_GESTAO')] },
       { path: 'rh/pdi',                  component: PdiComponent,                  canActivate: [guard('RH_PDI')] },
+
+      { path: 'relatorios', component: RelatoriosComponent, canActivate: [guard('MOD_ESTOQUE')] },
 
       // Settings
       {

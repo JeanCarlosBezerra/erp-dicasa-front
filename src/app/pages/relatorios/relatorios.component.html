@@ -1,0 +1,201 @@
+<div class="page-header">
+  <p class="page-tag">RELATÓRIOS</p>
+  <h1>Central de Relatórios</h1>
+  <p class="page-desc">Gere e baixe relatórios completos em formato Excel</p>
+</div>
+
+<div class="relatorios-grid">
+
+  <!-- CARD RUPTURA -->
+  <div class="rel-card">
+    <div class="rel-card-header ruptura-header">
+      <mat-icon>warning</mat-icon>
+      <div>
+        <h2>Ruptura de Estoque</h2>
+        <p>Produtos com saldo zerado e histórico de venda</p>
+      </div>
+    </div>
+
+    <div class="rel-filtros">
+      <div class="filtro-group">
+        <label>Empresa</label>
+        <select [(ngModel)]="rupturaEmpresa">
+          <option value="">Todas as empresas</option>
+          <option *ngFor="let e of empresas" [value]="e.IDEMPRESA">{{ e.EMPALIAS }}</option>
+        </select>
+      </div>
+      <div class="filtro-group">
+        <label>Divisão</label>
+        <select [(ngModel)]="rupturaDivisao">
+          <option value="">Todas as divisões</option>
+          <option *ngFor="let d of divisoes" [value]="d.IDDIVISAO">{{ d.DESCRDIVISAO }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="rel-info">
+      <mat-icon>info</mat-icon>
+      Sem filtro de empresa, pode demorar alguns minutos para gerar.
+    </div>
+
+    <button class="btn-baixar" (click)="baixarRuptura()" [disabled]="baixandoRuptura">
+      <mat-icon>{{ baixandoRuptura ? 'hourglass_top' : 'download' }}</mat-icon>
+      {{ baixandoRuptura ? 'Gerando...' : 'Baixar XLSX' }}
+    </button>
+  </div>
+
+  <!-- CARD SEM GIRO -->
+  <div class="rel-card">
+    <div class="rel-card-header semgiro-header">
+      <mat-icon>hourglass_empty</mat-icon>
+      <div>
+        <h2>Produtos Sem Giro</h2>
+        <p>Produtos com saldo positivo sem movimentação</p>
+      </div>
+    </div>
+
+    <div class="rel-filtros">
+      <div class="filtro-group">
+        <label>Empresa</label>
+        <select [(ngModel)]="semGiroEmpresa">
+          <option value="">Todas as empresas</option>
+          <option *ngFor="let e of empresas" [value]="e.IDEMPRESA">{{ e.EMPALIAS }}</option>
+        </select>
+      </div>
+      <div class="filtro-group">
+        <label>Divisão</label>
+        <select [(ngModel)]="semGiroDivisao">
+          <option value="">Todas as divisões</option>
+          <option *ngFor="let d of divisoes" [value]="d.IDDIVISAO">{{ d.DESCRDIVISAO }}</option>
+        </select>
+      </div>
+      <div class="filtro-group">
+        <label>Dias sem giro</label>
+        <select [(ngModel)]="semGiroDias">
+          <option [value]="30">30+ dias</option>
+          <option [value]="60">60+ dias</option>
+          <option [value]="90">90+ dias</option>
+          <option [value]="120">120+ dias</option>
+          <option [value]="180">180+ dias</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="rel-info">
+      <mat-icon>info</mat-icon>
+      Sem filtro de empresa, pode demorar alguns minutos para gerar.
+    </div>
+
+    <button class="btn-baixar semgiro-btn" (click)="baixarSemGiro()" [disabled]="baixandoGiro">
+      <mat-icon>{{ baixandoGiro ? 'hourglass_top' : 'download' }}</mat-icon>
+      {{ baixandoGiro ? 'Gerando...' : 'Baixar XLSX' }}
+    </button>
+  </div>
+
+  <!-- Separador RH -->
+<div class="secao-titulo">
+  <mat-icon>people</mat-icon>
+  <span>Recursos Humanos</span>
+</div>
+
+<!-- CARD AVALIAÇÕES -->
+<div class="rel-card">
+  <div class="rel-card-header rh-aval-header">
+    <mat-icon>assignment_ind</mat-icon>
+    <div>
+      <h2>Avaliações por Ciclo</h2>
+      <p>Notas, médias e classificação 9-Box de todos os colaboradores</p>
+    </div>
+  </div>
+  <div class="rel-filtros">
+    <div class="filtro-group">
+      <label>Ciclo <span class="obrigatorio">*</span></label>
+      <select [(ngModel)]="avalCiclo">
+        <option value="">Selecione um ciclo</option>
+        <option *ngFor="let c of ciclos" [value]="c.id_ciclo">{{ c.nome }} {{ c.ano }}</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>Filial</label>
+      <select [(ngModel)]="avalFilial">
+        <option value="">Todas as filiais</option>
+        <option *ngFor="let f of filiais" [value]="f">{{ f }}</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn-baixar rh-aval-btn" (click)="baixarAvaliacoes()" [disabled]="baixandoAval">
+    <mat-icon>{{ baixandoAval ? 'hourglass_top' : 'download' }}</mat-icon>
+    {{ baixandoAval ? 'Gerando...' : 'Baixar XLSX' }}
+  </button>
+</div>
+
+<!-- CARD PDI -->
+<div class="rel-card">
+  <div class="rel-card-header rh-pdi-header">
+    <mat-icon>rocket_launch</mat-icon>
+    <div>
+      <h2>Planos de Desenvolvimento (PDI)</h2>
+      <p>Todos os PDIs com status e progresso</p>
+    </div>
+  </div>
+  <div class="rel-filtros">
+    <div class="filtro-group">
+      <label>Ciclo</label>
+      <select [(ngModel)]="pdiCiclo">
+        <option value="">Todos os ciclos</option>
+        <option *ngFor="let c of ciclos" [value]="c.id_ciclo">{{ c.nome }} {{ c.ano }}</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>Filial</label>
+      <select [(ngModel)]="pdiFilial">
+        <option value="">Todas as filiais</option>
+        <option *ngFor="let f of filiais" [value]="f">{{ f }}</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>Status</label>
+      <select [(ngModel)]="pdiStatus">
+        <option value="">Todos os status</option>
+        <option *ngFor="let s of statusPdi" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn-baixar rh-pdi-btn" (click)="baixarPdi()" [disabled]="baixandoPdi">
+    <mat-icon>{{ baixandoPdi ? 'hourglass_top' : 'download' }}</mat-icon>
+    {{ baixandoPdi ? 'Gerando...' : 'Baixar XLSX' }}
+  </button>
+</div>
+
+<!-- CARD RANKING -->
+<div class="rel-card">
+  <div class="rel-card-header rh-rank-header">
+    <mat-icon>emoji_events</mat-icon>
+    <div>
+      <h2>Ranking 9-Box</h2>
+      <p>Todos os colaboradores ordenados por média geral</p>
+    </div>
+  </div>
+  <div class="rel-filtros">
+    <div class="filtro-group">
+      <label>Ciclo <span class="obrigatorio">*</span></label>
+      <select [(ngModel)]="rankCiclo">
+        <option value="">Selecione um ciclo</option>
+        <option *ngFor="let c of ciclos" [value]="c.id_ciclo">{{ c.nome }} {{ c.ano }}</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>Filial</label>
+      <select [(ngModel)]="rankFilial">
+        <option value="">Todas as filiais</option>
+        <option *ngFor="let f of filiais" [value]="f">{{ f }}</option>
+      </select>
+    </div>
+  </div>
+  <button class="btn-baixar rh-rank-btn" (click)="baixarRanking()" [disabled]="baixandoRank">
+    <mat-icon>{{ baixandoRank ? 'hourglass_top' : 'download' }}</mat-icon>
+    {{ baixandoRank ? 'Gerando...' : 'Baixar XLSX' }}
+  </button>
+</div>
+
+</div>

@@ -424,3 +424,115 @@ h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px; color: #1e1e2f; }
   &.badge-amarelo  { background: #fff8e1; color: #f57f17; }
   &.badge-vermelho { background: #fce4ec; color: #c62828; }
 }
+
+// ── Botão exportar PDF ──
+.btn-exportar-pdf {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 8px; border: none; cursor: pointer;
+  background: #ef4444; color: #fff; font-size: 12px; font-weight: 500;
+  transition: background .2s; white-space: nowrap;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  &:hover { background: #dc2626; }
+}
+
+// ── Elementos só de impressão (ocultos na tela) ──
+.print-dash-header,
+.print-filtros-ativos { display: none; }
+
+// ══════════════════════════════════════
+// @MEDIA PRINT — Dashboard 9-Box
+// ══════════════════════════════════════
+@media print {
+  :host { padding: 0 !important; max-width: 100% !important; }
+
+  // Oculta elementos de navegação e interação
+  .abas,
+  .filtros-bar,
+  .btn-exportar-pdf,
+  .btn-fechar,
+  .box-cell:hover,
+  .section-title p { display: none !important; }
+
+  // ── Cabeçalho ──
+  .print-dash-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    border-bottom: 2px solid #1e2a3a;
+
+    .print-logo {
+      display: flex; flex-direction: column;
+      strong { font-size: 20px; font-weight: 800; color: #1e2a3a; }
+      span { font-size: 11px; color: #6b7280; }
+    }
+    .print-titulo {
+      text-align: center;
+      h2 { margin: 0; font-size: 14px; font-weight: 600; color: #1e2a3a; }
+      span { font-size: 12px; color: #6b7280; }
+    }
+    .print-data { font-size: 11px; color: #6b7280; text-align: right; }
+  }
+
+  // ── Filtros ativos ──
+  .print-filtros-ativos {
+    display: flex !important;
+    gap: 16px; font-size: 12px; color: #6b7280;
+    margin-bottom: 12px; padding: 8px 12px;
+    background: #f8fafc; border-radius: 6px;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    strong { color: #1e2a3a; }
+  }
+
+  // ── Métricas ──
+  .metricas-row {
+    grid-template-columns: repeat(4, 1fr) !important;
+    margin-bottom: 16px !important;
+  }
+  .metrica-card {
+    padding: 10px !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .metrica-val { font-size: 20px !important; }
+
+  // ── Layout dashboard — empilha vertical no PDF ──
+  .dashboard-layout {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  // ── 9-Box grid ──
+  .nine-box-grid {
+    grid-template-columns: repeat(3, 100px) !important;
+    grid-template-rows: repeat(3, 75px) !important;
+  }
+  .box-cell {
+    cursor: default !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+    &.ativo { border-color: transparent !important; box-shadow: none !important; }
+  }
+  .box-count { font-size: 18px !important; }
+
+  // ── Side panel — lista completa de colaboradores ──
+  .colab-list {
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  .panel-card {
+    page-break-inside: avoid;
+    border: 1px solid #e5e7eb !important;
+  }
+
+  // ── Distribuição — barras coloridas ──
+  .distrib-bar {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  // ── Oculta page-header normal (substituído pelo print-dash-header) ──
+  .page-header { display: none !important; }
+}

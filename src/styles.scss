@@ -40,3 +40,73 @@ h1, .mat-h1 { font-family: $font-family-heading; font-size: $font-size-h1; }
   font-family: 'Material Symbols Outlined' !important;
   font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
+
+@media print {
+  // Oculta o sidenav (menu lateral)
+  mat-sidenav,
+  .sidenav-inner,
+  .brand-block,
+  .user-card,
+  .logout-fixed { display: none !important; }
+
+  // Remove o margin-left inline que o Angular Material injeta
+  mat-sidenav-content,
+  .mat-sidenav-content,
+  .main-content {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    position: static !important;
+    overflow: visible !important;
+  }
+
+  // Remove o container pai
+  mat-sidenav-container,
+  .mat-drawer-container {
+    overflow: visible !important;
+  }
+
+  body { margin: 0 !important; }
+
+  html, body {
+    height: auto !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  mat-sidenav-content,
+  .mat-sidenav-content,
+  .mat-drawer-content,
+  .main-content,
+  .mat-sidenav-container,
+  .mat-drawer-container {
+    height: auto !important;
+    overflow: visible !important;
+    min-height: unset !important;
+  }
+
+  // Remove scroll do Angular Material que corta o conteúdo
+  [class*="mat-drawer"],
+  [class*="mat-sidenav"] {
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  // O host do componente não pode ter altura fixa
+  app-formulario-avaliacao {
+    display: block !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+    .section-card {
+    page-break-inside: auto !important;  // ← era avoid
+  }
+
+  // Mas mantém cada linha de competência sem quebrar no meio
+  .comp-row,
+  .obs-inline-row {
+    page-break-inside: avoid;
+  }
+}

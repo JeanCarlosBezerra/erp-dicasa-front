@@ -52,6 +52,8 @@ export class AvaliacaoDesempenhoComponent {
   carregando = true;
   setores: string[] = [];
   abaSelecionada: 'matriz' | 'macro' | 'setores' = 'matriz';
+  hoje = new Date();
+  exportarPdf() { window.print(); }
 
   filiais = ['HCAB','HCAM','HCVR','CDAM','CDAT','BENJAMIN','CONCEPT'];
 

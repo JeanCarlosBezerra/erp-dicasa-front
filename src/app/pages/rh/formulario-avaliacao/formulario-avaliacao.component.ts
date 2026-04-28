@@ -44,6 +44,7 @@ export class FormularioAvaliacaoComponent {
   colaboradoresFiltrados: Colaborador[] = [];
   mostrarSugestoes = false;
 
+  hoje = new Date();
   tecnicas: Competencia[] = [];
   comportamentais: Competencia[] = [];
   observacoes = '';
@@ -259,6 +260,10 @@ export class FormularioAvaliacaoComponent {
     } else {
       this.carregarCargoPeloColaborador(c);
     }
+  }
+
+  exportarPdf() {
+    window.print();
   }
 
   private carregarCargoPeloColaborador(c: Colaborador) {
