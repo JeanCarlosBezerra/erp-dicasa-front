@@ -55,6 +55,27 @@ export class DashboardComercialComponent implements OnInit {
   modoCompartilhamento = false;
   toggleModoCompartilhamento() { this.modoCompartilhamento = !this.modoCompartilhamento; }
 
+  get empresasPermitidas(): number[] {
+    try {
+      const token = localStorage.getItem('access_token');
+      if (!token) return [];
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const roles: string[] = Array.isArray(payload.roles)
+        ? payload.roles
+        : (payload.roles || '').split(',').map((r: string) => r.trim());
+
+      // ADMIN ou sem restrição de empresa → vê tudo
+      if (roles.includes('ADMIN')) return [];
+
+      // Filtra roles COM_EMPRESA_X
+      const empresaRoles = roles
+        .filter(r => r.startsWith('COM_EMPRESA_'))
+        .map(r => Number(r.replace('COM_EMPRESA_', '')));
+
+      return empresaRoles; // vazio = vê tudo, preenchido = filtra
+    } catch { return []; }
+  }
+
   // ── Totais ──
   get faturamentoTotal(): number   { return this.cards.reduce((s, c) => s + (c.faturamento   || 0), 0); }
   get lucroTotal(): number         { return this.cards.reduce((s, c) => s + (c.lucro         || 0), 0); }
@@ -149,6 +170,11 @@ export class DashboardComercialComponent implements OnInit {
           return { idEmpresa: id, apelido, faturamento, lucro, devolucoes, descontoValor, descontoPerc, metaFatProp, metaMargem };
         })
         .filter(c => (c.faturamento ?? 0) > 0 || (c.lucro ?? 0) > 0);
+        if (this.empresasPermitidas.length > 0) {
+          this.cards = this.cards.filter(c => 
+            c.idEmpresa !== null && this.empresasPermitidas.includes(c.idEmpresa)
+          );
+        }
 
     } finally {
       this.carregando = false;
