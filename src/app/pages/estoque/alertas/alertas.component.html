@@ -4,7 +4,7 @@
   <p class="page-desc">Monitore rupturas e produtos sem giro em tempo real</p>
 </div>
 
-<!-- FILTROS -->
+<!-- FILTROS PRINCIPAIS -->
 <div class="filtros-bar">
   <div class="filtro-group">
     <label>Empresa <span class="obrigatorio">*</span></label>
@@ -15,15 +15,11 @@
       </option>
     </select>
   </div>
-  <!-- Mensagem de erro -->
-  <div class="filtro-erro" *ngIf="erroFiltro">
-    <mat-icon>info</mat-icon> {{ erroFiltro }}
-  </div>
 
   <div class="filtro-group">
-    <label>Divisão</label>
-    <select [(ngModel)]="divisaoFiltro" (ngModelChange)="onDivisaoChange()">
-      <option value="">Todas as divisões</option>
+    <label>Divisão <span class="obrigatorio">*</span></label>
+    <select [(ngModel)]="divisaoFiltro" (ngModelChange)="onDivisaoChange()" [class.select-erro]="erroFiltro">
+      <option value="">Selecione uma divisão</option>
       <option *ngFor="let d of divisoes" [value]="d.IDDIVISAO">{{ d.DESCRDIVISAO }}</option>
     </select>
   </div>
@@ -55,6 +51,58 @@
   </button>
 </div>
 
+<!-- Mensagem de erro filtro obrigatório -->
+<div class="filtro-erro" *ngIf="erroFiltro">
+  <mat-icon>info</mat-icon> {{ erroFiltro }}
+</div>
+
+<!-- FILTROS AVANÇADOS — só aparecem depois de dados carregados -->
+<div class="filtros-avancados" *ngIf="dadosCarregados">
+  <div class="filtros-avancados-titulo">
+    <mat-icon>tune</mat-icon> Filtros avançados
+  </div>
+
+  <div class="filtros-avancados-campos">
+
+    <!-- Vendas no mês (mín e máx) — disponível em ambas as abas -->
+    <div class="filtro-group filtro-sm">
+      <label>Vendas/mês mín.</label>
+      <input type="number" min="0" [(ngModel)]="minVendasMes" placeholder="Ex: 1">
+    </div>
+
+    <div class="filtro-group filtro-sm">
+      <label>Vendas/mês máx.</label>
+      <input type="number" min="0" [(ngModel)]="maxVendasMes" placeholder="Ex: 5">
+    </div>
+
+    <!-- Filtros só de Ruptura -->
+    <ng-container *ngIf="abaSelecionada === 'ruptura'">
+      <div class="filtro-group filtro-sm">
+        <label>Dias s/ venda máx.</label>
+        <input type="number" min="0" [(ngModel)]="maxDiasSemVenda" placeholder="Ex: 90">
+      </div>
+    </ng-container>
+
+    <!-- Filtros só de Sem Giro -->
+    <ng-container *ngIf="abaSelecionada === 'semgiro'">
+      <div class="filtro-group filtro-sm">
+        <label>Capital parado mín. (R$)</label>
+        <input type="number" min="0" [(ngModel)]="minCapital" placeholder="Ex: 200">
+      </div>
+
+      <div class="filtro-group filtro-sm">
+        <label>Qtd. em estoque mín.</label>
+        <input type="number" min="0" [(ngModel)]="minSaldo" placeholder="Ex: 10">
+      </div>
+    </ng-container>
+
+    <button class="btn-buscar-filtros btn-aplicar" (click)="buscar()">
+      <mat-icon>filter_list</mat-icon> Aplicar
+    </button>
+
+  </div>
+</div>
+
 <!-- Estado inicial — antes de buscar -->
 <div class="estado-inicial" *ngIf="!dadosCarregados">
   <mat-icon>search</mat-icon>
@@ -65,6 +113,7 @@
 </div>
 
 <ng-container *ngIf="dadosCarregados">
+
 <!-- CARDS DE TOTAIS -->
 <div class="cards-row">
   <div class="alert-card ruptura">
@@ -120,6 +169,11 @@
 
 <!-- ════ ABA RUPTURA ════ -->
 <div *ngIf="abaSelecionada === 'ruptura'">
+    <!-- Aviso de limite atingido -->
+    <div class="aviso-limite" *ngIf="ruptura.length >= 500">
+      <mat-icon>info</mat-icon>
+      Exibindo os 500 primeiros resultados. Selecione uma <strong>Seção</strong> para visualizar todos os produtos.
+    </div>
   <div class="table-header-info">
     <span>{{ ruptura.length }} produto(s) com estoque zerado</span>
     <span class="table-sub">Ordenado por última venda</span>
@@ -157,9 +211,9 @@
             </div>
           </td>
           <td><span class="badge-empresa">{{ nomeEmpresa(p.IDEMPRESA) }}</span></td>
-          <td class="td-sec">{{ p.DESCRDIVISAO }}</td>
-          <td class="td-sec">{{ p.DESCRSECAO }}</td>
-          <td>{{ p.ULTIMA_VENDA ? (p.ULTIMA_VENDA | date:'dd/MM/yyyy') : '—' }}</td>
+          <td class="td-sec">{{ nomeDivisao(p.IDDIVISAO) }}</td>
+          <td class="td-sec">{{ nomeSecao(p.IDSECAO) }}</td>
+          <td>{{ getUltimaVenda(p.DIAS_SEM_VENDA) }}</td>
           <td>
             <span class="badge-dias {{ corDias(p.DIAS_SEM_VENDA) }}">
               {{ p.DIAS_SEM_VENDA }} dias
@@ -170,7 +224,6 @@
       </tbody>
     </table>
 
-    <!-- Paginação -->
     <div class="paginacao" *ngIf="totalPaginasRuptura > 1">
       <button [disabled]="paginaRuptura === 1" (click)="paginaRuptura = paginaRuptura - 1">
         <mat-icon>chevron_left</mat-icon>
@@ -212,6 +265,7 @@
           <th>Saldo</th>
           <th>Última venda</th>
           <th>Dias parado</th>
+          <th>Vnd/mês</th>
           <th>Capital parado</th>
         </tr>
       </thead>
@@ -225,13 +279,14 @@
             </div>
           </td>
           <td><span class="badge-empresa">{{ nomeEmpresa(p.IDEMPRESA) }}</span></td>
-          <td class="td-sec">{{ p.DESCRDIVISAO }}</td>
-          <td class="td-sec">{{ p.DESCRSECAO }}</td>
+          <td class="td-sec">{{ nomeDivisao(p.IDDIVISAO) }}</td>
+          <td class="td-sec">{{ nomeSecao(p.IDSECAO) }}</td>
           <td class="td-num">{{ p.SALDO | number:'1.0-2' }}</td>
-          <td>{{ p.ULTIMA_VENDA ? (p.ULTIMA_VENDA | date:'dd/MM/yyyy') : '—' }}</td>
+          <td>{{ getUltimaVenda(p.DIAS_SEM_GIRO) }}</td>
           <td>
             <span class="badge-dias semgiro">{{ p.DIAS_SEM_GIRO }} dias</span>
           </td>
+          <td class="td-num">{{ p.QTD_VENDIDA_MES | number:'1.0-0' }}</td>
           <td class="td-capital">R$ {{ moeda(p.CAPITAL_PARADO) }}</td>
         </tr>
       </tbody>
@@ -251,7 +306,6 @@
 
 <!-- ════ ABA HEATMAP ════ -->
 <div *ngIf="abaSelecionada === 'heatmap'">
-
   <div class="heatmap-intro">
     <div class="heatmap-legenda">
       <span class="leg-titulo">Intensidade:</span>
@@ -312,4 +366,5 @@
     <p>Nenhum dado carregado. Faça uma busca primeiro.</p>
   </div>
 </div>
+
 </ng-container>

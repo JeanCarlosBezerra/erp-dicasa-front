@@ -143,6 +143,23 @@
           </mat-expansion-panel>
         }
 
+        @if (auth.hasRole('MOD_COMPRAS')) {
+          <mat-expansion-panel>
+            <mat-expansion-panel-header class="menu-btn">
+              <mat-panel-title>
+                <mat-icon class="menu-icon">shopping_cart</mat-icon>
+                <span class="menu-title-text">Compras</span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            <div class="submenu-wrapper">
+              <button mat-button class="submenu-btn"
+                routerLink="/menu/compras/encomendas" routerLinkActive="active-submenu">
+                <mat-icon>assignment_turned_in</mat-icon> Encomendas
+              </button>
+            </div>
+          </mat-expansion-panel>
+        }
+
         <!-- Compras Estratégicas -->
         @if (auth.hasRole('MOD_COMPRAS')) {
           <mat-expansion-panel>

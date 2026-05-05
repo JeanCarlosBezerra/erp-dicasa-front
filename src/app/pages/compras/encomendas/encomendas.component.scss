@@ -1,0 +1,245 @@
+.encomendas-page {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+// ─── HEADER ───────────────────────────────────────────────
+.page-header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #fff;
+  padding: 28px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+
+  .module-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #94a3b8;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  h1 { font-size: 26px; font-weight: 700; margin: 0 0 6px; color: #fff; }
+  p  { font-size: 13px; color: #94a3b8; margin: 0; }
+
+  .header-badge {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 14px 20px;
+    text-align: right;
+    white-space: nowrap;
+
+    .badge-label { display: block; font-size: 10px; letter-spacing: 1.5px; color: #64748b; text-transform: uppercase; }
+    strong       { display: block; font-size: 15px; color: #fff; margin: 2px 0; }
+    .badge-count { font-size: 12px; color: #94a3b8; }
+  }
+}
+
+// ─── FILTROS ──────────────────────────────────────────────
+.filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0 24px;
+
+  .filter-field  { min-width: 160px; }
+  .filter-empresa { min-width: 160px; }
+  .filter-tipo    { min-width: 180px; }
+
+  .btn-filtrar {
+    background: #2563eb;
+    color: #fff;
+    height: 56px;
+    padding: 0 24px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 6px;
+    mat-icon { font-size: 18px; }
+    &:hover { background: #1d4ed8; }
+  }
+}
+
+// ─── KPI CARDS ────────────────────────────────────────────
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 0 24px;
+
+  @media (max-width: 1100px) { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 600px)  { grid-template-columns: 1fr; }
+}
+
+.kpi-card {
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  border: 1px solid transparent;
+
+  .kpi-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    mat-icon { font-size: 22px; }
+  }
+
+  .kpi-body { display: flex; flex-direction: column; gap: 2px; }
+  .kpi-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .kpi-value { font-size: 28px; font-weight: 700; line-height: 1.1; }
+  .kpi-currency { font-size: 20px; }
+  .kpi-sub { font-size: 11px; margin-top: 2px; }
+
+  &.kpi-success {
+    background: #f0fdf4; border-color: #bbf7d0;
+    .kpi-icon { background: #dcfce7; mat-icon { color: #16a34a; } }
+    .kpi-label { color: #14532d; }
+    .kpi-value { color: #16a34a; }
+    .kpi-sub   { color: #15803d; }
+  }
+
+  &.kpi-info {
+    background: #eff6ff; border-color: #bfdbfe;
+    .kpi-icon { background: #dbeafe; mat-icon { color: #2563eb; } }
+    .kpi-label { color: #1e3a8a; }
+    .kpi-value { color: #1d4ed8; }
+    .kpi-sub   { color: #1e40af; }
+  }
+
+  &.kpi-warning {
+    background: #fffbeb; border-color: #fde68a;
+    .kpi-icon { background: #fef3c7; mat-icon { color: #d97706; } }
+    .kpi-label { color: #92400e; }
+    .kpi-value { color: #d97706; }
+    .kpi-sub   { color: #b45309; }
+  }
+
+  &.kpi-value-card {
+    background: #fdf4ff; border-color: #e9d5ff;
+    .kpi-icon { background: #f3e8ff; mat-icon { color: #7c3aed; } }
+    .kpi-label { color: #4c1d95; }
+    .kpi-value { color: #6d28d9; }
+    .kpi-sub   { color: #5b21b6; }
+  }
+}
+
+// ─── LOADING ──────────────────────────────────────────────
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+  gap: 16px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+// ─── TABELA ───────────────────────────────────────────────
+.table-wrapper {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  margin: 0 24px 24px;
+  overflow: hidden;
+
+  .table-header-bar {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+
+    .table-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #475569;
+    }
+  }
+}
+
+.encomendas-table {
+  width: 100%;
+
+  th.mat-header-cell {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+  }
+
+  td.mat-cell {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #334155;
+    border-bottom: 1px solid #f1f5f9;
+    vertical-align: middle;
+  }
+
+  .mat-row:last-child td { border-bottom: none; }
+  .mat-row:hover td { background: #f8fafc; }
+}
+
+.col-num        { text-align: right; }
+.col-fornecedor { max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.col-cliente    { max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.col-produto    { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+.col-valor      { font-weight: 600; color: #1e40af; }
+
+// NF
+.nf-numero { font-weight: 600; }
+.nf-serie  { font-size: 11px; color: #94a3b8; margin-left: 4px; }
+
+// Chips
+.pedido-chip {
+  background: #f0fdf4; color: #166534;
+  font-size: 11px; font-weight: 700;
+  padding: 3px 8px; border-radius: 4px;
+  font-family: monospace;
+}
+
+.sem-pedido { color: #94a3b8; font-size: 12px; font-style: italic; }
+
+.metodo-chip {
+  background: #f1f5f9; color: #475569;
+  font-size: 11px; padding: 3px 8px; border-radius: 4px;
+}
+
+// Ícones ERP
+.icon-sim { color: #16a34a; font-size: 18px; width: 18px; height: 18px; }
+.icon-nao { color: #94a3b8; font-size: 18px; width: 18px; height: 18px; }
+
+// Status badges
+.status-badge {
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px;
+  white-space: nowrap; display: inline-block;
+
+  &.badge-success   { background: #dcfce7; color: #16a34a; }
+  &.badge-info      { background: #dbeafe; color: #1d4ed8; }
+  &.badge-warning   { background: #fef3c7; color: #d97706; }
+  &.badge-secondary { background: #f1f5f9; color: #64748b; }
+}
+
+// Empty state
+.empty-state {
+  text-align: center; padding: 48px 24px; color: #94a3b8;
+  mat-icon { font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px; }
+  p { font-size: 14px; margin: 0; }
+}

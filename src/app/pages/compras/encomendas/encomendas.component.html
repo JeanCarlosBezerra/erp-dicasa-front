@@ -1,0 +1,231 @@
+<div class="encomendas-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-left">
+      <span class="module-label">COMPRAS</span>
+      <h1>Acompanhamento de Encomendas</h1>
+      <p>NFs recebidas dos fornecedores, identificadas e vinculadas às encomendas dos clientes.</p>
+    </div>
+    <div class="header-right">
+      <div class="header-badge">
+        <span class="badge-label">MÓDULO</span>
+        <strong>Encomendas</strong>
+        <span class="badge-count">{{ dataSource.data.length }} registros</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filter-bar">
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Data Início</mat-label>
+      <input matInput [matDatepicker]="pickerInicio" [(ngModel)]="dataInicio">
+      <mat-datepicker-toggle matSuffix [for]="pickerInicio"></mat-datepicker-toggle>
+      <mat-datepicker #pickerInicio></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Data Fim</mat-label>
+      <input matInput [matDatepicker]="pickerFim" [(ngModel)]="dataFim">
+      <mat-datepicker-toggle matSuffix [for]="pickerFim"></mat-datepicker-toggle>
+      <mat-datepicker #pickerFim></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field filter-empresa">
+      <mat-label>Empresa</mat-label>
+      <mat-select [(ngModel)]="empresasSelecionadas" multiple>
+        @for (emp of empresas; track emp.id) {
+          <mat-option [value]="emp.id">{{ emp.apelido }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field filter-tipo">
+      <mat-label>Tipo</mat-label>
+      <mat-select [(ngModel)]="tipoFiltro" (ngModelChange)="onTipoChange()">
+        @for (t of tipoOptions; track t.value) {
+          <mat-option [value]="t.value">{{ t.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-flat-button class="btn-filtrar" (click)="carregar()">
+      <mat-icon>filter_list</mat-icon> Filtrar
+    </button>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid">
+    <div class="kpi-card kpi-success">
+      <div class="kpi-icon"><mat-icon>assignment_turned_in</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-label">NFs de Encomenda</span>
+        <strong class="kpi-value">{{ totalEncomendas }}</strong>
+        <span class="kpi-sub">vinculadas a pedidos de clientes</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-info">
+      <div class="kpi-icon"><mat-icon>inventory_2</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Compra de Estoque</span>
+        <strong class="kpi-value">{{ totalEstoque }}</strong>
+        <span class="kpi-sub">reposição sem encomenda</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-warning">
+      <div class="kpi-icon"><mat-icon>help_outline</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Sem Identificação</span>
+        <strong class="kpi-value">{{ totalSemIdentificacao }}</strong>
+        <span class="kpi-sub">fornecedor não informou PC</span>
+      </div>
+    </div>
+
+    <div class="kpi-card kpi-value-card">
+      <div class="kpi-icon"><mat-icon>account_balance_wallet</mat-icon></div>
+      <div class="kpi-body">
+        <span class="kpi-label">Valor em Encomendas</span>
+        <strong class="kpi-value kpi-currency">{{ formatCurrency(valorTotalEncomendas) }}</strong>
+        <span class="kpi-sub">total das NFs de encomenda</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  @if (carregando) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Buscando NFs e vinculando encomendas...</p>
+    </div>
+  }
+
+  <!-- TABELA -->
+  @if (!carregando) {
+    <div class="table-wrapper">
+      <div class="table-header-bar">
+        <span class="table-title">NFs Recebidas — Identificação e Vínculo</span>
+      </div>
+
+      <table mat-table [dataSource]="dataSource" class="encomendas-table">
+
+        <!-- NF / Série -->
+        <ng-container matColumnDef="nroNf">
+          <th mat-header-cell *matHeaderCellDef>NF / Série</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="nf-numero">{{ row.nroNf }}</span>
+            <span class="nf-serie">/ {{ row.serie }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Data Emissão -->
+        <ng-container matColumnDef="dtEmissao">
+          <th mat-header-cell *matHeaderCellDef>Emissão</th>
+          <td mat-cell *matCellDef="let row">{{ formatDate(row.dtEmissao) }}</td>
+        </ng-container>
+
+        <!-- Fornecedor -->
+        <ng-container matColumnDef="fornecedor">
+          <th mat-header-cell *matHeaderCellDef>Fornecedor</th>
+          <td mat-cell *matCellDef="let row" class="col-fornecedor">{{ row.fornecedor }}</td>
+        </ng-container>
+
+        <!-- Cliente (da encomenda) -->
+        <ng-container matColumnDef="cliente">
+          <th mat-header-cell *matHeaderCellDef>Cliente</th>
+          <td mat-cell *matCellDef="let row" class="col-cliente">{{ getCliente(row) }}</td>
+        </ng-container>
+
+        <!-- Produto -->
+        <ng-container matColumnDef="produto">
+          <th mat-header-cell *matHeaderCellDef>Produto(s)</th>
+          <td mat-cell *matCellDef="let row" class="col-produto"
+              [matTooltip]="row.pedidoCompra?.produtos?.length > 1 ? 'Múltiplos produtos' : ''">
+            {{ getProdutoResumido(row) }}
+          </td>
+        </ng-container>
+
+        <!-- PC identificado -->
+        <ng-container matColumnDef="pcExtraido">
+          <th mat-header-cell *matHeaderCellDef>Pedido Compra</th>
+          <td mat-cell *matCellDef="let row">
+            @if (row.pcExtraido) {
+              <span class="pedido-chip">{{ row.pcExtraido }}</span>
+            } @else {
+              <span class="sem-pedido">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="pedidoVenda">
+          <th mat-header-cell *matHeaderCellDef>Ped. Venda</th>
+          <td mat-cell *matCellDef="let row">
+            @if (row.encomenda?.idOrcamento) {
+              <span class="pedido-chip">{{ row.encomenda.idOrcamento }}</span>
+            } @else {
+              <span class="sem-pedido">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Previsão Entrega -->
+        <ng-container matColumnDef="previsaoEntrega">
+          <th mat-header-cell *matHeaderCellDef>Prev. Entrega</th>
+          <td mat-cell *matCellDef="let row">{{ getPrevisaoEntrega(row) }}</td>
+        </ng-container>
+
+        <!-- Valor NF -->
+        <ng-container matColumnDef="valorNf">
+          <th mat-header-cell *matHeaderCellDef class="col-num">Valor NF</th>
+          <td mat-cell *matCellDef="let row" class="col-num col-valor">
+            {{ formatCurrency(row.valorNf) }}
+          </td>
+        </ng-container>
+
+        <!-- Método de extração -->
+        <ng-container matColumnDef="metodoExtracao">
+          <th mat-header-cell *matHeaderCellDef>Identificado por</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="metodo-chip">{{ metodoLabel(row.metodoExtracao) }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Gravada no ERP -->
+        <ng-container matColumnDef="gravadaErp">
+          <th mat-header-cell *matHeaderCellDef>No ERP</th>
+          <td mat-cell *matCellDef="let row">
+            @if (row.gravadaErp) {
+              <mat-icon class="icon-sim" matTooltip="Gravada no ERP">check_circle</mat-icon>
+            } @else {
+              <mat-icon class="icon-nao" matTooltip="Ainda não gravada">schedule</mat-icon>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Tipo -->
+        <ng-container matColumnDef="tipoCompra">
+          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <td mat-cell *matCellDef="let row">
+            <span class="status-badge" [ngClass]="tipoClass(row.tipoCompra)">
+              {{ tipoLabel(row.tipoCompra) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+      </table>
+
+      @if (dataSource.data.length === 0) {
+        <div class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <p>Nenhuma NF encontrada para o período e filtros selecionados.</p>
+        </div>
+      }
+    </div>
+  }
+
+</div>

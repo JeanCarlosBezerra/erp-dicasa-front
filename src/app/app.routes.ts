@@ -25,6 +25,7 @@ import { MetasComponent } from './pages/comercial/metas/metas.component';
 import { PdiComponent } from './pages/rh/pdi/pdi.component';
 import { AlertasComponent } from './pages/estoque/alertas/alertas.component';
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
+import { EncomendasComponent } from './pages/compras/encomendas/encomendas.component';
 
 const guard = (role: string) => () => {
   const auth = inject(AuthService);
@@ -65,6 +66,8 @@ export const routes: Routes = [
       { path: 'comercial/colaborador', component: ColaboradorComponent,         canActivate: [guard('COM_COLABORADOR')] },
       { path: 'comercial/faturamento', component: FaturamentoComponent,         canActivate: [guard('COM_FATURAMENTO')] },
       { path: 'comercial/metas', component: MetasComponent, canActivate: [guard('COM_METAS')] },
+
+      { path: 'compras/encomendas', component: EncomendasComponent, canActivate: [guard('MOD_COMPRAS')] },
 
       // Estoque
       { path: 'estoque/alertas', component: AlertasComponent, canActivate: [guard('MOD_ESTOQUE')] },
