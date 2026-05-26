@@ -1,0 +1,363 @@
+<div class="painel-wrap">
+
+  <!-- HEADER -->
+  <div class="painel-header">
+    <div class="header-top">
+      <div>
+        <p class="page-tag">COMERCIAL</p>
+        <h1>{{ isGestor ? 'Painel da Equipe' : 'Meu Painel' }}</h1>
+      </div>
+      <div class="header-empresa" *ngIf="empresas.length > 1 && isGestor">
+        <select [(ngModel)]="empresaSelecionada" (ngModelChange)="carregar()">
+          @for (e of empresas; track e.id) {
+            <option [value]="e.id.toString()">{{ e.apelido }}</option>
+          }
+        </select>
+      </div>
+      <div class="empresa-chip" *ngIf="empresas.length === 1">
+        <mat-icon>store</mat-icon> {{ nomeEmpresa(empresaSelecionada) }}
+      </div>
+    </div>
+
+    <!-- Seletor de período -->
+    <div class="periodo-row">
+      @for (p of periodos; track p.label) {
+        <button class="periodo-btn" [class.ativo]="periodoLabel === p.label"
+                (click)="selecionarPeriodo(p)">{{ p.label }}</button>
+      }
+      <button class="periodo-btn" [class.ativo]="periodoLabel === 'Personalizado'"
+              (click)="mostrarDataCustom = !mostrarDataCustom">
+        Personalizado
+      </button>
+    </div>
+    @if (mostrarDataCustom) {
+      <div class="data-custom-panel">
+        <input type="date" [(ngModel)]="dataInicioCustom" />
+        <span>até</span>
+        <input type="date" [(ngModel)]="dataFimCustom" [min]="dataInicioCustom" />
+        <button (click)="aplicarDataCustom()">Aplicar</button>
+      </div>
+    }
+
+  </div>
+
+  <!-- LOADING -->
+  @if (carregando) {
+    <div class="loading-state">
+      <mat-icon>hourglass_top</mat-icon>
+      <span>Carregando dados...</span>
+    </div>
+  }
+
+  <!-- ERRO -->
+  @if (erroMsg && !carregando) {
+    <div class="erro-state">
+      <mat-icon>error_outline</mat-icon> {{ erroMsg }}
+    </div>
+  }
+
+  <!-- ════ VISÃO VENDEDOR ════ -->
+  @if (!isGestor && dadosCarregados && !carregando) {
+
+    @if (!meusDados) {
+      <div class="empty-state">
+        <mat-icon>person_search</mat-icon>
+        <p>Seus dados de vendas não foram encontrados.</p>
+        <p class="empty-sub">Verifique com o gestor se seu cadastro está vinculado.</p>
+      </div>
+    }
+
+    @if (meusDados) {
+      <!-- Avatar + nome -->
+      <div class="vendedor-card">
+        <div class="vendedor-avatar">{{ iniciais(meusDados.nome) }}</div>
+        <div class="vendedor-info">
+          <strong>{{ meusDados.nome }}</strong>
+          <span>{{ nomeEmpresa(empresaSelecionada) }} · {{ periodoLabel }}</span>
+        </div>
+        @if (rankingPosicao > 0) {
+          <div class="ranking-badge" [class.ouro]="rankingPosicao === 1"
+               [class.prata]="rankingPosicao === 2" [class.bronze]="rankingPosicao === 3">
+            {{ rankingPosicao }}º lugar
+          </div>
+        }
+      </div>
+
+      <!-- Meta placeholder -->
+      <div class="meta-card">
+        <div class="meta-header">
+          <span class="meta-label">Faturamento {{ periodoLabel | lowercase }}</span>
+          <span class="meta-sem-info">Meta a definir com Dr. Ricardo</span>
+        </div>
+        <div class="meta-valor">R$ {{ moeda(meusDados.faturamento) }}</div>
+        <div class="meta-sub-row">
+          <span><mat-icon>trending_up</mat-icon> {{ meusDados.qtdvenda }} vendas no período</span>
+          @if (periodoLabel === 'Este mês') {
+            <span class="ritmo">R$ {{ moeda(mediadiaria) }}/dia útil</span>
+          }
+        </div>
+      </div>
+
+      <!-- KPIs grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">Faturamento</span>
+          <span class="kpi-val kpi-info">R$ {{ moeda(meusDados.faturamento) }}</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Lucro líquido</span>
+          <span class="kpi-val" [class]="'kpi-' + corMargem(meusDados.margem)">
+            R$ {{ moeda(meusDados.lucro) }}
+          </span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Margem</span>
+          <span class="kpi-val" [class]="'kpi-' + corMargem(meusDados.margem)">
+            {{ meusDados.margem.toFixed(1) }}%
+          </span>
+          <span class="kpi-sub">meta: ≥20%</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Desconto médio</span>
+          <span class="kpi-val" [class]="'kpi-' + corDesconto(meusDados.descontoPerc)">
+            {{ meusDados.descontoPerc.toFixed(1) }}%
+          </span>
+          <span class="kpi-sub">limite: 5%</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Desc. concedido</span>
+          <span class="kpi-val kpi-warn">R$ {{ moeda(meusDados.descontoValor) }}</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Devoluções</span>
+          <span class="kpi-val" [class]="meusDados.devolucoes > 0 ? 'kpi-danger' : 'kpi-ok'">
+            R$ {{ moeda(meusDados.devolucoes) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Dias úteis (só no mês) -->
+      @if (periodoLabel === 'Este mês') {
+        <div class="dias-card">
+          <div class="dias-header">
+            <span>Dias úteis do mês</span>
+            <span class="dias-info">{{ diasUteisPassados }} de {{ diasUteis }} passados</span>
+          </div>
+          <div class="prog-wrap">
+            <div class="prog-bar prog-info"
+                 [style.width.%]="(diasUteisPassados / diasUteis) * 100"></div>
+          </div>
+          <div class="dias-footer">
+            <span>Restam <strong>{{ diasUteisRestantes }}</strong> dias úteis</span>
+            <span class="ritmo">Ritmo atual: R$ {{ moeda(mediadiaria) }}/dia</span>
+          </div>
+        </div>
+      }
+
+      <!-- Ranking na equipe -->
+      @if (!isGestor && meusDados && vendedoresFiltrados.length > 1) {
+      <div class="posicao-card">
+        <div class="posicao-header">
+          <mat-icon>leaderboard</mat-icon> Sua posição na equipe
+        </div>
+        <div class="posicao-body">
+          <div class="posicao-numero">
+            {{ rankingPosicao }}º
+            <span>de {{ vendedoresFiltrados.length }}</span>
+          </div>
+          <div class="posicao-info">
+            @if (meusDados.faturamento >= mediaFaturamento) {
+              <span class="posicao-ok">
+                <mat-icon>trending_up</mat-icon>
+                Acima da média da equipe
+              </span>
+              <span class="posicao-diff ok">
+                +R$ {{ moeda(meusDados.faturamento - mediaFaturamento) }}
+              </span>
+            } @else {
+              <span class="posicao-warn">
+                <mat-icon>trending_down</mat-icon>
+                Abaixo da média da equipe
+              </span>
+              <span class="posicao-diff warn">
+                -R$ {{ moeda(mediaFaturamento - meusDados.faturamento) }}
+              </span>
+            }
+            <span class="posicao-media">
+              Média da equipe: R$ {{ moeda(mediaFaturamento) }}
+            </span>
+          </div>
+        </div>
+        <div class="prog-wrap" style="margin-top:10px">
+          <div class="prog-bar"
+               [class]="meusDados.faturamento >= mediaFaturamento ? 'prog-ok' : 'prog-warn'"
+               [style.width.%]="barraVendedor(meusDados)">
+          </div>
+        </div>
+      </div>
+}
+    }
+  }
+
+  <!-- ════ VISÃO GESTOR ════ -->
+  @if (isGestor && dadosCarregados && !carregando) {
+
+    <!-- Detalhe do vendedor selecionado -->
+    @if (vendedorSelecionado) {
+      <button class="btn-voltar" (click)="voltarParaLista()">← Voltar para equipe</button>
+
+      <div class="vendedor-card">
+        <div class="vendedor-avatar">{{ iniciais(vendedorSelecionado.nome) }}</div>
+        <div class="vendedor-info">
+          <strong>{{ vendedorSelecionado.nome }}</strong>
+          <span>{{ nomeEmpresa(empresaSelecionada) }}</span>
+        </div>
+        <div class="ranking-badge">
+          {{ (vendedoresFiltrados.indexOf(vendedorSelecionado) + 1) }}º lugar
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-label">Faturamento</span>
+          <span class="kpi-val kpi-info">R$ {{ moeda(vendedorSelecionado.faturamento) }}</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Lucro líquido</span>
+          <span class="kpi-val" [class]="'kpi-' + corMargem(vendedorSelecionado.margem)">
+            R$ {{ moeda(vendedorSelecionado.lucro) }}
+          </span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Margem</span>
+          <span class="kpi-val" [class]="'kpi-' + corMargem(vendedorSelecionado.margem)">
+            {{ vendedorSelecionado.margem.toFixed(1) }}%
+          </span>
+          <span class="kpi-sub">meta: ≥20%</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Desconto médio</span>
+          <span class="kpi-val" [class]="'kpi-' + corDesconto(vendedorSelecionado.descontoPerc)">
+            {{ vendedorSelecionado.descontoPerc.toFixed(1) }}%
+          </span>
+          <span class="kpi-sub">limite: 5%</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Qtd. vendas</span>
+          <span class="kpi-val">{{ vendedorSelecionado.qtdvenda }}</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-label">Devoluções</span>
+          <span class="kpi-val" [class]="vendedorSelecionado.devolucoes > 0 ? 'kpi-danger' : 'kpi-ok'">
+            R$ {{ moeda(vendedorSelecionado.devolucoes) }}
+          </span>
+        </div>
+      </div>
+      <!-- Após o kpi-grid do vendedor selecionado, dentro do @if (vendedorSelecionado) -->
+      <div class="ranking-card">
+        <div class="ranking-titulo">
+          <mat-icon>leaderboard</mat-icon> Posição na equipe
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+          <div class="posicao-numero">
+            {{ vendedoresFiltrados.indexOf(vendedorSelecionado) + 1 }}º
+            <span>de {{ vendedoresFiltrados.length }}</span>
+          </div>
+          <div class="posicao-info">
+            @if (vendedorSelecionado.faturamento >= mediaFaturamento) {
+              <span class="posicao-ok"><mat-icon>trending_up</mat-icon> Acima da média</span>
+              <span class="posicao-diff ok">+R$ {{ moeda(vendedorSelecionado.faturamento - mediaFaturamento) }}</span>
+            } @else {
+              <span class="posicao-warn"><mat-icon>trending_down</mat-icon> Abaixo da média</span>
+              <span class="posicao-diff warn">-R$ {{ moeda(mediaFaturamento - vendedorSelecionado.faturamento) }}</span>
+            }
+            <span class="posicao-media">Média da equipe: R$ {{ moeda(mediaFaturamento) }}</span>
+          </div>
+        </div>
+      
+        @for (v of vendedoresFiltrados.slice(0, 5); track v.idVendedor; let i = $index) {
+          <div class="ranking-row" [class.minha-row]="v.idVendedor === vendedorSelecionado.idVendedor">
+            <span class="rank-pos" [class.pos-top]="i < 3">{{ i + 1 }}º</span>
+            <div class="rank-bar-wrap">
+              <div class="rank-bar" [style.width.%]="barraVendedor(v)"
+                   [class.rank-bar-eu]="v.idVendedor === vendedorSelecionado.idVendedor"></div>
+            </div>
+            <span class="rank-nome">{{ v.nome.split(' ')[0] }}</span>
+            <span class="rank-val">{{ moedaK(v.faturamento) }}</span>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Lista da equipe -->
+    @if (!vendedorSelecionado) {
+
+      <!-- KPIs da equipe -->
+      <div class="equipe-resumo">
+        <div class="equipe-kpi">
+          <span class="kpi-label">Total equipe</span>
+          <span class="kpi-val kpi-info">R$ {{ moeda(totalEquipe) }}</span>
+        </div>
+        <div class="equipe-kpi">
+          <span class="kpi-label">Vendedores</span>
+          <span class="kpi-val">{{ vendedoresFiltrados.length }}</span>
+        </div>
+        <div class="equipe-kpi">
+          <span class="kpi-label">Média por vendedor</span>
+          <span class="kpi-val">{{ moedaK(mediaFaturamento) }}</span>
+        </div>
+      </div>
+
+      <!-- Busca -->
+      <div class="busca-wrap">
+        <mat-icon>search</mat-icon>
+        <input type="text" [(ngModel)]="buscaVendedor"
+               placeholder="Buscar vendedor..." />
+      </div>
+
+      <!-- Lista de vendedores -->
+      <div class="vendedores-lista">
+        @for (v of vendedoresFiltrados; track v.idVendedor; let i = $index) {
+          <div class="vendedor-row" (click)="selecionarVendedor(v)">
+            <div class="vr-pos" [class.pos-top]="i < 3">{{ i + 1 }}º</div>
+            <div class="vr-avatar">{{ iniciais(v.nome) }}</div>
+            <div class="vr-body">
+              <div class="vr-nome">{{ v.nome.split(' ').slice(0,3).join(' ') }}</div>
+              <div class="vr-bar-wrap">
+                <div class="vr-bar" [style.width.%]="barraVendedor(v)"></div>
+              </div>
+              <div class="vr-sub-row">
+                <span class="vr-fat">R$ {{ moeda(v.faturamento) }}</span>
+                <span class="vr-badges">
+                  <span class="badge-mini" [class]="'badge-' + corMargem(v.margem)">
+                    {{ v.margem.toFixed(1) }}% mg
+                  </span>
+                  @if (v.descontoPerc > 5) {
+                    <span class="badge-mini badge-danger">{{ v.descontoPerc.toFixed(1) }}% desc</span>
+                  }
+                </span>
+              </div>
+            </div>
+            <mat-icon class="vr-chevron">chevron_right</mat-icon>
+          </div>
+        }
+
+        @if (!vendedoresFiltrados.length) {
+          <div class="empty-state">
+            <mat-icon>search_off</mat-icon>
+            <p>Nenhum vendedor encontrado.</p>
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- EMPTY se não há dados -->
+  @if (!carregando && dadosCarregados && !isGestor && !meusDados) {
+    <div class="empty-state">
+      <mat-icon>bar_chart</mat-icon>
+      <p>Nenhuma venda encontrada no período.</p>
+    </div>
+  }
+
+</div>

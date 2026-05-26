@@ -87,24 +87,10 @@
               </mat-panel-title>
             </mat-expansion-panel-header>
             <div class="submenu-wrapper">
-              <button mat-button class="submenu-btn" routerLink="/menu/financeiro/dashboard" routerLinkActive="active-submenu">
-                <mat-icon>dashboard</mat-icon> Dashboard
+              <button mat-button class="submenu-btn"
+                routerLink="/menu/financeiro/credito-cobranca" routerLinkActive="active-submenu">
+                <mat-icon>account_balance</mat-icon> Crédito &amp; Cobrança
               </button>
-              @if (auth.hasRole('FIN_INDICADORES')) {
-                <button mat-button class="submenu-btn" routerLink="/menu/financeiro/indicadores" routerLinkActive="active-submenu">
-                  <mat-icon>analytics</mat-icon> Indicadores
-                </button>
-              }
-              @if (auth.hasRole('FIN_FLUXO_CAIXA')) {
-                <button mat-button class="submenu-btn" routerLink="/menu/financeiro/fluxo-caixa" routerLinkActive="active-submenu">
-                  <mat-icon>show_chart</mat-icon> Fluxo de Caixa
-                </button>
-              }
-              @if (auth.hasRole('FIN_CONTAS_RECEBER')) {
-                <button mat-button class="submenu-btn" routerLink="/menu/financeiro/contas-receber" routerLinkActive="active-submenu">
-                  <mat-icon>payments</mat-icon> Contas a Receber
-                </button>
-              }
             </div>
           </mat-expansion-panel>
         }
@@ -137,6 +123,12 @@
               @if (auth.hasRole('COM_METAS')) {
                 <button mat-button class="submenu-btn" routerLink="/menu/comercial/metas" routerLinkActive="active-submenu">
                   <mat-icon>flag</mat-icon> Metas
+                </button>
+              }
+              @if (auth.hasRole('COM_MEU_PAINEL')) {
+                <button mat-button class="submenu-btn"
+                  routerLink="/menu/comercial/meu-painel" routerLinkActive="active-submenu">
+                  <mat-icon>person</mat-icon> Meu Painel
                 </button>
               }
             </div>

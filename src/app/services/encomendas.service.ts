@@ -39,6 +39,7 @@ export interface EncomendaItem {
   encomenda: {
     idEncomenda: number;
     idOrcamento: number;
+    idEmpresaEncomenda: number | null;  // ← adiciona essa linha
     cliente: string;
     dtVenda: string;
     dtRegistroEncomenda: string;

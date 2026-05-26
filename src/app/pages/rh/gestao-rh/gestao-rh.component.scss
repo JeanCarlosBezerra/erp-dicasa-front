@@ -207,3 +207,9 @@
   font-weight: 500;
   &:hover { background: #4338ca; }
 }
+
+.btn-del {
+  background: none; border: none; cursor: pointer;
+  font-size: 14px; padding: 4px 6px; border-radius: 4px;
+  &:hover { background: #fff8f8; }
+}

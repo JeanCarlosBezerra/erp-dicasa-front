@@ -120,10 +120,16 @@ export class GestaoRhComponent {
   }
 
   editarColaborador(c: any) {
-    this.editandoId = c.id;
-    this.formColaborador = { ...c };
-    this.modalColaborador = true;
-  }
+  this.editandoId = c.id;
+  this.formColaborador = {
+    ...c,
+    // Garante que o input date recebe yyyy-MM-dd
+    dt_admissao: c.dt_admissao
+      ? (c.dt_admissao as string).slice(0, 10)
+      : '',
+  };
+  this.modalColaborador = true;
+}
 
   salvarColaborador() {
     // Preenche campo texto empresa a partir do id
@@ -205,6 +211,36 @@ export class GestaoRhComponent {
       },
       error: () => this.snack.open('Erro ao salvar', 'OK', { duration: 3000 })
     });
+  }
+
+  // Modal de confirmação exclusão competência
+  competenciaParaExcluir: any = null;
+  modalExcluirCompetencia = false;
+
+  confirmarExclusaoCompetencia(comp: any) {
+    this.competenciaParaExcluir = comp;
+    this.modalExcluirCompetencia = true;
+  }
+
+  cancelarExclusaoCompetencia() {
+    this.competenciaParaExcluir = null;
+    this.modalExcluirCompetencia = false;
+  }
+
+  executarExclusaoCompetencia() {
+    if (!this.competenciaParaExcluir) return;
+    this.http.delete(`${this.api}/rh/gestao/competencias/${this.competenciaParaExcluir.id}`)
+      .subscribe({
+        next: () => {
+          this.snack.open('Competência excluída!', 'OK', { duration: 2000 });
+          this.cancelarExclusaoCompetencia();
+          this.loadCompetencias(this.cargoSelecionadoComp.id);
+        },
+        error: () => {
+          this.snack.open('Erro ao excluir', 'OK', { duration: 3000 });
+          this.cancelarExclusaoCompetencia();
+        }
+      });
   }
 
   // === CICLOS ===

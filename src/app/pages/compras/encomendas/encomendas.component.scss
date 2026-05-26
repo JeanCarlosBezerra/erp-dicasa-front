@@ -243,3 +243,262 @@
   mat-icon { font-size: 48px; width: 48px; height: 48px; margin-bottom: 12px; }
   p { font-size: 14px; margin: 0; }
 }
+
+// ─── Botão de detalhe na linha ─────────────────────────────────
+.btn-detalhe {
+  background: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.15s;
+ 
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+ 
+  &:hover { background: #f1f5f9; border-color: #94a3b8; color: #334155; }
+ 
+  &.ativo {
+    background: #2563eb;
+    border-color: #2563eb;
+    color: #fff;
+  }
+}
+ 
+// ─── Overlay escuro ────────────────────────────────────────────
+.detalhe-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: 100;
+}
+ 
+// ─── Painel deslizante ─────────────────────────────────────────
+.detalhe-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 560px;
+  max-width: 95vw;
+  height: 100vh;
+  background: #fff;
+  z-index: 101;
+  box-shadow: -8px 0 32px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideIn 0.2s ease;
+}
+ 
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+ 
+// ─── Header do painel ──────────────────────────────────────────
+.detalhe-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  flex-shrink: 0;
+ 
+  .detalhe-header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+ 
+    mat-icon { color: #2563eb; font-size: 24px; width: 24px; height: 24px; }
+ 
+    strong { display: block; font-size: 15px; color: #0f172a; font-weight: 700; }
+    .detalhe-idnfe { font-size: 12px; color: #64748b; }
+  }
+ 
+  .btn-fechar {
+    background: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #64748b;
+    &:hover { background: #f1f5f9; color: #334155; }
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+  }
+}
+ 
+// ─── Loading do detalhe ────────────────────────────────────────
+.detalhe-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex: 1;
+  color: #64748b;
+  font-size: 13px;
+}
+ 
+// ─── Conteúdo do painel ────────────────────────────────────────
+.detalhe-panel > .detalhe-section:first-of-type,
+.detalhe-panel .detalhe-section {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  overflow-y: auto;
+}
+ 
+.detalhe-panel {
+  overflow-y: auto;
+}
+ 
+.detalhe-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #475569;
+  margin-bottom: 14px;
+ 
+  mat-icon { font-size: 16px; width: 16px; height: 16px; color: #2563eb; }
+}
+ 
+// ─── Transportador ─────────────────────────────────────────────
+.detalhe-transp {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+ 
+  .transp-nome {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+  }
+ 
+  .transp-info {
+    font-size: 12px;
+    color: #64748b;
+  }
+}
+ 
+// ─── Tabela de produtos ────────────────────────────────────────
+.detalhe-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+ 
+  th {
+    padding: 8px 10px;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    border-bottom: 2px solid #e2e8f0;
+    white-space: nowrap;
+ 
+    &.right { text-align: right; }
+  }
+ 
+  td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: middle;
+ 
+    &.right { text-align: right; }
+  }
+ 
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #f8fafc; }
+ 
+  .td-item   { color: #94a3b8; font-size: 11px; }
+  .td-codigo { font-family: monospace; font-size: 11px; color: #64748b; }
+  .td-descricao { max-width: 200px; }
+  .td-un     { color: #64748b; }
+  .td-total  { font-weight: 700; color: #1e40af; }
+}
+ 
+// ─── Parcelas ──────────────────────────────────────────────────
+.parcelas-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+ 
+.parcela-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 13px;
+ 
+  .parcela-num  { font-weight: 600; color: #475569; min-width: 55px; }
+  .parcela-venc { color: #64748b; flex: 1; }
+  .parcela-valor { font-weight: 700; color: #1e40af; }
+}
+ 
+// ─── Chip empresa ──────────────────────────────────────────────
+.empresa-chip {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+ 
+// ─── Transportador na tabela ───────────────────────────────────
+.col-transportador {
+  max-width: 180px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #64748b;
+  font-size: 12px;
+}
+ 
+// ─── Filtro produto ────────────────────────────────────────────
+.filter-produto { min-width: 200px; }
+
+.filter-bar-secundaria {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 12px; padding: 0 24px 8px;
+  .filter-field { min-width: 180px; }
+}
+
+.btn-limpar-filtros {
+  display: flex; align-items: center; gap: 4px;
+  padding: 8px 14px; border-radius: 6px;
+  border: 1px solid #e2e8f0; background: #fff;
+  font-size: 12px; color: #64748b; cursor: pointer;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+  &:hover { background: #f1f5f9; }
+}
+
+.aviso-limite {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: #92400e;
+  background: #fffbeb; border: 1px solid #fde68a;
+  border-radius: 6px; padding: 4px 10px;
+  mat-icon { font-size: 14px; width: 14px; height: 14px; color: #d97706; }
+}
+
+.marca-badge {
+  display: block; font-size: 10px; color: #64748b;
+  margin-top: 2px; font-style: italic;
+}
+
+.table-header-bar {
+  display: flex; align-items: center;
+  justify-content: space-between; gap: 12px;
+}

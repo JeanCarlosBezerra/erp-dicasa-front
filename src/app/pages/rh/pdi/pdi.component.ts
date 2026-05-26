@@ -335,6 +335,39 @@ get totalColaboradoresComPdi(): number {
     });
   }
 
+voltarParaLista() {
+  this.colaboradorSelecionado = null;
+  this.buscaNome = '';
+  this.pdis = [];
+  this.mostrarFormNovo = false;
+  if (this.temPermissaoGestor) this.carregarTodosPdis();
+  this.cdr.detectChanges();
+}
+
+  salvarNovoPdiConcluido() {
+    if (!this.colaboradorSelecionado || !this.cicloAtivo) return;
+    if (!this.novoItem.item.trim()) { alert('Informe o item de desenvolvimento.'); return; }
+    if (!this.novoItem.prazo) { alert('Informe o prazo.'); return; }
+
+    const c = this.colaboradorSelecionado;
+    this.avalSvc.salvarPdi({
+      id_ciclo: this.cicloAtivo.id_ciclo, matricula: c.matricula,
+      nome: c.nome, filial: c.filial, setor: c.setor, cargo: c.cargo,
+      avaliador: this.usuarioLogado,
+      tipo_competencia: this.novoItem.tipo_competencia,
+      item: this.novoItem.item, descricao: this.novoItem.descricao,
+      prazo: this.novoItem.prazo, qtde_meses: this.novoItem.qtde_meses,
+      status: 'Concluída',   // ← já entra concluído
+    }).subscribe({
+      next: () => {
+        this.mostrarFormNovo = false;
+        this.carregarPdiPorMatricula(c.matricula);
+        if (this.temPermissaoGestor) this.carregarTodosPdis();
+      },
+      error: () => alert('Erro ao salvar PDI.')
+    });
+  }
+
   // ── EDIÇÃO inline ──
   abrirEdicao(pdi: PdiItem) {
     // Fecha edição de outros
@@ -372,6 +405,30 @@ get totalColaboradoresComPdi(): number {
         this.cdr.detectChanges();
       },
       error: () => alert('Erro ao editar PDI.')
+    });
+  }
+
+  salvarEdicaoFinalizado(pdi: PdiItem) {
+    if (!pdi._editItem?.trim()) { alert('Item não pode ser vazio.'); return; }
+    this.avalSvc.editarPdi(pdi.id_pdi, {
+      tipo_competencia: pdi._editTipo!,
+      item:       pdi._editItem!,
+      descricao:  pdi._editDescricao!,
+      prazo:      pdi._editPrazo!,
+      qtde_meses: pdi._editMeses!,
+    }).subscribe({
+      next: () => {
+        // Atualiza campos locais
+        pdi.tipo_competencia = pdi._editTipo!;
+        pdi.item      = pdi._editItem!;
+        pdi.descricao = pdi._editDescricao!;
+        pdi.prazo     = pdi._editPrazo!;
+        pdi.qtde_meses = pdi._editMeses!;
+        pdi._editando = false;
+        // Marca como concluída
+        this.alterarStatus(pdi, 'Concluída');
+      },
+      error: () => alert('Erro ao salvar PDI.')
     });
   }
 
@@ -424,4 +481,26 @@ get totalColaboradoresComPdi(): number {
   private itemVazio() {
     return { tipo_competencia: 'Comportamental', item: '', descricao: '', prazo: '', qtde_meses: 3 };
   }
+
+  calcularMeses(prazo: string): number {
+    if (!prazo) return 1;
+    const hoje = new Date();
+    const fim  = new Date(prazo + 'T00:00:00');
+    const meses = (fim.getFullYear() - hoje.getFullYear()) * 12
+                + (fim.getMonth() - hoje.getMonth());
+    return Math.max(1, meses);
+  }
+
+  onPrazoNovoChange() {
+    if (this.novoItem.prazo) {
+      this.novoItem.qtde_meses = this.calcularMeses(this.novoItem.prazo);
+    }
+  }
+
+  onPrazoEdicaoChange(pdi: PdiItem) {
+    if (pdi._editPrazo) {
+      pdi._editMeses = this.calcularMeses(pdi._editPrazo);
+    }
+  }
+
 }

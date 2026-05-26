@@ -55,7 +55,40 @@
     </button>
   </div>
 
-  <!-- KPI CARDS -->
+  <!-- FILTROS RÁPIDOS — abaixo da barra principal -->
+  <div class="filter-bar-secundaria">
+    <mat-form-field appearance="outline" class="filter-field filter-produto">
+      <mat-label>Buscar produto</mat-label>
+      <input matInput [(ngModel)]="filtroProduto"
+             (ngModelChange)="onProdutoChange()"
+             placeholder="Código ou nome...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field filter-fornecedor">
+      <mat-label>Fornecedor</mat-label>
+      <input matInput [(ngModel)]="filtroFornecedor"
+             (ngModelChange)="onFornecedorChange()"
+             placeholder="Nome do fornecedor...">
+      <mat-icon matSuffix>business</mat-icon>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="filter-field filter-marca">
+      <mat-label>Marca</mat-label>
+      <input matInput [(ngModel)]="filtroMarca"
+             (ngModelChange)="onMarcaChange()"
+             placeholder="Nome da marca...">
+      <mat-icon matSuffix>label</mat-icon>
+    </mat-form-field>
+
+    @if (filtroFornecedor || filtroProduto || filtroMarca) {
+      <button class="btn-limpar-filtros" (click)="limparFiltros()">
+        <mat-icon>clear</mat-icon> Limpar filtros
+      </button>
+    }
+  </div>
+
+  <!-- KPI CARDS — refletem o filtro atual -->
   <div class="kpi-grid">
     <div class="kpi-card kpi-success">
       <div class="kpi-icon"><mat-icon>assignment_turned_in</mat-icon></div>
@@ -107,13 +140,31 @@
     <div class="table-wrapper">
       <div class="table-header-bar">
         <span class="table-title">NFs Recebidas — Identificação e Vínculo</span>
+        @if (atingiuLimite) {
+          <span class="aviso-limite">
+            <mat-icon>info</mat-icon>
+            Exibindo os 150 primeiros resultados. Refine o período para ver todos.
+          </span>
+        }
       </div>
 
-      <table mat-table [dataSource]="dataSource" class="encomendas-table">
+      <table mat-table [dataSource]="dataSource" matSort class="encomendas-table">
+
+        <!-- Botão detalhe -->
+        <ng-container matColumnDef="detalhe">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let row">
+            <button class="btn-detalhe" (click)="abrirDetalhe(row.idNfe)"
+                    [class.ativo]="nfeDetalheId === row.idNfe"
+                    matTooltip="Ver detalhes da NF">
+              <mat-icon>{{ nfeDetalheId === row.idNfe ? 'expand_less' : 'expand_more' }}</mat-icon>
+            </button>
+          </td>
+        </ng-container>
 
         <!-- NF / Série -->
         <ng-container matColumnDef="nroNf">
-          <th mat-header-cell *matHeaderCellDef>NF / Série</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>NF / Série</th>
           <td mat-cell *matCellDef="let row">
             <span class="nf-numero">{{ row.nroNf }}</span>
             <span class="nf-serie">/ {{ row.serie }}</span>
@@ -122,34 +173,57 @@
 
         <!-- Data Emissão -->
         <ng-container matColumnDef="dtEmissao">
-          <th mat-header-cell *matHeaderCellDef>Emissão</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Emissão</th>
           <td mat-cell *matCellDef="let row">{{ formatDate(row.dtEmissao) }}</td>
         </ng-container>
 
         <!-- Fornecedor -->
         <ng-container matColumnDef="fornecedor">
-          <th mat-header-cell *matHeaderCellDef>Fornecedor</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Fornecedor</th>
           <td mat-cell *matCellDef="let row" class="col-fornecedor">{{ row.fornecedor }}</td>
         </ng-container>
 
-        <!-- Cliente (da encomenda) -->
+        <!-- Transportador -->
+        <ng-container matColumnDef="transportador">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Transportador</th>
+          <td mat-cell *matCellDef="let row" class="col-transportador">
+            {{ row.transportador || '—' }}
+          </td>
+        </ng-container>
+
+        <!-- Empresa da Encomenda -->
+        <ng-container matColumnDef="empresaEncomenda">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Empresa</th>
+          <td mat-cell *matCellDef="let row">
+            @if (getEmpresaEncomenda(row) !== '—') {
+              <span class="empresa-chip">{{ getEmpresaEncomenda(row) }}</span>
+            } @else {
+              <span class="sem-pedido">—</span>
+            }
+          </td>
+        </ng-container>
+
+        <!-- Cliente -->
         <ng-container matColumnDef="cliente">
-          <th mat-header-cell *matHeaderCellDef>Cliente</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Cliente</th>
           <td mat-cell *matCellDef="let row" class="col-cliente">{{ getCliente(row) }}</td>
         </ng-container>
 
         <!-- Produto -->
         <ng-container matColumnDef="produto">
-          <th mat-header-cell *matHeaderCellDef>Produto(s)</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Produto(s)</th>
           <td mat-cell *matCellDef="let row" class="col-produto"
               [matTooltip]="row.pedidoCompra?.produtos?.length > 1 ? 'Múltiplos produtos' : ''">
-            {{ getProdutoResumido(row) }}
+            <span>{{ getProdutoResumido(row) }}</span>
+            @if (getMarcaResumida(row)) {
+              <span class="marca-badge">{{ getMarcaResumida(row) }}</span>
+            }
           </td>
         </ng-container>
 
         <!-- PC identificado -->
         <ng-container matColumnDef="pcExtraido">
-          <th mat-header-cell *matHeaderCellDef>Pedido Compra</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Pedido Compra</th>
           <td mat-cell *matCellDef="let row">
             @if (row.pcExtraido) {
               <span class="pedido-chip">{{ row.pcExtraido }}</span>
@@ -159,8 +233,9 @@
           </td>
         </ng-container>
 
+        <!-- Pedido Venda -->
         <ng-container matColumnDef="pedidoVenda">
-          <th mat-header-cell *matHeaderCellDef>Ped. Venda</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Ped. Venda</th>
           <td mat-cell *matCellDef="let row">
             @if (row.encomenda?.idOrcamento) {
               <span class="pedido-chip">{{ row.encomenda.idOrcamento }}</span>
@@ -172,13 +247,13 @@
 
         <!-- Previsão Entrega -->
         <ng-container matColumnDef="previsaoEntrega">
-          <th mat-header-cell *matHeaderCellDef>Prev. Entrega</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Prev. Entrega</th>
           <td mat-cell *matCellDef="let row">{{ getPrevisaoEntrega(row) }}</td>
         </ng-container>
 
         <!-- Valor NF -->
         <ng-container matColumnDef="valorNf">
-          <th mat-header-cell *matHeaderCellDef class="col-num">Valor NF</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header class="col-num">Valor NF</th>
           <td mat-cell *matCellDef="let row" class="col-num col-valor">
             {{ formatCurrency(row.valorNf) }}
           </td>
@@ -206,7 +281,7 @@
 
         <!-- Tipo -->
         <ng-container matColumnDef="tipoCompra">
-          <th mat-header-cell *matHeaderCellDef>Tipo</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Tipo</th>
           <td mat-cell *matCellDef="let row">
             <span class="status-badge" [ngClass]="tipoClass(row.tipoCompra)">
               {{ tipoLabel(row.tipoCompra) }}
@@ -218,6 +293,103 @@
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
 
       </table>
+
+      <!-- PAINEL DE DETALHE DA NF -->
+      @if (nfeDetalheId) {
+        <div class="detalhe-overlay" (click)="fecharDetalhe()"></div>
+        <div class="detalhe-panel">
+          <div class="detalhe-header">
+            <div class="detalhe-header-left">
+              <mat-icon>receipt_long</mat-icon>
+              <div>
+                <strong>Detalhes da NF</strong>
+                <span class="detalhe-idnfe">#{{ nfeDetalheId }}</span>
+              </div>
+            </div>
+            <button class="btn-fechar" (click)="fecharDetalhe()">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+
+          @if (carregandoDetalhe) {
+            <div class="detalhe-loading">
+              <mat-spinner diameter="32"></mat-spinner>
+              <span>Carregando XML da nota...</span>
+            </div>
+          }
+
+          @if (!carregandoDetalhe && nfeDetalhe) {
+
+            @if (nfeDetalhe.transportador) {
+              <div class="detalhe-section">
+                <div class="detalhe-section-title">
+                  <mat-icon>local_shipping</mat-icon> Transportador
+                </div>
+                <div class="detalhe-transp">
+                  <span class="transp-nome">{{ nfeDetalhe.transportador.xNome }}</span>
+                  <span class="transp-info">CNPJ: {{ nfeDetalhe.transportador.cnpj }}</span>
+                  @if (nfeDetalhe.transportador.placa) {
+                    <span class="transp-info">
+                      Placa: {{ nfeDetalhe.transportador.placa }} — {{ nfeDetalhe.transportador.ufPlaca }}
+                    </span>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="detalhe-section">
+              <div class="detalhe-section-title">
+                <mat-icon>inventory_2</mat-icon>
+                Produtos ({{ nfeDetalhe.produtos.length }})
+              </div>
+              <table class="detalhe-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th class="right">Qtd</th>
+                    <th class="right">Un</th>
+                    <th class="right">Vlr Unit</th>
+                    <th class="right">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (p of nfeDetalhe.produtos; track p.nItem) {
+                    <tr>
+                      <td class="td-item">{{ p.nItem }}</td>
+                      <td class="td-codigo">{{ p.cprod }}</td>
+                      <td class="td-descricao">{{ p.xprod }}</td>
+                      <td class="right">{{ formatDecimal(p.qcom) }}</td>
+                      <td class="right td-un">{{ p.ucom }}</td>
+                      <td class="right">{{ formatCurrency(p.vuncom) }}</td>
+                      <td class="right td-total">{{ formatCurrency(p.vprod) }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            @if (nfeDetalhe.parcelas.length > 0) {
+              <div class="detalhe-section">
+                <div class="detalhe-section-title">
+                  <mat-icon>payments</mat-icon>
+                  Parcelas ({{ nfeDetalhe.parcelas.length }})
+                </div>
+                <div class="parcelas-grid">
+                  @for (p of nfeDetalhe.parcelas; track p.nDup) {
+                    <div class="parcela-item">
+                      <span class="parcela-num">Nro {{ p.nDup }}</span>
+                      <span class="parcela-venc">{{ formatDateSimples(p.dVenc) }}</span>
+                      <span class="parcela-valor">{{ formatCurrency(p.vDup) }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
 
       @if (dataSource.data.length === 0) {
         <div class="empty-state">

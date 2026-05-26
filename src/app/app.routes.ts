@@ -4,13 +4,9 @@ import { Router } from '@angular/router';
 import { AuthService } from './services/auth.service';
 import { LoginComponent } from './pages/login/login.component';
 import { Menu } from './pages/menu/menu';
-import { DashboardComponent } from './pages/financeiro/dashboard/dashboard.component';
-import { FluxoCaixaComponent } from './pages/financeiro/fluxocaixa/fluxocaixa.component';
-import { Contasreceber } from './pages/financeiro/contasreceber/contasreceber.component';
 import { HomeComponent } from './pages/home/home.component';
 import { ColaboradorComponent } from './pages/comercial/colaborador/colaborador.component';
 import { DashboardComercialComponent } from './pages/comercial/dashboard/dashboard-comercial.component';
-import { IndicadoresComponent } from './pages/financeiro/indicadores/indicadores.component';
 import { ProdutosComponent } from './pages/estoque/produtos/produtos.component';
 import { ResumoExecutivoComponent } from './pages/compras-estrategicas/resumo-executivo/resumo-executivo.component';
 import { AnaliseFornecedoresComponent } from './pages/compras-estrategicas/analise-fornecedores/analise-fornecedores.component';
@@ -26,6 +22,9 @@ import { PdiComponent } from './pages/rh/pdi/pdi.component';
 import { AlertasComponent } from './pages/estoque/alertas/alertas.component';
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 import { EncomendasComponent } from './pages/compras/encomendas/encomendas.component';
+import { CreditoCobrancaComponent } from './pages/financeiro/credito-cobranca/creditocobranca.component';
+import { MeuPainelComponent } from './pages/comercial/meu-painel/meu-painel.component';
+
 
 const guard = (role: string) => () => {
   const auth = inject(AuthService);
@@ -53,10 +52,7 @@ export const routes: Routes = [
       { path: 'home', component: HomeComponent },
 
       // Financeiro
-      { path: 'financeiro/dashboard',      component: DashboardComponent,   canActivate: [guard('MOD_FINANCEIRO')] },
-      { path: 'financeiro/indicadores',    component: IndicadoresComponent,  canActivate: [guard('FIN_INDICADORES')] },
-      { path: 'financeiro/fluxo-caixa',   component: FluxoCaixaComponent,   canActivate: [guard('FIN_FLUXO_CAIXA')] },
-      { path: 'financeiro/contas-receber', component: Contasreceber,         canActivate: [guard('FIN_CONTAS_RECEBER')] },
+      { path: 'financeiro/credito-cobranca', component: CreditoCobrancaComponent, canActivate: [guard('MOD_FINANCEIRO')] },
 
       // Pedidos
       { path: 'pedidos-list', component: PedidosListComponent, canActivate: [guard('MOD_PEDIDOS')] },
@@ -65,7 +61,8 @@ export const routes: Routes = [
       { path: 'comercial/dashboard',   component: DashboardComercialComponent, canActivate: [guard('COM_DASHBOARD')] },
       { path: 'comercial/colaborador', component: ColaboradorComponent,         canActivate: [guard('COM_COLABORADOR')] },
       { path: 'comercial/faturamento', component: FaturamentoComponent,         canActivate: [guard('COM_FATURAMENTO')] },
-      { path: 'comercial/metas', component: MetasComponent, canActivate: [guard('COM_METAS')] },
+      { path: 'comercial/metas',       component: MetasComponent,               canActivate: [guard('COM_METAS')] },
+      { path: 'comercial/meu-painel', component: MeuPainelComponent, canActivate: [guard('COM_MEU_PAINEL')] },
 
       { path: 'compras/encomendas', component: EncomendasComponent, canActivate: [guard('MOD_COMPRAS')] },
 
@@ -73,10 +70,10 @@ export const routes: Routes = [
       { path: 'estoque/alertas', component: AlertasComponent, canActivate: [guard('MOD_ESTOQUE')] },
 
       // Compras Estratégicas
-      { path: 'compras-estrategicas/resumo-executivo',     component: ResumoExecutivoComponent,    canActivate: [guard('MOD_COMPRAS')] },
-      { path: 'compras-estrategicas/analise-fornecedores', component: AnaliseFornecedoresComponent, canActivate: [guard('MOD_COMPRAS')] },
-      { path: 'compras-estrategicas/analise-produtos',     component: AnaliseProdutosComponent,    canActivate: [guard('MOD_COMPRAS')] },
-      { path: 'compras-estrategicas/analise-spend-abc',    component: AnaliseSpendAbcComponent,    canActivate: [guard('MOD_COMPRAS')] },
+      { path: 'compras-estrategicas/resumo-executivo',     component: ResumoExecutivoComponent,     canActivate: [guard('MOD_COMPRAS')] },
+      { path: 'compras-estrategicas/analise-fornecedores', component: AnaliseFornecedoresComponent,  canActivate: [guard('MOD_COMPRAS')] },
+      { path: 'compras-estrategicas/analise-produtos',     component: AnaliseProdutosComponent,     canActivate: [guard('MOD_COMPRAS')] },
+      { path: 'compras-estrategicas/analise-spend-abc',    component: AnaliseSpendAbcComponent,     canActivate: [guard('MOD_COMPRAS')] },
 
       // RH
       { path: 'rh/avaliacao-desempenho', component: AvaliacaoDesempenhoComponent, canActivate: [guard('RH_DASHBOARD')] },
@@ -86,7 +83,6 @@ export const routes: Routes = [
 
       { path: 'relatorios', component: RelatoriosComponent, canActivate: [guard('MOD_ESTOQUE')] },
 
-      // Settings
       {
         path: 'settings',
         canActivate: [guard('MOD_CONFIGURACOES')],

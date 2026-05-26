@@ -1,4 +1,8 @@
 <div class="page-header">
+  <button class="btn-voltar" (click)="voltarParaLista()">
+    ← Voltar
+  </button>
+  
   <p class="page-tag">RECURSOS HUMANOS</p>
   <h1>Plano de Desenvolvimento Individual</h1>
   <p class="page-desc">
@@ -149,11 +153,11 @@
         </div>
         <div class="form-group">
           <label>Prazo</label>
-          <input type="date" [(ngModel)]="novoItem.prazo" />
+          <input type="date" [(ngModel)]="novoItem.prazo"(ngModelChange)="onPrazoNovoChange()" />
         </div>
         <div class="form-group">
           <label>Qtde. Meses</label>
-          <input type="number" [(ngModel)]="novoItem.qtde_meses" min="1" max="24" />
+          <input type="number" [(ngModel)]="novoItem.qtde_meses" min="1" max="24" [placeholder]="novoItem.prazo ? 'calculado' : 'meses'" />
         </div>
         <div class="form-group full">
           <label>Item de desenvolvimento</label>
@@ -169,6 +173,9 @@
         <button class="btn-cancel" (click)="fecharFormNovo()">Cancelar</button>
         <button class="btn-save" (click)="salvarNovoPdi()">
           <mat-icon>save</mat-icon> Salvar PDI
+        </button>
+        <button class="btn-save btn-concluir" (click)="salvarNovoPdiConcluido()">
+          <mat-icon>check_circle</mat-icon> Salvar e Concluir
         </button>
       </div>
     </div>
@@ -195,7 +202,7 @@
             </div>
             <div class="form-group">
               <label>Prazo</label>
-              <input type="date" [(ngModel)]="p._editPrazo" />
+              <input type="date" [(ngModel)]="p._editPrazo" (ngModelChange)="onPrazoEdicaoChange(p)" />
             </div>
             <div class="form-group">
               <label>Meses</label>
@@ -212,8 +219,12 @@
           </div>
           <div class="form-actions">
             <button class="btn-cancel" (click)="cancelarEdicao(p)">Cancelar</button>
+            <!-- DEPOIS -->
             <button class="btn-save" (click)="salvarEdicao(p)">
               <mat-icon>save</mat-icon> Salvar edição
+            </button>
+            <button class="btn-save btn-concluir" (click)="salvarEdicaoFinalizado(p)">
+              <mat-icon>check_circle</mat-icon> Salvar e Finalizar
             </button>
           </div>
         </div>

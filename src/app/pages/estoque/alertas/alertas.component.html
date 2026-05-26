@@ -10,12 +10,9 @@
     <label>Empresa <span class="obrigatorio">*</span></label>
     <select [(ngModel)]="empresaFiltro" [class.select-erro]="erroFiltro">
       <option value="">Selecione uma empresa</option>
-      <option *ngFor="let e of empresas" [value]="e.IDEMPRESA.toString()">
-        {{ e.EMPALIAS }}
-      </option>
+      <option *ngFor="let e of empresas" [value]="e.IDEMPRESA.toString()">{{ e.EMPALIAS }}</option>
     </select>
   </div>
-
   <div class="filtro-group">
     <label>Divisão <span class="obrigatorio">*</span></label>
     <select [(ngModel)]="divisaoFiltro" (ngModelChange)="onDivisaoChange()" [class.select-erro]="erroFiltro">
@@ -23,7 +20,6 @@
       <option *ngFor="let d of divisoes" [value]="d.IDDIVISAO">{{ d.DESCRDIVISAO }}</option>
     </select>
   </div>
-
   <div class="filtro-group">
     <label>Seção</label>
     <select [(ngModel)]="secaoFiltro" [disabled]="!divisaoFiltro">
@@ -31,7 +27,6 @@
       <option *ngFor="let s of secoes" [value]="s.IDSECAO">{{ s.DESCRSECAO }}</option>
     </select>
   </div>
-
   <div class="filtro-group" *ngIf="abaSelecionada === 'semgiro'">
     <label>Dias sem giro</label>
     <select [(ngModel)]="diasSemGiro">
@@ -42,271 +37,345 @@
       <option [value]="180">180+ dias</option>
     </select>
   </div>
-
-  <button class="btn-limpar" (click)="limparFiltros()">
-    <mat-icon>clear</mat-icon> Limpar
-  </button>
-  <button class="btn-buscar-filtros" (click)="buscar()">
-    <mat-icon>search</mat-icon> Buscar
-  </button>
+  <button class="btn-limpar" (click)="limparFiltros()"><mat-icon>clear</mat-icon> Limpar</button>
+  <button class="btn-buscar-filtros" (click)="buscar()"><mat-icon>search</mat-icon> Buscar</button>
 </div>
 
-<!-- Mensagem de erro filtro obrigatório -->
-<div class="filtro-erro" *ngIf="erroFiltro">
-  <mat-icon>info</mat-icon> {{ erroFiltro }}
-</div>
+<div class="filtro-erro" *ngIf="erroFiltro"><mat-icon>info</mat-icon> {{ erroFiltro }}</div>
 
-<!-- FILTROS AVANÇADOS — só aparecem depois de dados carregados -->
+<!-- FILTROS AVANÇADOS -->
 <div class="filtros-avancados" *ngIf="dadosCarregados">
-  <div class="filtros-avancados-titulo">
-    <mat-icon>tune</mat-icon> Filtros avançados
-  </div>
-
+  <div class="filtros-avancados-titulo"><mat-icon>tune</mat-icon> Filtros avançados</div>
   <div class="filtros-avancados-campos">
-
-    <!-- Vendas no mês (mín e máx) — disponível em ambas as abas -->
-    <div class="filtro-group filtro-sm">
-      <label>Vendas/mês mín.</label>
-      <input type="number" min="0" [(ngModel)]="minVendasMes" placeholder="Ex: 1">
-    </div>
-
-    <div class="filtro-group filtro-sm">
-      <label>Vendas/mês máx.</label>
-      <input type="number" min="0" [(ngModel)]="maxVendasMes" placeholder="Ex: 5">
-    </div>
-
-    <!-- Filtros só de Ruptura -->
+    <div class="filtro-group filtro-sm"><label>Vendas/mês mín.</label><input type="number" min="0" [(ngModel)]="minVendasMes" placeholder="Ex: 1"></div>
+    <div class="filtro-group filtro-sm"><label>Vendas/mês máx.</label><input type="number" min="0" [(ngModel)]="maxVendasMes" placeholder="Ex: 5"></div>
     <ng-container *ngIf="abaSelecionada === 'ruptura'">
-      <div class="filtro-group filtro-sm">
-        <label>Dias s/ venda máx.</label>
-        <input type="number" min="0" [(ngModel)]="maxDiasSemVenda" placeholder="Ex: 90">
-      </div>
+      <div class="filtro-group filtro-sm"><label>Dias s/ venda máx.</label><input type="number" min="0" [(ngModel)]="maxDiasSemVenda" placeholder="Ex: 90"></div>
     </ng-container>
-
-    <!-- Filtros só de Sem Giro -->
     <ng-container *ngIf="abaSelecionada === 'semgiro'">
-      <div class="filtro-group filtro-sm">
-        <label>Capital parado mín. (R$)</label>
-        <input type="number" min="0" [(ngModel)]="minCapital" placeholder="Ex: 200">
-      </div>
-
-      <div class="filtro-group filtro-sm">
-        <label>Qtd. em estoque mín.</label>
-        <input type="number" min="0" [(ngModel)]="minSaldo" placeholder="Ex: 10">
-      </div>
+      <div class="filtro-group filtro-sm"><label>Capital parado mín. (R$)</label><input type="number" min="0" [(ngModel)]="minCapital" placeholder="Ex: 200"></div>
+      <div class="filtro-group filtro-sm"><label>Qtd. em estoque mín.</label><input type="number" min="0" [(ngModel)]="minSaldo" placeholder="Ex: 10"></div>
     </ng-container>
-
-    <button class="btn-buscar-filtros btn-aplicar" (click)="buscar()">
-      <mat-icon>filter_list</mat-icon> Aplicar
-    </button>
-
+    <button class="btn-buscar-filtros btn-aplicar" (click)="buscar()"><mat-icon>filter_list</mat-icon> Aplicar</button>
+    <div class="filtro-flags">
+      <label class="flag-toggle" [class.ativo]="apenasAtivoCompra"
+             (click)="apenasAtivoCompra = !apenasAtivoCompra">
+        <span class="flag-dot" [class.inativo]="apenasAtivoCompra"></span>
+        Ocultar inativos p/ compra
+      </label>
+      <label class="flag-toggle" [class.ativo]="apenasAtivoVenda"
+             (click)="apenasAtivoVenda = !apenasAtivoVenda">
+        <span class="flag-dot" [class.inativo]="apenasAtivoVenda"></span>
+        Ocultar inativos p/ venda
+      </label>
+    </div>
   </div>
 </div>
 
-<!-- Estado inicial — antes de buscar -->
+<!-- ESTADO INICIAL -->
 <div class="estado-inicial" *ngIf="!dadosCarregados">
   <mat-icon>search</mat-icon>
   <p>Selecione os filtros desejados e clique em <strong>Buscar</strong> para carregar os alertas.</p>
-  <button class="btn-buscar" (click)="buscar()">
-    <mat-icon>search</mat-icon> Buscar alertas
-  </button>
+  <button class="btn-buscar" (click)="buscar()"><mat-icon>search</mat-icon> Buscar alertas</button>
 </div>
 
 <ng-container *ngIf="dadosCarregados">
 
-<!-- CARDS DE TOTAIS -->
+<!-- KPI CARDS GLOBAIS -->
 <div class="cards-row">
-  <div class="alert-card ruptura">
-    <mat-icon>warning</mat-icon>
-    <div>
-      <span class="card-label">Em ruptura</span>
-      <span class="card-val">{{ carregandoTotais ? '...' : (totais.EM_RUPTURA || 0) }}</span>
+    <div class="alert-card ruptura">
+      <mat-icon>warning</mat-icon>
+      <div>
+        <span class="card-label">Em ruptura</span>
+        <span class="card-val">
+          {{ carregandoRuptura ? '...' : totalEmRuptura }}
+          <span class="card-mais" *ngIf="atingiuLimiteRuptura">+</span>
+        </span>
+      </div>
     </div>
-  </div>
-  <div class="alert-card critico">
-    <mat-icon>error_outline</mat-icon>
-    <div>
-      <span class="card-label">Sem giro (30–60 dias)</span>
-      <span class="card-val">{{ carregandoTotais ? '...' : (totais.CRITICO || 0) }}</span>
+
+    <div class="alert-card critico">
+      <mat-icon>error_outline</mat-icon>
+      <div>
+        <span class="card-label">Sem giro (30–60 dias)</span>
+        <span class="card-val">{{ carregandoGiro ? '...' : totalCritico }}</span>
+      </div>
     </div>
-  </div>
-  <div class="alert-card semgiro">
-    <mat-icon>hourglass_empty</mat-icon>
-    <div>
-      <span class="card-label">Sem giro (+60 dias)</span>
-      <span class="card-val">{{ carregandoTotais ? '...' : (totais.SEM_GIRO_60 || 0) }}</span>
+
+    <div class="alert-card semgiro">
+      <mat-icon>hourglass_empty</mat-icon>
+      <div>
+        <span class="card-label">Sem giro (+60 dias)</span>
+        <span class="card-val">
+          {{ carregandoGiro ? '...' : totalSemGiro60 }}
+          <span class="card-mais" *ngIf="atingiuLimiteGiro">+</span>
+        </span>
+      </div>
     </div>
-  </div>
-  <div class="alert-card capital">
-    <mat-icon>account_balance_wallet</mat-icon>
-    <div>
-      <span class="card-label">Capital parado</span>
-      <span class="card-val">R$ {{ carregandoTotais ? '...' : moeda(totais.CAPITAL_PARADO || 0) }}</span>
+
+    <div class="alert-card capital">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <div>
+        <span class="card-label">Capital parado</span>
+        <span class="card-val">R$ {{ carregandoGiro ? '...' : moeda(capitalParadoTotal) }}</span>
+      </div>
     </div>
-  </div>
 </div>
 
 <!-- ABAS -->
 <div class="abas">
-  <button class="aba" [class.ativa]="abaSelecionada === 'ruptura'"
-    (click)="abaSelecionada = 'ruptura'">
-    <mat-icon>warning</mat-icon>
-    Produtos em ruptura
-    <span class="aba-count ruptura-count">{{ ruptura.length }}</span>
+  <button class="aba" [class.ativa]="abaSelecionada === 'ruptura'" (click)="abaSelecionada = 'ruptura'">
+    <mat-icon>warning</mat-icon> Produtos em ruptura
+    <span class="aba-count ruptura-count">{{ rupturaFiltrada.length }}</span>
   </button>
-  <button class="aba" [class.ativa]="abaSelecionada === 'semgiro'"
-    (click)="abaSelecionada = 'semgiro'">
-    <mat-icon>hourglass_empty</mat-icon>
-    Sem giro
-    <span class="aba-count semgiro-count">{{ semGiro.length }}</span>
+  <button class="aba" [class.ativa]="abaSelecionada === 'semgiro'" (click)="abaSelecionada = 'semgiro'">
+    <mat-icon>hourglass_empty</mat-icon> Sem giro
+    <span class="aba-count semgiro-count">{{ semGiroFiltrada.length }}</span>
   </button>
-  <button class="aba" [class.ativa]="abaSelecionada === 'heatmap'"
-    (click)="abaSelecionada = 'heatmap'">
-    <mat-icon>grid_view</mat-icon>
-    Mapa de calor
+  <button class="aba" [class.ativa]="abaSelecionada === 'heatmap'" (click)="abaSelecionada = 'heatmap'">
+    <mat-icon>grid_view</mat-icon> Mapa de calor
   </button>
 </div>
 
 <!-- ════ ABA RUPTURA ════ -->
 <div *ngIf="abaSelecionada === 'ruptura'">
-    <!-- Aviso de limite atingido -->
-    <div class="aviso-limite" *ngIf="ruptura.length >= 500">
-      <mat-icon>info</mat-icon>
-      Exibindo os 500 primeiros resultados. Selecione uma <strong>Seção</strong> para visualizar todos os produtos.
+
+  <!-- Cards de faixas -->
+  <div class="faixas-row" *ngIf="!carregandoRuptura && ruptura.length">
+    <div class="faixa-card faixa-urgente">
+      <div class="faixa-header"><span class="faixa-label">Ruptura recente</span><span class="faixa-periodo">0 – 15 dias</span></div>
+      <div class="faixa-valor">{{ ruptura0_15.length }}</div>
+      <div class="faixa-sub">produtos<span class="faixa-capital" *ngIf="custoReposicao(ruptura0_15) > 0"> · rep. R$ {{ moeda(custoReposicao(ruptura0_15)) }}</span></div>
     </div>
-  <div class="table-header-info">
-    <span>{{ ruptura.length }} produto(s) com estoque zerado</span>
-    <span class="table-sub">Ordenado por última venda</span>
+    <div class="faixa-card faixa-atencao">
+      <div class="faixa-header"><span class="faixa-label">Atenção</span><span class="faixa-periodo">15 – 30 dias</span></div>
+      <div class="faixa-valor">{{ ruptura15_30.length }}</div>
+      <div class="faixa-sub">produtos<span class="faixa-capital" *ngIf="custoReposicao(ruptura15_30) > 0"> · rep. R$ {{ moeda(custoReposicao(ruptura15_30)) }}</span></div>
+    </div>
+    <div class="faixa-card faixa-critico">
+      <div class="faixa-header"><span class="faixa-label">Crítico</span><span class="faixa-periodo">30 – 60 dias</span></div>
+      <div class="faixa-valor">{{ ruptura30_60.length }}</div>
+      <div class="faixa-sub">produtos<span class="faixa-capital" *ngIf="custoReposicao(ruptura30_60) > 0"> · rep. R$ {{ moeda(custoReposicao(ruptura30_60)) }}</span></div>
+    </div>
+    <div class="faixa-card faixa-grave">
+      <div class="faixa-header"><span class="faixa-label">Grave</span><span class="faixa-periodo">+ 60 dias</span></div>
+      <div class="faixa-valor">{{ ruptura60plus.length }}</div>
+      <div class="faixa-sub">produtos<span class="faixa-capital" *ngIf="custoReposicao(ruptura60plus) > 0"> · rep. R$ {{ moeda(custoReposicao(ruptura60plus)) }}</span></div>
+    </div>
   </div>
 
-  <div class="loading-state" *ngIf="carregandoRuptura">
-    <mat-icon>hourglass_top</mat-icon> Carregando...
+<div class="aviso-limite" *ngIf="atingiuLimiteRuptura">
+  <mat-icon>info</mat-icon>
+  Exibindo os <strong>500 primeiros</strong> resultados ordenados por urgência.
+  Filtre por <strong>Seção</strong> para ver todos os produtos de uma área específica.
+</div>
+
+  <!-- Barra de busca local -->
+  <div class="busca-local-bar" *ngIf="!carregandoRuptura && ruptura.length">
+    <div class="busca-local-input">
+      <mat-icon>search</mat-icon>
+      <input type="text" placeholder="Buscar produto (código ou nome)..."
+             [(ngModel)]="filtroProduto" (ngModelChange)="onFiltroProdutoChange()">
+    </div>
+    <div class="busca-local-input">
+      <mat-icon>label</mat-icon>
+      <input type="text" placeholder="Filtrar por marca..."
+             [(ngModel)]="filtroMarca" (ngModelChange)="onFiltroMarcaChange()">
+    </div>
+    <button class="btn-limpar-local" *ngIf="filtroProduto || filtroMarca" (click)="limparFiltrosLocais()">
+      <mat-icon>close</mat-icon> Limpar
+    </button>
+    <span class="busca-resultado" *ngIf="filtroProduto || filtroMarca">
+      {{ rupturaFiltrada.length }} de {{ ruptura.length }} resultado(s)
+    </span>
   </div>
 
+  <div class="legenda-vnd">
+    <span class="leg-vnd vnd-alto">▉ Venda alta (&gt;10/mês)</span>
+    <span class="leg-vnd vnd-medio">▉ Venda média (3–10)</span>
+    <span class="leg-vnd vnd-baixo">▉ Slow motion (1–3)</span>
+    <span class="leg-vnd vnd-zero">▉ Parado (&lt;1)</span>
+  </div>
+
+  <div class="loading-state" *ngIf="carregandoRuptura"><mat-icon>hourglass_top</mat-icon> Carregando...</div>
+
+  <div class="empty-state" *ngIf="!carregandoRuptura && !rupturaFiltrada.length && ruptura.length">
+    <mat-icon>search_off</mat-icon><p>Nenhum produto encontrado com os filtros aplicados.</p>
+  </div>
   <div class="empty-state" *ngIf="!carregandoRuptura && !ruptura.length">
-    <mat-icon>check_circle</mat-icon>
-    <p>Nenhum produto em ruptura com os filtros aplicados! 🎉</p>
+    <mat-icon>check_circle</mat-icon><p>Nenhum produto em ruptura com os filtros aplicados! 🎉</p>
   </div>
 
-  <div class="tabela-wrap" *ngIf="!carregandoRuptura && ruptura.length">
+  <div class="tabela-wrap" *ngIf="!carregandoRuptura && rupturaFiltrada.length">
     <table class="tabela-alertas">
       <thead>
         <tr>
-          <th>Produto</th>
-          <th>Empresa</th>
+          <th class="sortable" (click)="sortByRuptura('DESCRCOMPRODUTO')">Produto <mat-icon class="sort-icon">{{ sortIconRuptura('DESCRCOMPRODUTO') }}</mat-icon></th>
+          <th class="sortable" (click)="sortByRuptura('IDEMPRESA')">Empresa <mat-icon class="sort-icon">{{ sortIconRuptura('IDEMPRESA') }}</mat-icon></th>
           <th>Divisão</th>
           <th>Seção</th>
+          <th class="sortable" (click)="sortByRuptura('MARCA')">Marca <mat-icon class="sort-icon">{{ sortIconRuptura('MARCA') }}</mat-icon></th>
           <th>Última venda</th>
-          <th>Dias s/ venda</th>
-          <th>Vnd/mês</th>
+          <th class="sortable" (click)="sortByRuptura('DIAS_SEM_VENDA')">Dias s/ venda <mat-icon class="sort-icon">{{ sortIconRuptura('DIAS_SEM_VENDA') }}</mat-icon></th>
+          <th class="sortable" (click)="sortByRuptura('QTD_VENDIDA_MES')">Vnd/mês <mat-icon class="sort-icon">{{ sortIconRuptura('QTD_VENDIDA_MES') }}</mat-icon></th>
+          <th class="sortable" (click)="sortByRuptura('VALCUSTOMEDIO')">Custo rep. <mat-icon class="sort-icon">{{ sortIconRuptura('VALCUSTOMEDIO') }}</mat-icon></th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let p of rupturaExibida">
           <td class="td-produto">
             <span class="dot-ruptura"></span>
-            <div>
-              <strong>{{ p.DESCRCOMPRODUTO }}</strong>
-              <span class="td-id">#{{ p.IDPRODUTO }}</span>
-            </div>
+            <div><strong>{{ p.DESCRCOMPRODUTO }}</strong><span class="td-id">#{{ p.IDPRODUTO }}</span></div>
+            <span class="badge-inativo-compra" *ngIf="p.FLAG_INATIVO_COMPRA === 'T'">Inativo compra</span>
+            <span class="badge-inativo-venda"  *ngIf="p.FLAG_INATIVO_VENDA  === 'T'">Inativo venda</span>
           </td>
           <td><span class="badge-empresa">{{ nomeEmpresa(p.IDEMPRESA) }}</span></td>
           <td class="td-sec">{{ nomeDivisao(p.IDDIVISAO) }}</td>
           <td class="td-sec">{{ nomeSecao(p.IDSECAO) }}</td>
+          <td class="td-sec">{{ p.MARCA || '—' }}</td>
           <td>{{ getUltimaVenda(p.DIAS_SEM_VENDA) }}</td>
-          <td>
-            <span class="badge-dias {{ corDias(p.DIAS_SEM_VENDA) }}">
-              {{ p.DIAS_SEM_VENDA }} dias
-            </span>
-          </td>
-          <td class="td-num">{{ p.QTD_VENDIDA_MES | number:'1.0-0' }}</td>
+          <td><span class="badge-dias {{ corDias(p.DIAS_SEM_VENDA) }}">{{ p.DIAS_SEM_VENDA }} dias</span></td>
+          <td class="td-num"><span class="badge-vnd {{ corVendasRuptura(p.QTD_VENDIDA_MES) }}">{{ p.QTD_VENDIDA_MES | number:'1.0-1' }}</span></td>
+          <td class="td-capital">{{ p.VALCUSTOMEDIO > 0 ? 'R$ ' + moeda(p.VALCUSTOMEDIO * p.QTD_VENDIDA_MES) : '—' }}</td>
         </tr>
       </tbody>
     </table>
-
     <div class="paginacao" *ngIf="totalPaginasRuptura > 1">
-      <button [disabled]="paginaRuptura === 1" (click)="paginaRuptura = paginaRuptura - 1">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
+      <button [disabled]="paginaRuptura === 1" (click)="paginaRuptura = paginaRuptura - 1"><mat-icon>chevron_left</mat-icon></button>
       <span>{{ paginaRuptura }} / {{ totalPaginasRuptura }}</span>
-      <button [disabled]="paginaRuptura === totalPaginasRuptura" (click)="paginaRuptura = paginaRuptura + 1">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
+      <button [disabled]="paginaRuptura === totalPaginasRuptura" (click)="paginaRuptura = paginaRuptura + 1"><mat-icon>chevron_right</mat-icon></button>
     </div>
   </div>
 </div>
 
 <!-- ════ ABA SEM GIRO ════ -->
 <div *ngIf="abaSelecionada === 'semgiro'">
-  <div class="table-header-info">
-    <span>{{ semGiro.length }} produto(s) sem movimentação há {{ diasSemGiro }}+ dias</span>
-    <span class="capital-total">
-      Capital parado: <strong>R$ {{ moeda(capitalParadoTotal) }}</strong>
+
+  <!-- Cards de faixas -->
+  <div class="faixas-row" *ngIf="!carregandoGiro && semGiro.length">
+    <div class="faixa-card faixa-atencao">
+      <div class="faixa-header"><span class="faixa-label">Atenção</span><span class="faixa-periodo">30 – 60 dias</span></div>
+      <div class="faixa-valor">{{ semgiro30_60.length }}</div>
+      <div class="faixa-sub">produtos<span class="faixa-capital" *ngIf="capitalFaixa(semgiro30_60) > 0"> · R$ {{ moeda(capitalFaixa(semgiro30_60)) }}</span></div>
+    </div>
+    <div class="faixa-card faixa-critico">
+      <div class="faixa-header"><span class="faixa-label">Crítico</span><span class="faixa-periodo">60 – 90 dias</span></div>
+      <div class="faixa-valor">{{ semgiro60_90.length }}</div>
+      <div class="faixa-sub">produtos<span class="faixa-capital" *ngIf="capitalFaixa(semgiro60_90) > 0"> · R$ {{ moeda(capitalFaixa(semgiro60_90)) }}</span></div>
+    </div>
+    <div class="faixa-card faixa-grave">
+      <div class="faixa-header"><span class="faixa-label">Grave</span><span class="faixa-periodo">90 – 180 dias</span></div>
+      <div class="faixa-valor">{{ semgiro90_180.length }}</div>
+      <div class="faixa-sub">produtos<span class="faixa-capital" *ngIf="capitalFaixa(semgiro90_180) > 0"> · R$ {{ moeda(capitalFaixa(semgiro90_180)) }}</span></div>
+    </div>
+    <div class="faixa-card faixa-obsoleto">
+      <div class="faixa-header"><span class="faixa-label">Risco de obsolescência</span><span class="faixa-periodo">+ 180 dias</span></div>
+      <div class="faixa-valor">{{ semgiro180plus.length }}</div>
+      <div class="faixa-sub">produtos<span class="faixa-capital" *ngIf="capitalFaixa(semgiro180plus) > 0"> · R$ {{ moeda(capitalFaixa(semgiro180plus)) }}</span></div>
+    </div>
+  </div>
+
+  <!-- Barra de busca local -->
+  <div class="busca-local-bar" *ngIf="!carregandoGiro && semGiro.length">
+    <div class="busca-local-input">
+      <mat-icon>search</mat-icon>
+      <input type="text" placeholder="Buscar produto (código ou nome)..."
+             [(ngModel)]="filtroProduto" (ngModelChange)="onFiltroProdutoChange()">
+    </div>
+    <div class="busca-local-input">
+      <mat-icon>label</mat-icon>
+      <input type="text" placeholder="Filtrar por marca..."
+             [(ngModel)]="filtroMarca" (ngModelChange)="onFiltroMarcaChange()">
+    </div>
+    <button class="btn-limpar-local" *ngIf="filtroProduto || filtroMarca" (click)="limparFiltrosLocais()">
+      <mat-icon>close</mat-icon> Limpar
+    </button>
+    <span class="busca-resultado" *ngIf="filtroProduto || filtroMarca">
+      {{ semGiroFiltrada.length }} de {{ semGiro.length }} resultado(s)
     </span>
   </div>
 
-  <div class="loading-state" *ngIf="carregandoGiro">
-    <mat-icon>hourglass_top</mat-icon> Carregando...
+  <div class="table-header-info">
+    <span>{{ semGiroFiltrada.length }} produto(s) sem movimentação há {{ diasSemGiro }}+ dias</span>
+    <span class="capital-total">Capital parado: <strong>R$ {{ moeda(capitalParadoTotal) }}</strong></span>
   </div>
 
+  <div class="legenda-vnd">
+    <span class="leg-vnd vnd-alto">▉ Ainda vende (&gt;5/mês)</span>
+    <span class="leg-vnd vnd-medio">▉ Venda baixa (1–5)</span>
+    <span class="leg-vnd vnd-baixo">▉ Slow motion (&lt;1)</span>
+    <span class="leg-vnd vnd-zero">▉ Totalmente parado</span>
+  </div>
+
+  <div class="loading-state" *ngIf="carregandoGiro"><mat-icon>hourglass_top</mat-icon> Carregando...</div>
+
+  <div class="empty-state" *ngIf="!carregandoGiro && !semGiroFiltrada.length && semGiro.length">
+    <mat-icon>search_off</mat-icon><p>Nenhum produto encontrado com os filtros aplicados.</p>
+  </div>
   <div class="empty-state" *ngIf="!carregandoGiro && !semGiro.length">
-    <mat-icon>check_circle</mat-icon>
-    <p>Nenhum produto parado com os filtros aplicados! 🎉</p>
+    <mat-icon>check_circle</mat-icon><p>Nenhum produto parado com os filtros aplicados! 🎉</p>
   </div>
 
-  <div class="tabela-wrap" *ngIf="!carregandoGiro && semGiro.length">
+  <div class="tabela-wrap" *ngIf="!carregandoGiro && semGiroFiltrada.length">
     <table class="tabela-alertas">
       <thead>
         <tr>
-          <th>Produto</th>
-          <th>Empresa</th>
+          <th class="sortable" (click)="sortByGiro('DESCRCOMPRODUTO')">Produto <mat-icon class="sort-icon">{{ sortIconGiro('DESCRCOMPRODUTO') }}</mat-icon></th>
+          <th class="sortable" (click)="sortByGiro('IDEMPRESA')">Empresa <mat-icon class="sort-icon">{{ sortIconGiro('IDEMPRESA') }}</mat-icon></th>
           <th>Divisão</th>
           <th>Seção</th>
-          <th>Saldo</th>
+          <th class="sortable" (click)="sortByGiro('MARCA')">Marca <mat-icon class="sort-icon">{{ sortIconGiro('MARCA') }}</mat-icon></th>
+          <th class="sortable" (click)="sortByGiro('SALDO')">Saldo <mat-icon class="sort-icon">{{ sortIconGiro('SALDO') }}</mat-icon></th>
           <th>Última venda</th>
-          <th>Dias parado</th>
-          <th>Vnd/mês</th>
-          <th>Capital parado</th>
+          <th class="sortable" (click)="sortByGiro('DIAS_SEM_GIRO')">Dias parado <mat-icon class="sort-icon">{{ sortIconGiro('DIAS_SEM_GIRO') }}</mat-icon></th>
+          <th class="sortable" (click)="sortByGiro('QTD_VENDIDA_MES')">Vnd/mês <mat-icon class="sort-icon">{{ sortIconGiro('QTD_VENDIDA_MES') }}</mat-icon></th>
+          <th class="sortable" (click)="sortByGiro('CAPITAL_PARADO')">Capital parado <mat-icon class="sort-icon">{{ sortIconGiro('CAPITAL_PARADO') }}</mat-icon></th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let p of giroExibido">
           <td class="td-produto">
             <span class="dot-semgiro"></span>
-            <div>
-              <strong>{{ p.DESCRCOMPRODUTO }}</strong>
-              <span class="td-id">#{{ p.IDPRODUTO }}</span>
-            </div>
+            <div><strong>{{ p.DESCRCOMPRODUTO }}</strong><span class="td-id">#{{ p.IDPRODUTO }}</span></div>
+            <span class="badge-inativo-compra" *ngIf="p.FLAG_INATIVO_COMPRA === 'T'">Inativo compra</span>
+            <span class="badge-inativo-venda"  *ngIf="p.FLAG_INATIVO_VENDA  === 'T'">Inativo venda</span>
           </td>
           <td><span class="badge-empresa">{{ nomeEmpresa(p.IDEMPRESA) }}</span></td>
           <td class="td-sec">{{ nomeDivisao(p.IDDIVISAO) }}</td>
           <td class="td-sec">{{ nomeSecao(p.IDSECAO) }}</td>
+          <td class="td-sec">{{ p.MARCA || '—' }}</td>
           <td class="td-num">{{ p.SALDO | number:'1.0-2' }}</td>
           <td>{{ getUltimaVenda(p.DIAS_SEM_GIRO) }}</td>
-          <td>
-            <span class="badge-dias semgiro">{{ p.DIAS_SEM_GIRO }} dias</span>
-          </td>
-          <td class="td-num">{{ p.QTD_VENDIDA_MES | number:'1.0-0' }}</td>
+          <td><span class="badge-dias semgiro">{{ p.DIAS_SEM_GIRO }} dias</span></td>
+          <td class="td-num"><span class="badge-vnd {{ corVendasGiro(p.QTD_VENDIDA_MES) }}">{{ p.QTD_VENDIDA_MES | number:'1.0-1' }}</span></td>
           <td class="td-capital">R$ {{ moeda(p.CAPITAL_PARADO) }}</td>
         </tr>
       </tbody>
     </table>
-
     <div class="paginacao" *ngIf="totalPaginasGiro > 1">
-      <button [disabled]="paginaGiro === 1" (click)="paginaGiro = paginaGiro - 1">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
+      <button [disabled]="paginaGiro === 1" (click)="paginaGiro = paginaGiro - 1"><mat-icon>chevron_left</mat-icon></button>
       <span>{{ paginaGiro }} / {{ totalPaginasGiro }}</span>
-      <button [disabled]="paginaGiro === totalPaginasGiro" (click)="paginaGiro = paginaGiro + 1">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
+      <button [disabled]="paginaGiro === totalPaginasGiro" (click)="paginaGiro = paginaGiro + 1"><mat-icon>chevron_right</mat-icon></button>
     </div>
   </div>
 </div>
 
 <!-- ════ ABA HEATMAP ════ -->
 <div *ngIf="abaSelecionada === 'heatmap'">
+
   <div class="heatmap-intro">
+    <!-- Selector de visão -->
+    <div class="heatmap-visao-tabs">
+      <button class="heatmap-tab" [class.ativo]="heatmapVisao === 'secao'"
+              (click)="heatmapVisao = 'secao'">
+        <mat-icon>grid_view</mat-icon> Por Seção
+      </button>
+      <button class="heatmap-tab" [class.ativo]="heatmapVisao === 'marca'"
+              (click)="heatmapVisao = 'marca'">
+        <mat-icon>label</mat-icon> Por Marca
+      </button>
+    </div>
+
     <div class="heatmap-legenda">
       <span class="leg-titulo">Intensidade:</span>
       <span class="leg-item zero">0</span>
@@ -315,21 +384,24 @@
       <span class="leg-item alto">Alto</span>
       <span class="leg-item critico">Crítico</span>
     </div>
-    <span class="heatmap-sub">{{ heatmapDados.length }} seções analisadas</span>
+
+    <span class="heatmap-sub" *ngIf="heatmapVisao === 'secao'">
+      {{ heatmapDados.length }} seções analisadas
+    </span>
+    <span class="heatmap-sub" *ngIf="heatmapVisao === 'marca'">
+      {{ heatmapDadosMarca.length }} marcas em ruptura
+    </span>
   </div>
 
-  <div class="heatmap-tabela-wrap">
+  <!-- VISÃO POR SEÇÃO (existente) -->
+  <div class="heatmap-tabela-wrap" *ngIf="heatmapVisao === 'secao'">
     <table class="heatmap-tabela">
       <thead>
         <tr>
           <th class="col-secao">Seção</th>
           <th class="col-divisao">Divisão</th>
-          <th class="col-cell">
-            <mat-icon>warning</mat-icon> Ruptura
-          </th>
-          <th class="col-cell">
-            <mat-icon>hourglass_empty</mat-icon> Sem giro
-          </th>
+          <th class="col-cell"><mat-icon>warning</mat-icon> Ruptura</th>
+          <th class="col-cell"><mat-icon>hourglass_empty</mat-icon> Sem giro</th>
           <th class="col-capital">Capital parado</th>
           <th class="col-total">Total alertas</th>
         </tr>
@@ -338,33 +410,53 @@
         <tr *ngFor="let h of heatmapDados">
           <td class="col-secao-val">{{ h.secao }}</td>
           <td class="col-divisao-val">{{ h.divisao }}</td>
+          <td class="col-cell-val"><div class="heat-cell {{ intensidade(h.ruptura, maxRuptura) }}">{{ h.ruptura }}</div></td>
+          <td class="col-cell-val"><div class="heat-cell {{ intensidade(h.semGiro, maxSemGiro) }}">{{ h.semGiro }}</div></td>
+          <td class="col-capital-val" [class.capital-alto]="h.capital > 1000">{{ h.capital > 0 ? 'R$ ' + moeda(h.capital) : '—' }}</td>
+          <td class="col-total-val"><span class="badge-total {{ intensidade(h.ruptura + h.semGiro, maxRuptura + maxSemGiro) }}">{{ h.ruptura + h.semGiro }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="empty-state" *ngIf="!heatmapDados.length">
+      <mat-icon>info</mat-icon><p>Nenhum dado carregado. Faça uma busca primeiro.</p>
+    </div>
+  </div>
+
+  <!-- VISÃO POR MARCA (nova) -->
+  <div class="heatmap-tabela-wrap" *ngIf="heatmapVisao === 'marca'">
+    <table class="heatmap-tabela">
+      <thead>
+        <tr>
+          <th class="col-secao">Marca</th>
+          <th class="col-cell"><mat-icon>warning</mat-icon> Produtos em ruptura</th>
+          <th class="col-capital">Custo de reposição</th>
+          <th class="col-cell">Intensidade</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let h of heatmapDadosMarca">
+          <td class="col-secao-val">{{ h.marca }}</td>
           <td class="col-cell-val">
-            <div class="heat-cell {{ intensidade(h.ruptura, maxRuptura) }}">
+            <div class="heat-cell {{ intensidade(h.ruptura, maxRupturaMarca) }}">
               {{ h.ruptura }}
             </div>
           </td>
+          <td class="col-capital-val" [class.capital-alto]="h.custoRep > 500">
+            {{ h.custoRep > 0 ? 'R$ ' + moeda(h.custoRep) : '—' }}
+          </td>
           <td class="col-cell-val">
-            <div class="heat-cell {{ intensidade(h.semGiro, maxSemGiro) }}">
-              {{ h.semGiro }}
-            </div>
-          </td>
-          <td class="col-capital-val" [class.capital-alto]="h.capital > 1000">
-            {{ h.capital > 0 ? 'R$ ' + moeda(h.capital) : '—' }}
-          </td>
-          <td class="col-total-val">
-            <span class="badge-total {{ intensidade(h.ruptura + h.semGiro, maxRuptura + maxSemGiro) }}">
-              {{ h.ruptura + h.semGiro }}
+            <span class="badge-total {{ intensidade(h.ruptura, maxRupturaMarca) }}">
+              {{ intensidade(h.ruptura, maxRupturaMarca) | titlecase }}
             </span>
           </td>
         </tr>
       </tbody>
     </table>
+    <div class="empty-state" *ngIf="!heatmapDadosMarca.length">
+      <mat-icon>info</mat-icon><p>Nenhuma ruptura encontrada para exibir por marca.</p>
+    </div>
   </div>
 
-  <div class="empty-state" *ngIf="!heatmapDados.length">
-    <mat-icon>info</mat-icon>
-    <p>Nenhum dado carregado. Faça uma busca primeiro.</p>
-  </div>
 </div>
 
 </ng-container>
