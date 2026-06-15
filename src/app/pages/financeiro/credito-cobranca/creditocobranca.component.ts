@@ -9,8 +9,10 @@ import { environment } from '../../../../environments/environment';
 export interface ResumoSituacao {
   situacao: 'A_VENCER' | 'VENCIDO' | 'JURIDICO' | 'PAGO';
   status: string;
+  juridico?: boolean;
   totalTitulos: number;
   valorTotal: number;
+  valorBruto?: number;        // ← NOVO
 }
 
 export interface FaixaVencimento {
@@ -25,9 +27,15 @@ export interface FaixaVencimento {
 
 export interface ResumoConsolidado {
   totalCarteira: number;
+  totalCarteiraBruto: number;       // ← NOVO
   totalPago: number;
+  totalPagoOperacional: number;
+  totalPagoJuridico: number;
   inadimplencia: number;
   pctInadimplencia: number;
+  carteiraJuridica: number;
+  carteiraJuridicaBruto: number;    // ← NOVO
+  atrasoProlongado: number;
   aProtestar: number;
   retornoCobranca: number;
   emGarantia: number;
@@ -62,6 +70,7 @@ export interface Titulo {
 export interface PaginacaoTitulos {
   total: number;
   valorTotal: number;
+  valorSaldoTotal: number;          // ← NOVO
   pagina: number;
   porPagina: number;
   dados: Titulo[];
@@ -96,6 +105,9 @@ export class CreditoCobrancaComponent {
   filtroGarantia:  string = '';
   paginaAtual:     number = 1;
   readonly POR_PAGINA = 50;
+  filtroCliente: string = '';
+  filtroForma:   string = '';
+  formasPagamento: { id: number; descricao: string }[] = [];   // ← pro select
 
   carregandoPainel    = false;
   carregandoRelatorio = false;
@@ -104,6 +116,7 @@ export class CreditoCobrancaComponent {
 
   resumo:  ResumoConsolidado | null = null;
   titulos: PaginacaoTitulos  | null = null;
+  agrupar: 'situacao' | 'forma' = 'situacao';   // ← seletor
 
   // ─── Modo de data ─────────────────────────────────────────────────────────
   get modoComparativo(): boolean { return !this.dataFim || this.dataFim === this.dataInicio; }
@@ -122,6 +135,16 @@ export class CreditoCobrancaComponent {
   get linhasVencido():  ResumoSituacao[] { return this.resumo?.linhas.filter(l => l.situacao === 'VENCIDO')   ?? []; }
   get linhasJuridico(): ResumoSituacao[] { return this.resumo?.linhas.filter(l => l.situacao === 'JURIDICO')  ?? []; }
   get linhasPago():     ResumoSituacao[] { return this.resumo?.linhas.filter(l => l.situacao === 'PAGO')      ?? []; }
+  get linhasPagoOperacional(): ResumoSituacao[] {
+    return this.resumo?.linhas.filter(l => l.situacao === 'PAGO' && !l.juridico) ?? [];
+  }
+  get linhasPagoJuridico(): ResumoSituacao[] {
+    return this.resumo?.linhas.filter(l => l.situacao === 'PAGO' && l.juridico) ?? [];
+  }
+
+  get subTotalAVencerBruto():  number { return this.linhasAVencer.reduce((s,l)  => s + (l.valorBruto ?? 0), 0); }
+  get subTotalVencidoBruto():  number { return this.linhasVencido.reduce((s,l)  => s + (l.valorBruto ?? 0), 0); }
+  get subTotalJuridicoBruto(): number { return this.linhasJuridico.reduce((s,l) => s + (l.valorBruto ?? 0), 0); }
   get subTotalAVencer():  number { return this.linhasAVencer.reduce((s,l)  => s + l.valorTotal, 0); }
   get subTotalVencido():  number { return this.linhasVencido.reduce((s,l)  => s + l.valorTotal, 0); }
   get subTotalJuridico(): number { return this.linhasJuridico.reduce((s,l) => s + l.valorTotal, 0); }
@@ -134,136 +157,91 @@ export class CreditoCobrancaComponent {
   abs(n: number): number { return Math.abs(n); }
 
   constructor() {
-    afterNextRender(() => { this.cdr.detectChanges(); });
+    afterNextRender(() => {
+      this.carregarFormas();
+      this.cdr.detectChanges();
+    });
   }
 
-  // ─── MOCK DATA ────────────────────────────────────────────────────────────
-  private carregarDadosMock() {
-    this.resumo = {
-      totalCarteira:    12_467_303,
-      totalPago:         8_069_329,
-      inadimplencia:     8_070_479,
-      pctInadimplencia:  33,
-      aProtestar:        1_222_141,
-      retornoCobranca:   13,
-      emGarantia:          842_190,
-      qtdGarantia:             34,
-      anterior: {
-        totalCarteira:   12_284_000,
-        inadimplencia:    7_920_000,
-        pctInadimplencia: 31.8,
-      },
-      linhas: [
-        { situacao: 'A_VENCER', status: 'A vencer',        totalTitulos: 1_240, valorTotal: 5_219_509 },
-        { situacao: 'A_VENCER', status: 'Cliente especial',totalTitulos:   87,  valorTotal:   154_334 },
-        { situacao: 'A_VENCER', status: 'Leal Moreira',    totalTitulos:   12,  valorTotal:     2_746 },
-        { situacao: 'A_VENCER', status: 'Condicionado',    totalTitulos:   54,  valorTotal:    12_068 },
-        { situacao: 'VENCIDO',  status: 'Cobrança interna',totalTitulos:  312,  valorTotal:   901_292 },
-        { situacao: 'VENCIDO',  status: 'Protestado',      totalTitulos:   98,  valorTotal:   252_842 },
-        { situacao: 'VENCIDO',  status: 'Cliente especial',totalTitulos:  143,  valorTotal:   315_757 },
-        { situacao: 'VENCIDO',  status: 'Leal Moreira',    totalTitulos:   31,  valorTotal:    17_369 },
-        { situacao: 'VENCIDO',  status: 'Condicionado',    totalTitulos:   67,  valorTotal:   156_280 },
-        { situacao: 'VENCIDO',  status: 'Marco Antonio',   totalTitulos:   28,  valorTotal:    64_289 },
-        { situacao: 'JURIDICO', status: 'Mendes',          totalTitulos:  589,  valorTotal: 3_124_122 },
-        { situacao: 'JURIDICO', status: 'Jailton',         totalTitulos:  258,  valorTotal: 1_272_701 },
-        { situacao: 'PAGO',     status: 'Cobrança interna',totalTitulos:  421,  valorTotal: 1_050_966 },
-        { situacao: 'PAGO',     status: 'Protestado',      totalTitulos:   87,  valorTotal:    92_410 },
-        { situacao: 'PAGO',     status: 'Cliente especial',totalTitulos:  156,  valorTotal:   185_861 },
-        { situacao: 'PAGO',     status: 'Leal Moreira',    totalTitulos:   23,  valorTotal:    16_807 },
-        { situacao: 'PAGO',     status: 'Condicionado',    totalTitulos:  892,  valorTotal: 6_294_245 },
-        { situacao: 'PAGO',     status: 'Marco Antonio',   totalTitulos:   41,  valorTotal:    37_092 },
-      ],
-      faixas: [
-        { label: 'Até 7 dias — vencido recente', diasMin: 0,   diasMax: 7,   valor:   324_180, qtd: 187, acao: 'Cobrança interna', nivel: 'recente' },
-        { label: '8 a 15 dias — aviso Serasa',   diasMin: 8,   diasMax: 15,  valor:   489_230, qtd: 203, acao: 'Notificação preventiva', nivel: 'aviso' },
-        { label: '16 a 30 dias',                 diasMin: 16,  diasMax: 30,  valor:   732_941, qtd: 318, acao: 'Protestar', nivel: 'medio' },
-        { label: '31 a 90 dias — 3 meses',       diasMin: 31,  diasMax: 90,  valor: 1_134_882, qtd: 421, acao: 'Cobrança ativa', nivel: 'critico' },
-        { label: '91 a 180 dias — 6 meses',      diasMin: 91,  diasMax: 180, valor:   892_470, qtd: 289, acao: 'Negociação / acordo', nivel: 'grave' },
-        { label: 'Mais de 180 dias — jurídico',  diasMin: 181, diasMax: null,valor: 4_396_824, qtd: 847, acao: 'Mendes / Jailton', nivel: 'juridico' },
-      ],
-      evolucao: [
-        { data: '2026-04-16', pctInadimplencia: 29.1, valorCarteira: 11_800_000 },
-        { data: '2026-04-17', pctInadimplencia: 29.4, valorCarteira: 11_850_000 },
-        { data: '2026-04-18', pctInadimplencia: 29.8, valorCarteira: 11_900_000 },
-        { data: '2026-04-21', pctInadimplencia: 30.1, valorCarteira: 11_980_000 },
-        { data: '2026-04-22', pctInadimplencia: 30.5, valorCarteira: 12_050_000 },
-        { data: '2026-04-23', pctInadimplencia: 30.9, valorCarteira: 12_100_000 },
-        { data: '2026-04-24', pctInadimplencia: 31.2, valorCarteira: 12_150_000 },
-        { data: '2026-04-25', pctInadimplencia: 31.0, valorCarteira: 12_120_000 },
-        { data: '2026-04-28', pctInadimplencia: 31.4, valorCarteira: 12_180_000 },
-        { data: '2026-04-29', pctInadimplencia: 31.8, valorCarteira: 12_220_000 },
-        { data: '2026-04-30', pctInadimplencia: 31.5, valorCarteira: 12_200_000 },
-        { data: '2026-05-02', pctInadimplencia: 32.0, valorCarteira: 12_280_000 },
-        { data: '2026-05-05', pctInadimplencia: 32.4, valorCarteira: 12_310_000 },
-        { data: '2026-05-06', pctInadimplencia: 32.9, valorCarteira: 12_380_000 },
-        { data: '2026-05-07', pctInadimplencia: 32.6, valorCarteira: 12_350_000 },
-        { data: '2026-05-08', pctInadimplencia: 33.0, valorCarteira: 12_420_000 },
-        { data: '2026-05-09', pctInadimplencia: 33.0, valorCarteira: 12_467_303 },
-      ],
-      retornoPorCobrador: [
-        { cobrador: 'Condicionado',    valor: 6_294_245, pct: 78 },
-        { cobrador: 'Cobrança interna',valor: 1_050_966, pct: 54 },
-        { cobrador: 'Cliente especial',valor:   185_861, pct: 37 },
-        { cobrador: 'Protestado',      valor:    92_410, pct: 27 },
-        { cobrador: 'Leal Moreira',    valor:    16_807, pct: 49 },
-        { cobrador: 'Marco Antonio',   valor:    37_092, pct: 37 },
-      ],
-    };
+  private carregarFormas() {
+    this.http.get<{ id: number; descricao: string }[]>(
+      `${this.api}/financeiro/credito-cobranca/formas-pagamento`
+    ).subscribe({
+      next: data => { this.formasPagamento = data; this.cdr.detectChanges(); },
+      error: () => { /* silencioso — select fica vazio se falhar */ },
+    });
+  }
 
-    this.titulos = {
-      total:       2_847,
-      valorTotal:  12_467_303,
-      pagina:      1,
-      porPagina:   this.POR_PAGINA,
-      dados: [
-        { idEmpresa:1, empresaAlias:'HCAB', idClifor:107454, nomeCliente:'Carolina Azevedo',              idTitulo:577420,  digitoTitulo:'1', valTitulo:608.85,    valLiquido:608.85,    sumPagamento:0,        valDesconto:null,    dtMovimento:'2017-11-24', dtVencimento:'2017-11-25', situacao:'JURIDICO', status:'Perda',           emGarantia:true,  banco:'Banco do Brasil', diasVencido:3087 },
-        { idEmpresa:2, empresaAlias:'SHRM', idClifor:227780, nomeCliente:'Livia Santana Marques',         idTitulo:208082,  digitoTitulo:'4', valTitulo:2985.14,   valLiquido:2985.14,   sumPagamento:2190.39,  valDesconto:null,    dtMovimento:'2019-05-30', dtVencimento:'2019-09-27', situacao:'VENCIDO',  status:'Cliente especial',emGarantia:false, banco:'Banco do Brasil', diasVencido:2415 },
-        { idEmpresa:1, empresaAlias:'HCAB', idClifor:128852, nomeCliente:'Thiago Vidal',                  idTitulo:4376,    digitoTitulo:'10',valTitulo:565.48,    valLiquido:565.48,    sumPagamento:533.39,   valDesconto:null,    dtMovimento:'2020-04-09', dtVencimento:'2021-02-03', situacao:'VENCIDO',  status:'Cob. interna',    emGarantia:false, banco:'Banco do Brasil', diasVencido:1918 },
-        { idEmpresa:1, empresaAlias:'HCAB', idClifor:1017405,nomeCliente:'Verena Azevedo Ferreira de',    idTitulo:6562,    digitoTitulo:'1', valTitulo:1258.00,   valLiquido:1258.00,   sumPagamento:0,        valDesconto:null,    dtMovimento:'2020-10-23', dtVencimento:'2020-11-22', situacao:'VENCIDO',  status:'Cliente especial',emGarantia:true,  banco:'Banco do Brasil', diasVencido:1994 },
-        { idEmpresa:1, empresaAlias:'HCAB', idClifor:1035849,nomeCliente:'S.C Chady Serviços e Construção',idTitulo:955712, digitoTitulo:'1', valTitulo:729.10,    valLiquido:4690.15,   sumPagamento:0,        valDesconto:null,    dtMovimento:'2021-03-05', dtVencimento:'2021-04-04', situacao:'VENCIDO',  status:'Cliente especial',emGarantia:false, banco:null,             diasVencido:1856 },
-        { idEmpresa:2, empresaAlias:'SHRM', idClifor:88341,  nomeCliente:'Ana Paula Ferreira Lima',       idTitulo:771209,  digitoTitulo:'3', valTitulo:3420.00,   valLiquido:3420.00,   sumPagamento:0,        valDesconto:null,    dtMovimento:'2026-03-15', dtVencimento:'2026-06-15', situacao:'A_VENCER', status:'Condicionado',    emGarantia:true,  banco:'Bradesco',        diasVencido:0 },
-        { idEmpresa:1, empresaAlias:'HCAB', idClifor:55129,  nomeCliente:'Construções Belém LTDA',        idTitulo:884512,  digitoTitulo:'2', valTitulo:8750.00,   valLiquido:8750.00,   sumPagamento:0,        valDesconto:null,    dtMovimento:'2026-04-01', dtVencimento:'2026-07-01', situacao:'A_VENCER', status:'A vencer',        emGarantia:false, banco:null,             diasVencido:0 },
-        { idEmpresa:6, empresaAlias:'HCVR', idClifor:73310,  nomeCliente:'Roberto Figueiredo Santos',     idTitulo:334780,  digitoTitulo:'5', valTitulo:1890.50,   valLiquido:1620.30,   sumPagamento:1620.30,  valDesconto:270.20,  dtMovimento:'2026-03-20', dtVencimento:'2026-05-05', situacao:'PAGO',     status:'Cobrança interna',emGarantia:false, banco:null,             diasVencido:0 },
-        { idEmpresa:1, empresaAlias:'HCAB', idClifor:91402,  nomeCliente:'Maria das Graças Oliveira',     idTitulo:118994,  digitoTitulo:'1', valTitulo:435.00,    valLiquido:435.00,    sumPagamento:0,        valDesconto:null,    dtMovimento:'2026-04-20', dtVencimento:'2026-05-01', situacao:'VENCIDO',  status:'Cobrança interna',emGarantia:false, banco:null,             diasVencido:8 },
-        { idEmpresa:7, empresaAlias:'HCAM', idClifor:48821,  nomeCliente:'Distribuidora Norte LTDA',      idTitulo:662341,  digitoTitulo:'3', valTitulo:15_400.00, valLiquido:15_400.00, sumPagamento:0,        valDesconto:null,    dtMovimento:'2025-11-10', dtVencimento:'2026-02-10', situacao:'VENCIDO',  status:'Protestado',      emGarantia:true,  banco:'Caixa',           diasVencido:88 },
-      ],
-    };
+  // blindagem de data corrompida (ex: ano 0230)
+  fmtDateSafe(s: string | null | undefined): string {
+    if (!s || s.length < 10) return '—';
+    const [y, m, d] = s.slice(0, 10).split('-');
+    const ano = Number(y);
+    if (!ano || ano < 1990 || ano > 2100) return '⚠ data inválida';
+    return `${d}/${m}/${y}`;
   }
 
   // ─── Buscar ───────────────────────────────────────────────────────────────
   buscarPainel() {
-    if (!this.dataInicio) { this.erroFiltro = 'Selecione ao menos a data inicial.'; return; }
-    this.erroFiltro = '';
-    this.dadosCarregados = true;
-    this.carregandoPainel = true;
-    this.cdr.detectChanges();
+  if (!this.dataInicio) { this.erroFiltro = 'Selecione ao menos a data inicial.'; return; }
+  this.erroFiltro = '';
+  this.dadosCarregados = true;
+  this.carregandoPainel = true;
+  this.cdr.detectChanges();
 
-    // TODO: substituir pelo endpoint real quando o SQL chegar
-    // this.http.get<ResumoConsolidado>(`${this.api}/financeiro/credito-cobranca/resumo?${this.buildParams()}`)
-    setTimeout(() => {
-      this.carregarDadosMock();
+  this.http.get<ResumoConsolidado>(
+    `${this.api}/financeiro/credito-cobranca/resumo?${this.buildParams()}`
+  ).subscribe({
+    next: data => {
+      this.resumo = data;
       this.carregandoPainel = false;
       this.cdr.detectChanges();
       if (this.abaSelecionada === 'graficos') {
         setTimeout(() => this.desenharGraficos(), 100);
       }
-    }, 600);
-  }
+    },
+    error: () => {
+      this.erroFiltro = 'Erro ao carregar dados financeiros.';
+      this.carregandoPainel = false;
+      this.cdr.detectChanges();
+    },
+  });
+}
 
   buscarRelatorio(pagina = 1) {
-    if (!this.dataInicio) { this.erroFiltro = 'Selecione ao menos a data inicial.'; return; }
-    this.erroFiltro = '';
-    this.dadosCarregados = true;
-    this.paginaAtual = pagina;
-    this.carregandoRelatorio = true;
-    this.cdr.detectChanges();
+  if (!this.dataInicio) { this.erroFiltro = 'Selecione ao menos a data inicial.'; return; }
+  this.erroFiltro = '';
+  this.dadosCarregados = true;
+  this.paginaAtual = pagina;
+  this.carregandoRelatorio = true;
+  this.cdr.detectChanges();
 
-    setTimeout(() => {
-      if (!this.titulos) this.carregarDadosMock();
+  const extra = [
+    this.filtroSituacao ? `situacao=${this.filtroSituacao}` : '',
+    this.filtroStatus   ? `status=${this.filtroStatus}`     : '',
+    this.filtroFaixa    ? `faixa=${this.filtroFaixa}`       : '',
+    this.filtroGarantia ? `garantia=${this.filtroGarantia}` : '',
+    this.filtroCliente  ? `cliente=${encodeURIComponent(this.filtroCliente)}` : '',
+    this.filtroForma    ? `forma=${encodeURIComponent(this.filtroForma)}`     : '',
+    `pagina=${pagina}`,
+    `limite=${this.POR_PAGINA}`,
+  ].filter(Boolean).join('&');
+
+  this.http.get<PaginacaoTitulos>(
+    `${this.api}/financeiro/credito-cobranca/titulos?${this.buildParams()}&${extra}`
+  ).subscribe({
+    next: data => {
+      this.titulos = data;
       this.carregandoRelatorio = false;
       this.cdr.detectChanges();
-    }, 400);
-  }
+    },
+    error: () => {
+      this.erroFiltro = 'Erro ao carregar títulos.';
+      this.carregandoRelatorio = false;
+      this.cdr.detectChanges();
+    },
+  });
+}
 
   buscar() {
     if (this.abaSelecionada === 'painel' || this.abaSelecionada === 'graficos') this.buscarPainel();
@@ -281,7 +259,26 @@ export class CreditoCobrancaComponent {
   }
 
   exportar() {
-    alert('Exportação será habilitada quando o backend estiver conectado.');
+    if (!this.dataInicio) { this.erroFiltro = 'Selecione ao menos a data inicial.'; return; }
+    const extra = [
+      this.filtroSituacao ? `situacao=${this.filtroSituacao}` : '',
+      this.filtroStatus   ? `status=${this.filtroStatus}`     : '',
+      this.filtroFaixa    ? `faixa=${this.filtroFaixa}`       : '',
+      this.filtroGarantia ? `garantia=${this.filtroGarantia}` : '',
+    ].filter(Boolean).join('&');
+    const url = `${this.api}/financeiro/credito-cobranca/exportar?${this.buildParams()}${extra ? '&' + extra : ''}`;
+
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `credito_cobranca_${new Date().toISOString().slice(0,10)}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+        this.cdr.detectChanges();
+      },
+      error: () => { this.erroFiltro = 'Erro ao gerar o Excel.'; this.cdr.detectChanges(); },
+    });
   }
 
   limpar() {
@@ -291,7 +288,10 @@ export class CreditoCobrancaComponent {
     this.dadosCarregados = false;
     this.resumo = null; this.titulos = null;
     this.erroFiltro = '';
+    this.filtroSituacao = this.filtroStatus = this.filtroFaixa = this.filtroGarantia = '';
+    this.filtroCliente = this.filtroForma = '';
     this.cdr.detectChanges();
+    
   }
 
   proximaPagina()  { if (this.paginaAtual < this.totalPaginas) this.buscarRelatorio(this.paginaAtual + 1); }
@@ -433,11 +433,23 @@ export class CreditoCobrancaComponent {
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
-  private buildParams(): string {
+ private buildParams(): string {
     const p: string[] = [`dataInicio=${this.dataInicio}`];
     if (this.dataFim && this.dataFim !== this.dataInicio) p.push(`dataFim=${this.dataFim}`);
     if (this.empresaFiltro) p.push(`empresa=${this.empresaFiltro}`);
+    p.push(`agrupar=${this.agrupar}`);
     return p.join('&');
+  }
+
+  // troca a visão e recarrega
+  mudarAgrupamento(modo: 'situacao' | 'forma') {
+    this.agrupar = modo;
+    if (this.dadosCarregados) this.buscar();
+  }
+
+  // título dinâmico do bloco Pagos
+  get tituloPagos(): string {
+    return this.modoComparativo ? `Pagos em ${this.fmtDate(this.dataInicio)}` : 'Pagos no período';
   }
 
   private hoje(): string { return new Date().toISOString().slice(0, 10); }

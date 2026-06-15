@@ -50,6 +50,10 @@ export class RelatoriosComponent {
   rupturaDivisao = '';
   baixandoRuptura = false;
 
+  ccEmpresa = '';
+  ccDataRef = new Date().toISOString().slice(0, 10);   // hoje
+  baixandoCC = false;
+
   // Filtros sem giro
   semGiroEmpresa = '';
   semGiroDivisao = '';
@@ -138,6 +142,28 @@ baixarRanking() {
     error: () => { this.baixandoRank = false; this.cdr.detectChanges(); }
   });
 }
+
+  baixarCreditoCobranca() {
+    this.baixandoCC = true;
+    const params: string[] = [];
+    if (this.ccEmpresa)  params.push(`empresa=${this.ccEmpresa}`);
+    if (this.ccDataRef)  params.push(`dataRef=${this.ccDataRef}`);
+    const qs = params.length ? `?${params.join('&')}` : '';
+
+    this.http.get(`${this.api}/estoque/relatorios/credito-cobranca${qs}`, { responseType: 'blob' })
+      .subscribe({
+        next: blob => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = `credito_cobranca_${new Date().toISOString().slice(0,10)}.xlsx`;
+          a.click();
+          URL.revokeObjectURL(a.href);
+          this.baixandoCC = false;
+          this.cdr.detectChanges();
+        },
+        error: () => { this.baixandoCC = false; this.cdr.detectChanges(); },
+      });
+  }
 
 private salvarBlob(blob: Blob, nome: string) {
   const a = document.createElement('a');

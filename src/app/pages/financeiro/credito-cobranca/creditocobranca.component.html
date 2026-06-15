@@ -28,11 +28,13 @@
     </div>
     <button class="btn-limpar" (click)="limpar()"><mat-icon>clear</mat-icon> Limpar</button>
     <button class="btn-buscar" (click)="buscar()"><mat-icon>search</mat-icon> Buscar</button>
+    <!-- Export movido para a Central de Relatórios (evita Assertion ibm_db em volume grande)
     @if (dadosCarregados) {
       <button class="btn-exportar" (click)="exportar()" matTooltip="Exportar para XLSX">
         <mat-icon>download</mat-icon>
       </button>
     }
+    -->
   </div>
 
   @if (erroFiltro) {
@@ -51,6 +53,18 @@
     </button>
   </div>
 
+   @if (dadosCarregados) {
+    <div class="agrupar-bar">
+      <span class="agrupar-label">Agrupar por:</span>
+      <label class="rb"><input type="radio" name="agrupar" [checked]="agrupar==='situacao'" (change)="mudarAgrupamento('situacao')"> Situação do cliente</label>
+      <label class="rb"><input type="radio" name="agrupar" [checked]="agrupar==='forma'" (change)="mudarAgrupamento('forma')"> Forma de pagamento</label>
+
+      @if (modoComparativo) {
+        <span class="aviso-data"><mat-icon>info</mat-icon> Selecione uma data final para ver os pagamentos acumulados do período.</span>
+      }
+    </div>
+  }
+
   @if (!dadosCarregados) {
     <div class="estado-inicial">
       <mat-icon>account_balance</mat-icon>
@@ -59,7 +73,6 @@
         <mat-icon>info</mat-icon>
         <span>1 data = exibe comparado com o dia anterior &nbsp;·&nbsp; 2 datas = acumulado do período</span>
       </div>
-      <button class="btn-buscar" (click)="buscar()"><mat-icon>search</mat-icon> Buscar</button>
     </div>
   }
 
@@ -85,7 +98,8 @@
         <div class="kpi-grid">
           <div class="kpi-card">
             <span class="kpi-label">Total carteira</span>
-            <strong class="kpi-value kpi-info">R$ {{ moeda(resumo.totalCarteira) }}</strong>
+            <strong class="kpi-value kpi-info">R$ {{ moeda(resumo.totalCarteiraBruto) }}</strong>
+            <span class="kpi-sub kpi-saldo">saldo a receber: R$ {{ moeda(resumo.totalCarteira) }}</span>
             @if (resumo.anterior) {
               <span class="kpi-sub">
                 <span [class]="variacaoClass(variacaoCarteira)">{{ variacaoSinal(variacaoCarteira) }} R$ {{ moeda(abs(variacaoCarteira)) }}</span>
@@ -113,54 +127,87 @@
             <strong class="kpi-value kpi-warn">R$ {{ moeda(resumo.aProtestar) }}</strong>
             <span class="kpi-sub">vencido 15–90 dias sem ação</span>
           </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Carteira jurídica</span>
+            <strong class="kpi-value kpi-juridico">R$ {{ moeda(resumo.carteiraJuridicaBruto) }}</strong>
+            <span class="kpi-sub kpi-saldo">saldo: R$ {{ moeda(resumo.carteiraJuridica) }}</span>
+            <span class="kpi-sub">Jurídico 1 (Jailton) · Jurídico 2 (Mendes)</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-label">Atraso prolongado (+720d)</span>
+            <strong class="kpi-value kpi-warn">R$ {{ moeda(resumo.atrasoProlongado) }}</strong>
+            <span class="kpi-sub">vencido antigo — candidato a write-off</span>
+          </div>
         </div>
 
         <div class="painel-grid">
           <div class="card">
             <div class="card-title"><mat-icon>credit_card</mat-icon> Títulos em aberto — por situação</div>
             <table class="tbl">
-              <thead><tr><th>Situação</th><th>Status / cobrador</th><th class="num">Títulos</th><th class="num">Total (R$)</th></tr></thead>
+              <thead><tr><th>Situação</th><th>Status / cobrador</th><th class="num">Títulos</th><th class="num">Vl. Bruto</th><th class="num">Saldo</th></tr></thead>
               <tbody>
                 @for (l of linhasAVencer; track l.status; let first = $first) {
                   <tr>
                     @if (first) { <td [attr.rowspan]="linhasAVencer.length" class="td-situacao"><span class="badge badge-vencer">A vencer</span></td> }
-                    <td>{{ l.status }}</td><td class="num">{{ l.totalTitulos | number }}</td><td class="num">{{ moeda(l.valorTotal) }}</td>
+                    <td>{{ l.status }}</td><td class="num">{{ l.totalTitulos | number }}</td>
+                    <td class="num">{{ moeda(l.valorBruto) }}</td><td class="num td-saldo">{{ moeda(l.valorTotal) }}</td>
                   </tr>
                 }
-                <tr class="subtotal-row"><td colspan="2">Subtotal a vencer</td><td></td><td class="num kpi-info">{{ moeda(subTotalAVencer) }}</td></tr>
+                <tr class="subtotal-row"><td colspan="2">Subtotal a vencer</td><td></td><td class="num kpi-info">{{ moeda(subTotalAVencerBruto) }}</td><td class="num td-saldo">{{ moeda(subTotalAVencer) }}</td></tr>
                 @for (l of linhasVencido; track l.status; let first = $first) {
                   <tr>
                     @if (first) { <td [attr.rowspan]="linhasVencido.length" class="td-situacao"><span class="badge badge-vencido">Vencido</span></td> }
-                    <td>{{ l.status }}</td><td class="num">{{ l.totalTitulos | number }}</td><td class="num">{{ moeda(l.valorTotal) }}</td>
+                    <td>{{ l.status }}</td><td class="num">{{ l.totalTitulos | number }}</td>
+                    <td class="num">{{ moeda(l.valorBruto) }}</td><td class="num td-saldo">{{ moeda(l.valorTotal) }}</td>
                   </tr>
                 }
-                <tr class="subtotal-row"><td colspan="2">Subtotal vencido</td><td></td><td class="num kpi-warn">{{ moeda(subTotalVencido) }}</td></tr>
+                <tr class="subtotal-row"><td colspan="2">Subtotal vencido</td><td></td><td class="num kpi-warn">{{ moeda(subTotalVencidoBruto) }}</td><td class="num td-saldo">{{ moeda(subTotalVencido) }}</td></tr>
                 @for (l of linhasJuridico; track l.status; let first = $first) {
                   <tr>
                     @if (first) { <td [attr.rowspan]="linhasJuridico.length" class="td-situacao"><span class="badge badge-juridico">Jurídico</span></td> }
-                    <td>{{ l.status }}</td><td class="num">{{ l.totalTitulos | number }}</td><td class="num">{{ moeda(l.valorTotal) }}</td>
+                    <td>{{ l.status }}</td><td class="num">{{ l.totalTitulos | number }}</td>
+                    <td class="num">{{ moeda(l.valorBruto) }}</td><td class="num td-saldo">{{ moeda(l.valorTotal) }}</td>
                   </tr>
                 }
-                <tr class="subtotal-row"><td colspan="2">Subtotal jurídico</td><td></td><td class="num kpi-juridico">{{ moeda(subTotalJuridico) }}</td></tr>
-                <tr class="total-geral-row"><td colspan="3">Total geral em aberto</td><td class="num">{{ moeda(resumo.totalCarteira) }}</td></tr>
+                <tr class="subtotal-row"><td colspan="2">Subtotal jurídico</td><td></td><td class="num kpi-juridico">{{ moeda(subTotalJuridicoBruto) }}</td><td class="num td-saldo">{{ moeda(subTotalJuridico) }}</td></tr>
+                <tr class="total-geral-row"><td colspan="3">Total geral em aberto</td><td class="num">{{ moeda(resumo.totalCarteiraBruto) }}</td><td class="num td-saldo">{{ moeda(resumo.totalCarteira) }}</td></tr>
               </tbody>
             </table>
+            <div class="tbl-legenda">
+              <mat-icon>info</mat-icon>
+              <span><strong>Vl. Bruto</strong> = valor do título sem abater pagamentos (bate com o relatório CISS 150101). <strong>Saldo</strong> = o que falta receber.</span>
+            </div>
           </div>
 
           <div class="painel-direita">
             <div class="card">
-              <div class="card-title"><mat-icon>check_circle</mat-icon> Pagos no período</div>
+              <div class="card-title"><mat-icon>check_circle</mat-icon> {{ tituloPagos }}</div>
               <table class="tbl">
                 <thead><tr><th>Status</th><th class="num">Total (R$)</th></tr></thead>
                 <tbody>
-                  @for (l of linhasPago; track l.status) {
+                  @for (l of linhasPagoOperacional; track l.status) {
                     <tr><td>{{ l.status }}</td><td class="num">{{ moeda(l.valorTotal) }}</td></tr>
                   }
-                  <tr class="total-pago-row"><td>Total pago</td><td class="num">{{ moeda(subTotalPago) }}</td></tr>
+                  <tr class="subtotal-row">
+                    <td>Pago operacional</td>
+                    <td class="num kpi-ok">{{ moeda(resumo.totalPagoOperacional) }}</td>
+                  </tr>
+
+                  @if (linhasPagoJuridico.length > 0) {
+                    @for (l of linhasPagoJuridico; track l.status) {
+                      <tr class="linha-juridica"><td>{{ l.status }}</td><td class="num">{{ moeda(l.valorTotal) }}</td></tr>
+                    }
+                    <tr class="subtotal-row">
+                      <td>Baixas jurídicas (fora do retorno)</td>
+                      <td class="num kpi-juridico">{{ moeda(resumo.totalPagoJuridico) }}</td>
+                    </tr>
+                  }
+
+                  <tr class="total-pago-row"><td>Total baixado</td><td class="num">{{ moeda(resumo.totalPago) }}</td></tr>
                 </tbody>
               </table>
               <div class="retorno-chip">
-                <span>Retorno de cobrança</span>
+                <span>Retorno de cobrança <small>(só operacional)</small></span>
                 <strong>{{ pct(resumo.retornoCobranca) }}</strong>
               </div>
             </div>
@@ -223,7 +270,9 @@
           <div class="card grafico-card">
             <div class="card-title"><mat-icon>show_chart</mat-icon> Evolução da inadimplência — últimos 30 dias</div>
             <canvas #canvasEvolucao style="width:100%;max-width:560px"></canvas>
-            <div class="grafico-sub">Tendência: <span class="kpi-danger">▲ +{{ pct(resumo.pctInadimplencia - resumo.evolucao[0].pctInadimplencia) }} no período</span></div>
+              @if (resumo.evolucao && resumo.evolucao.length > 0) {
+                <div class="grafico-sub">Tendência: <span class="kpi-danger">▲ +{{ pct(resumo.pctInadimplencia - resumo.evolucao[0].pctInadimplencia) }} no período</span></div>
+              }
           </div>
 
           <div class="card grafico-card">
@@ -250,6 +299,19 @@
   @if (abaSelecionada === 'relatorio') {
     <div>
       <div class="relatorio-filtros">
+        <div class="filtro-group filtro-sm">
+          <label>Cliente</label>
+          <input type="text" [(ngModel)]="filtroCliente" placeholder="Nome do cliente...">
+        </div>
+        <div class="filtro-group filtro-sm">
+          <label>Forma de pagamento</label>
+          <select [(ngModel)]="filtroForma">
+            <option value="">Todas</option>
+            @for (f of formasPagamento; track f.id) {
+              <option [value]="f.descricao">{{ f.descricao }}</option>
+            }
+          </select>
+        </div>
         <div class="filtro-group filtro-sm">
           <label>Situação</label>
           <select [(ngModel)]="filtroSituacao">
@@ -291,7 +353,9 @@
         <div class="relatorio-header">
           <span>{{ titulos.total | number }} títulos</span>
           <span class="dot-sep">·</span>
-          <span>Total: <strong>R$ {{ moeda(titulos.valorTotal) }}</strong></span>
+          <span>Vl. Bruto: <strong>R$ {{ moeda(titulos.valorTotal) }}</strong></span>
+          <span class="dot-sep">·</span>
+          <span>Saldo: <strong class="td-saldo">R$ {{ moeda(titulos.valorSaldoTotal) }}</strong></span>
         </div>
 
         <div class="tbl-wrap">
@@ -313,8 +377,8 @@
                   <td class="num">{{ moeda(t.valTitulo) }}</td>
                   <td class="num">{{ moeda(t.valLiquido) }}</td>
                   <td class="num td-desc">{{ t.sumPagamento ? moeda(t.sumPagamento) : '—' }}</td>
-                  <td>{{ fmtDate(t.dtMovimento) }}</td>
-                  <td [class.td-vencido]="t.situacao === 'VENCIDO' || t.situacao === 'JURIDICO'">{{ fmtDate(t.dtVencimento) }}</td>
+                  <td>{{ fmtDateSafe(t.dtMovimento) }}</td>
+                  <td [class.td-vencido]="t.situacao === 'VENCIDO' || t.situacao === 'JURIDICO'">{{ fmtDateSafe(t.dtVencimento) }}</td>
                   <td><span class="badge" [ngClass]="situacaoClass(t.situacao)">{{ situacaoLabel(t.situacao) }}</span></td>
                   <td class="td-status">{{ t.status }}</td>
                   <td>

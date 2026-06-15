@@ -236,8 +236,9 @@ export class GestaoRhComponent {
           this.cancelarExclusaoCompetencia();
           this.loadCompetencias(this.cargoSelecionadoComp.id);
         },
-        error: () => {
-          this.snack.open('Erro ao excluir', 'OK', { duration: 3000 });
+        error: (err) => {
+          const msg = err?.error?.message || 'Erro ao excluir competência.';
+          this.snack.open(msg, 'OK', { duration: 4000 });
           this.cancelarExclusaoCompetencia();
         }
       });

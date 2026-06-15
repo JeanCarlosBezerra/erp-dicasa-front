@@ -360,4 +360,46 @@
     </div>
   }
 
+  <!-- ════ BOTA-FORA — aparece nas duas visões (MOCK · validar fonte: DIVISAO 23) ════ -->
+  @if (dadosCarregados && !carregando && (meusDados || isGestor) && !vendedorSelecionado) {
+    <div class="botafora-card">
+      <div class="bf-header">
+        <div class="bf-titulo">
+          <mat-icon>local_offer</mat-icon>
+          <span>Bota-Fora <small>· {{ isGestor ? 'equipe' : 'prioridade de venda' }}</small></span>
+        </div>
+        <span class="bf-chip-mock">dados de exemplo</span>
+      </div>
+
+      <div class="bf-destaque">
+        <div class="bf-valor-bloco">
+          <span class="bf-label">{{ isGestor ? 'Vendido pela equipe' : 'Vendido no período' }}</span>
+          <strong class="bf-valor">R$ {{ moeda(botaForaMock.vendido) }}</strong>
+        </div>
+        <div class="bf-meta-bloco">
+          <span class="bf-pct" [class.bf-ok]="botaForaMock.pctMeta >= 100">{{ botaForaMock.pctMeta }}%</span>
+          <span class="bf-label">da meta ({{ moedaK(botaForaMock.meta) }})</span>
+        </div>
+      </div>
+
+      <div class="prog-wrap">
+        <div class="prog-bar" [class.prog-ok]="botaForaMock.pctMeta >= 100"
+             [class.prog-warn]="botaForaMock.pctMeta < 100"
+             [style.width.%]="botaForaMock.pctMeta > 100 ? 100 : botaForaMock.pctMeta"></div>
+      </div>
+
+      <div class="bf-secoes">
+        @for (s of botaForaMock.secoes; track s.nome) {
+          <div class="bf-secao-row">
+            <span class="bf-secao-nome">{{ s.nome }}</span>
+            <div class="bf-secao-bar-wrap">
+              <div class="bf-secao-bar" [style.width.%]="s.pct"></div>
+            </div>
+            <span class="bf-secao-val">{{ moedaK(s.valor) }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
 </div>

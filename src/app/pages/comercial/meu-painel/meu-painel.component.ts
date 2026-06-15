@@ -70,6 +70,33 @@ export class MeuPainelComponent {
   buscaVendedor = '';
   vendedorSelecionado: VendedorDados | null = null;
 
+
+
+  // ─── Bota-Fora (MOCK — validar fonte: DIVISAO 23) ─────────────────────────
+  // Quando ligar no backend: vendedor = só dele; gestor = SUM de todos da empresa
+  private botaForaBase = {
+    secoes: [
+      { nome: 'Ferramentas Bota-Fora', valor: 4200, pct: 100 },
+      { nome: 'Pintura Bota-Fora',     valor: 3100, pct: 74 },
+      { nome: 'Ferragens Bota-Fora',   valor: 2600, pct: 62 },
+      { nome: 'Automotivo Bota-Fora',  valor: 1580, pct: 38 },
+      { nome: 'Banheiro Bota-Fora',    valor: 1000, pct: 24 },
+    ],
+  };
+
+  get botaForaMock() {
+    // Gestor: simula soma da equipe (multiplica o mock pra parecer agregado)
+    // Vendedor: valor individual
+    const fator = this.isGestor ? this.vendedoresFiltrados.length || 1 : 1;
+    const secoes = this.botaForaBase.secoes.map(s => ({
+      ...s, valor: s.valor * fator,
+    }));
+    const vendido = secoes.reduce((acc, s) => acc + s.valor, 0);
+    const meta = this.isGestor ? 18000 * fator : 18000;
+    const pctMeta = meta ? Math.round((vendido / meta) * 100) : 0;
+    return { vendido, meta, pctMeta, secoes };
+  } 
+
   get vendedoresFiltrados(): VendedorDados[] {
     const q = this.buscaVendedor.toLowerCase();
     return this.todosVendedores

@@ -94,3 +94,11 @@ h1 { font-size: 24px; font-weight: 600; margin: 0 0 6px; color: #1e1e2f; }
 .rh-aval-btn { background: #0369a1; &:hover:not(:disabled) { background: #075985; } }
 .rh-pdi-btn  { background: #065f46; &:hover:not(:disabled) { background: #064e3b; } }
 .rh-rank-btn { background: #92400e; &:hover:not(:disabled) { background: #78350f; } }
+
+.fin-cc-header {
+  background: linear-gradient(135deg, #534AB7, #6B5FD0);
+}
+.fin-cc-btn {
+  background: #534AB7;
+  &:hover { background: #443BA0; }
+}

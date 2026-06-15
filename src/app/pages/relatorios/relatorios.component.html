@@ -196,6 +196,50 @@
     <mat-icon>{{ baixandoRank ? 'hourglass_top' : 'download' }}</mat-icon>
     {{ baixandoRank ? 'Gerando...' : 'Baixar XLSX' }}
   </button>
+
+  
+</div>
+
+<!-- Separador FINANCEIRO -->
+<div class="secao-titulo">
+  <mat-icon>account_balance</mat-icon>
+  <span>Financeiro</span>
+</div>
+
+<!-- CARD CRÉDITO & COBRANÇA -->
+<div class="rel-card">
+  <div class="rel-card-header fin-cc-header">
+    <mat-icon>request_quote</mat-icon>
+    <div>
+      <h2>Crédito &amp; Cobrança</h2>
+      <p>Todos os títulos em aberto com bruto, saldo e classificação</p>
+    </div>
+  </div>
+
+  <div class="rel-filtros">
+    <div class="filtro-group">
+      <label>Empresa</label>
+      <select [(ngModel)]="ccEmpresa">
+        <option value="">Todas as empresas</option>
+        <option *ngFor="let e of empresas" [value]="e.IDEMPRESA">{{ e.EMPALIAS }}</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>Data de referência</label>
+      <input type="date" [(ngModel)]="ccDataRef">
+    </div>
+  </div>
+
+  <div class="rel-info">
+    <mat-icon>info</mat-icon>
+    Relatório completo da carteira. Sem filtro de empresa, pode demorar um pouco.
+  </div>
+
+  <button class="btn-baixar fin-cc-btn" (click)="baixarCreditoCobranca()" [disabled]="baixandoCC">
+    <mat-icon>{{ baixandoCC ? 'hourglass_top' : 'download' }}</mat-icon>
+    {{ baixandoCC ? 'Gerando...' : 'Baixar XLSX' }}
+  </button>
 </div>
 
 </div>
+
