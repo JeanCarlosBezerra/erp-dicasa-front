@@ -320,6 +320,14 @@
           </select>
         </div>
         <div class="filtro-group filtro-sm">
+          <label>Vencimento de</label>
+          <input type="date" [(ngModel)]="filtroVencimentoDe">
+        </div>
+        <div class="filtro-group filtro-sm">
+          <label>Vencimento até</label>
+          <input type="date" [(ngModel)]="filtroVencimentoAte" [min]="filtroVencimentoDe">
+        </div>
+        <div class="filtro-group filtro-sm">
           <label>Status / cobrador</label>
           <select [(ngModel)]="filtroStatus">
             <option value="">Todos</option><option value="CLIENTE_ESPECIAL">Cliente especial</option>

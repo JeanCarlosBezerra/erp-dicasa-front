@@ -113,6 +113,8 @@ export class CreditoCobrancaComponent {
   carregandoRelatorio = false;
   dadosCarregados     = false;
   erroFiltro          = '';
+  filtroVencimentoDe:  string = '';
+  filtroVencimentoAte: string = '';
 
   resumo:  ResumoConsolidado | null = null;
   titulos: PaginacaoTitulos  | null = null;
@@ -208,7 +210,7 @@ export class CreditoCobrancaComponent {
   });
 }
 
-  buscarRelatorio(pagina = 1) {
+buscarRelatorio(pagina = 1) {
   if (!this.dataInicio) { this.erroFiltro = 'Selecione ao menos a data inicial.'; return; }
   this.erroFiltro = '';
   this.dadosCarregados = true;
@@ -223,6 +225,8 @@ export class CreditoCobrancaComponent {
     this.filtroGarantia ? `garantia=${this.filtroGarantia}` : '',
     this.filtroCliente  ? `cliente=${encodeURIComponent(this.filtroCliente)}` : '',
     this.filtroForma    ? `forma=${encodeURIComponent(this.filtroForma)}`     : '',
+    this.filtroVencimentoDe  ? `vencimentoDe=${this.filtroVencimentoDe}`   : '',
+    this.filtroVencimentoAte ? `vencimentoAte=${this.filtroVencimentoAte}` : '',
     `pagina=${pagina}`,
     `limite=${this.POR_PAGINA}`,
   ].filter(Boolean).join('&');
@@ -285,13 +289,12 @@ export class CreditoCobrancaComponent {
     this.dataInicio = this.hoje();
     this.dataFim = this.empresaFiltro = '';
     this.filtroSituacao = this.filtroStatus = this.filtroFaixa = this.filtroGarantia = '';
+    this.filtroCliente = this.filtroForma = '';
+    this.filtroVencimentoDe = this.filtroVencimentoAte = '';
     this.dadosCarregados = false;
     this.resumo = null; this.titulos = null;
     this.erroFiltro = '';
-    this.filtroSituacao = this.filtroStatus = this.filtroFaixa = this.filtroGarantia = '';
-    this.filtroCliente = this.filtroForma = '';
     this.cdr.detectChanges();
-    
   }
 
   proximaPagina()  { if (this.paginaAtual < this.totalPaginas) this.buscarRelatorio(this.paginaAtual + 1); }
