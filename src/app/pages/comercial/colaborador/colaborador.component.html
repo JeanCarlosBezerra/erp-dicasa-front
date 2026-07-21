@@ -105,38 +105,72 @@
           </ng-container>
 
           <ng-container matColumnDef="margem">
-            <th mat-header-cell *matHeaderCellDef>%MG</th>
+            <th mat-header-cell *matHeaderCellDef
+              matTooltip="Margem de lucro: Lucro Líquido ÷ Faturamento Líquido">
+              %MG
+            </th>
             <td mat-cell *matCellDef="let row">{{ row.margem | number:'1.2-2' }}%</td>
           </ng-container>
 
-          <!-- ── NOVAS COLUNAS DE DESCONTO ── -->
-          <ng-container matColumnDef="descontoValor">
+          <!-- ── DESCONTO DE PRODUTO (negociação do vendedor) ── -->
+          <ng-container matColumnDef="descontoProdutoValor">
             <th mat-header-cell *matHeaderCellDef
-              matTooltip="Soma de desconto por produto + desconto financeiro concedido no período">
-              Desc. R$
+              matTooltip="Desconto concedido no PRODUTO — negociação do vendedor no balcão. Reflete a atuação comercial do colaborador.">
+              Desc. Prod. R$
             </th>
             <td mat-cell *matCellDef="let row"
-              [class.desconto-alto]="row.descontoPerc > 5"
-              [class.desconto-medio]="row.descontoPerc > 2 && row.descontoPerc <= 5">
-              {{ row.descontoValor | number:'1.2-2' }}
+              [class.desconto-alto]="row.descontoProdutoPerc > 5"
+              [class.desconto-medio]="row.descontoProdutoPerc > 2 && row.descontoProdutoPerc <= 5">
+              {{ row.descontoProdutoValor | number:'1.2-2' }}
             </td>
           </ng-container>
 
-          <ng-container matColumnDef="descontoPerc">
+          <ng-container matColumnDef="descontoProdutoPerc">
             <th mat-header-cell *matHeaderCellDef
-              matTooltip="Percentual de desconto sobre o faturamento bruto (antes do desconto)">
-              Desc. %
+              matTooltip="% de desconto de produto sobre o faturamento bruto reconstruído (faturamento líquido + descontos).">
+              Desc. Prod. %
             </th>
             <td mat-cell *matCellDef="let row"
-              [class.desconto-alto]="row.descontoPerc > 5"
-              [class.desconto-medio]="row.descontoPerc > 2 && row.descontoPerc <= 5">
-              {{ row.descontoPerc | number:'1.2-2' }}%
+              [class.desconto-alto]="row.descontoProdutoPerc > 5"
+              [class.desconto-medio]="row.descontoProdutoPerc > 2 && row.descontoProdutoPerc <= 5">
+              {{ row.descontoProdutoPerc | number:'1.2-2' }}%
+            </td>
+          </ng-container>
+
+          <!-- ── DESCONTO FINANCEIRO (condição de pagamento / política) ── -->
+          <ng-container matColumnDef="descontoFinanceiroValor">
+            <th mat-header-cell *matHeaderCellDef
+              matTooltip="Desconto FINANCEIRO — condição de pagamento / política da loja. Não reflete negociação do vendedor.">
+              Desc. Fin. R$
+            </th>
+            <td mat-cell *matCellDef="let row"
+              [class.desconto-alto]="row.descontoFinanceiroPerc > 5"
+              [class.desconto-medio]="row.descontoFinanceiroPerc > 2 && row.descontoFinanceiroPerc <= 5">
+              {{ row.descontoFinanceiroValor | number:'1.2-2' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="descontoFinanceiroPerc">
+            <th mat-header-cell *matHeaderCellDef
+              matTooltip="% de desconto financeiro sobre o faturamento bruto reconstruído.">
+              Desc. Fin. %
+            </th>
+            <td mat-cell *matCellDef="let row"
+              [class.desconto-alto]="row.descontoFinanceiroPerc > 5"
+              [class.desconto-medio]="row.descontoFinanceiroPerc > 2 && row.descontoFinanceiroPerc <= 5">
+              {{ row.descontoFinanceiroPerc | number:'1.2-2' }}%
             </td>
           </ng-container>
 
           <ng-container matColumnDef="devolucoes">
-            <th mat-header-cell *matHeaderCellDef>Devol.</th>
-            <td mat-cell *matCellDef="let row">{{ row.devolucoes | number:'1.2-2' }}</td>
+            <th mat-header-cell *matHeaderCellDef
+              matTooltip="Valor de vendas canceladas ou devolvidas no período.">
+              Cancel./Devol.
+            </th>
+            <td mat-cell *matCellDef="let row"
+              [class.devolucao-destaque]="row.devolucoes > 0">
+              {{ row.devolucoes | number:'1.2-2' }}
+            </td>
           </ng-container>
 
           <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

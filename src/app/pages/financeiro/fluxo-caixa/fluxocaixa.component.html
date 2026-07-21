@@ -1,0 +1,291 @@
+<div class="cc-page">
+
+  <div class="page-header">
+    <p class="page-tag">FINANCEIRO</p>
+    <h1>Fluxo de Caixa</h1>
+    <p class="page-desc">Projeção de caixa — visão semanal (12 semanas) e visão diária (Previsto × Realizado)</p>
+  </div>
+
+  <!-- ════ ABAS ════ -->
+  <div class="tabs-bar">
+    <button class="tab-btn" [class.tab-ativa]="abaAtiva === 'semanal'" (click)="setAba('semanal')">
+      <mat-icon>calendar_view_week</mat-icon> Semanal
+    </button>
+    <button class="tab-btn" [class.tab-ativa]="abaAtiva === 'diario'" (click)="setAba('diario')">
+      <mat-icon>calendar_view_day</mat-icon> Diário
+    </button>
+  </div>
+
+  <!-- ════════════════ ABA SEMANAL (existente) ════════════════ -->
+  @if (abaAtiva === 'semanal') {
+
+  <div class="filtro-aviso">
+    <mat-icon>info</mat-icon>
+    <span>Projeção considera <strong>recebíveis a prazo</strong> (carnê/boleto) e <strong>contas a pagar</strong>. Vendas à vista/cartão do PDV serão incluídas após definição da regra de entrada de caixa.</span>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filtro-group">
+      <label>Saldo inicial em caixa hoje (R$)</label>
+      <input type="number" [(ngModel)]="saldoInicial" placeholder="0,00" step="1000">
+    </div>
+    <div class="filtro-group">
+      <label>Empresa</label>
+      <select [(ngModel)]="empresaFiltro">
+        <option value="">Todas as empresas</option>
+        <option value="1">HCAB</option><option value="2">SHRM</option>
+        <option value="6">HCVR</option><option value="7">HCAM</option><option value="8">ATACADO</option>
+      </select>
+    </div>
+    <button class="btn-limpar" (click)="limpar()"><mat-icon>clear</mat-icon> Limpar</button>
+    <button class="btn-buscar" (click)="buscar()"><mat-icon>refresh</mat-icon> Projetar</button>
+  </div>
+
+  @if (carregando) {
+    <div class="loading-state"><mat-icon>hourglass_top</mat-icon> Projetando o caixa...</div>
+  }
+  @if (erro) { <div class="filtro-erro"><mat-icon>error</mat-icon> {{ erro }}</div> }
+
+  @if (!carregando && dadosCarregados && dados) {
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Saldo inicial (hoje)</span>
+        <strong class="kpi-value kpi-info">R$ {{ moeda(dados.saldoInicial) }}</strong>
+        <span class="kpi-sub">informado manualmente</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Entram (próx. 4 semanas)</span>
+        <strong class="kpi-value kpi-ok">R$ {{ moeda(dados.entra30) }}</strong>
+        <span class="kpi-sub">recebíveis a prazo</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Saem (próx. 4 semanas)</span>
+        <strong class="kpi-value kpi-danger">R$ {{ moeda(dados.sai30) }}</strong>
+        <span class="kpi-sub">contas a pagar</span>
+      </div>
+      <div class="kpi-card" [class.kpi-card-alerta]="menorSaldo < 0">
+        <span class="kpi-label">Menor saldo projetado</span>
+        <strong class="kpi-value" [ngClass]="menorSaldo < 0 ? 'kpi-danger' : 'kpi-warn'">R$ {{ moeda(menorSaldo) }}</strong>
+        <span class="kpi-sub">{{ apertoLabel }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Saldo ao fim de 12 semanas</span>
+        <strong class="kpi-value" [ngClass]="saldoFinal < 0 ? 'kpi-danger' : 'kpi-info'">R$ {{ moeda(saldoFinal) }}</strong>
+        <span class="kpi-sub">projeção acumulada</span>
+      </div>
+    </div>
+
+    @if (menorSaldo < 0) {
+      <div class="alerta-caixa">
+        <mat-icon>warning</mat-icon>
+        <span>Atenção: a projeção indica <strong>saldo negativo</strong> em {{ apertoLabel }}. Com o saldo inicial informado, as saídas superam as entradas nesse ponto — necessário capital de giro ou antecipar recebíveis.</span>
+      </div>
+    }
+
+    <div class="card">
+      <div class="card-title"><mat-icon>show_chart</mat-icon> Saldo projetado por semana</div>
+      <svg class="grafico" [attr.viewBox]="'0 0 ' + W + ' ' + H" preserveAspectRatio="xMidYMid meet">
+        <path [attr.d]="areaPath" class="area" />
+        <line [attr.x1]="PAD" [attr.x2]="W - PAD" [attr.y1]="zeroY" [attr.y2]="zeroY" class="zero-line" />
+        <text [attr.x]="PAD - 6" [attr.y]="zeroY + 3" class="zero-text" text-anchor="end">0</text>
+        @for (b of barras; track $index) {
+          <rect [attr.x]="b.x - b.wE - 1" [attr.y]="b.yE" [attr.width]="b.wE" [attr.height]="b.hE" class="bar-entra" />
+          <rect [attr.x]="b.x + 1" [attr.y]="b.yS" [attr.width]="b.wE" [attr.height]="b.hS" class="bar-sai" />
+        }
+        <path [attr.d]="linhaPath" class="linha-saldo" />
+        @for (p of pontos; track $index) {
+          <circle [attr.cx]="p.x" [attr.cy]="p.y" r="3.5" [class.ponto-neg]="p.neg" class="ponto" />
+          <text [attr.x]="p.x" [attr.y]="H - 38" class="eixo-x" text-anchor="middle">S{{ $index + 1 }}</text>
+        }
+      </svg>
+      <div class="legenda-grafico">
+        <span class="lg lg-saldo">— Saldo acumulado</span>
+        <span class="lg lg-entra">■ Entradas</span>
+        <span class="lg lg-sai">■ Saídas</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><mat-icon>table_rows</mat-icon> Detalhe semana a semana</div>
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Semana</th><th>Período</th>
+            <th class="num">Entram</th><th class="num">Saem</th>
+            <th class="num">Resultado</th><th class="num">Saldo projetado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (w of dados.semanas; track w.semana) {
+            <tr [class.linha-aperto]="w.semana === dados.semanaMenorSaldo">
+              <td>{{ w.label }}</td>
+              <td class="periodo">{{ w.periodo }}</td>
+              <td class="num val-pos">{{ moeda(w.entrada) }}</td>
+              <td class="num val-neg">{{ moeda(w.saida) }}</td>
+              <td class="num" [ngClass]="classeSaldo(w.net)">{{ w.net >= 0 ? '+' : '' }}{{ moeda(w.net) }}</td>
+              <td class="num td-saldo" [ngClass]="classeSaldo(w.saldoAcumulado)">{{ moeda(w.saldoAcumulado) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <div class="tbl-legenda">
+        <mat-icon>info</mat-icon>
+        <span>Atrasado (já vencido): a receber R$ {{ moeda(dados.atrasado.entrada) }} · a pagar R$ {{ moeda(dados.atrasado.saida) }}. Não entra na projeção futura — é posição a regularizar.</span>
+      </div>
+    </div>
+  }
+
+  } <!-- fim aba semanal -->
+
+  <!-- ════════════════ ABA DIÁRIO (REAL) ════════════════ -->
+  @if (abaAtiva === 'diario') {
+
+  <div class="filtro-aviso">
+    <mat-icon>info</mat-icon>
+    <span>Visão de <strong>tesouraria (caixa real)</strong>: <strong>Previsto</strong> = recebível a vencer no dia (em aberto); <strong>Realizado</strong> = tudo que efetivamente entrou no caixa no dia (venda à vista dinheiro/pix/cartão + baixas de boletos/carnês). A venda à vista aparece só no Realizado — ela não é "prevista", simplesmente entra.</span>
+  </div>
+
+  <div class="filter-bar">
+    <div class="filtro-group">
+      <label>Data início</label>
+      <input type="date" [(ngModel)]="dataInicioDiario">
+    </div>
+    <div class="filtro-group">
+      <label>Data fim</label>
+      <input type="date" [(ngModel)]="dataFimDiario">
+    </div>
+    <div class="filtro-group">
+      <label>Saldo inicial do período (R$)</label>
+      <input type="number" [(ngModel)]="saldoInicialDiario" placeholder="0,00" step="1000">
+    </div>
+    <div class="filtro-group">
+      <label>Empresa</label>
+      <select [(ngModel)]="empresaFiltroDiario">
+        <option value="">Todas as empresas</option>
+        <option value="1">HCAB</option><option value="2">SHRM</option>
+        <option value="6">HCVR</option><option value="7">HCAM</option><option value="8">ATACADO</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>Vencido (janela)</label>
+      <select [(ngModel)]="vencidoCorteDias" (ngModelChange)="recarregarComCorte()">
+        <option [ngValue]="30">Últimos 30 dias</option>
+        <option [ngValue]="60">Últimos 60 dias</option>
+        <option [ngValue]="90">Últimos 90 dias</option>
+        <option [ngValue]="3650">Tudo</option>
+      </select>
+    </div>
+    <button class="btn-limpar" (click)="limparDiario()"><mat-icon>clear</mat-icon> Limpar</button>
+    <button class="btn-buscar" (click)="buscarDiario()"><mat-icon>refresh</mat-icon> Buscar</button>
+  </div>
+
+  @if (carregandoDiario) {
+    <div class="loading-state"><mat-icon>hourglass_top</mat-icon> Carregando a visão diária...</div>
+  }
+  @if (erroDiario) { <div class="filtro-erro"><mat-icon>error</mat-icon> {{ erroDiario }}</div> }
+
+  @if (!carregandoDiario && dadosDiarioCarregados && colunasDias.length) {
+
+    <div class="kpi-grid kpi-grid-4">
+      <div class="kpi-card">
+        <span class="kpi-label">Saldo final previsto</span>
+        <strong class="kpi-value" [ngClass]="saldoFinalDiarioPrevisto < 0 ? 'kpi-danger' : 'kpi-info'">R$ {{ moeda(saldoFinalDiarioPrevisto) }}</strong>
+        <span class="kpi-sub">{{ colunasDias.length }} dias · saldo inic. R$ {{ moeda(saldoInicialDiario) }}</span>
+      </div>
+      <div class="kpi-card" [class.kpi-card-alerta]="saldoFinalDiarioRealizado < 0">
+        <span class="kpi-label">Saldo final realizado</span>
+        <strong class="kpi-value" [ngClass]="saldoFinalDiarioRealizado < 0 ? 'kpi-danger' : 'kpi-ok'">R$ {{ moeda(saldoFinalDiarioRealizado) }}</strong>
+        <span class="kpi-sub">até o último dia</span>
+      </div>
+      <div class="kpi-card" [class.kpi-card-alerta]="resultadoRealizado < 0">
+        <span class="kpi-label">Resultado realizado (período)</span>
+        <strong class="kpi-value" [ngClass]="resultadoRealizado < 0 ? 'kpi-danger' : 'kpi-ok'">R$ {{ moeda(resultadoRealizado) }}</strong>
+        <span class="kpi-sub">entrou R$ {{ moedaCurta(totalEntradaRealizado) }} · saiu R$ {{ moedaCurta(totalSaidaRealizado) }}</span>
+      </div>
+      <div class="kpi-card kpi-card-alerta">
+        <span class="kpi-label">Vencido a pagar</span>
+        <strong class="kpi-value kpi-danger">R$ {{ moeda(vencidoTotal) }}</strong>
+        <span class="kpi-sub">janela: {{ vencidoCorteDias >= 3650 ? 'tudo' : (vencidoCorteDias + ' dias') }}</span>
+      </div>
+    </div>
+
+    <!-- MATRIZ PREVISTO × REALIZADO -->
+    <div class="card card-matriz">
+      <div class="card-title"><mat-icon>grid_on</mat-icon> Previsto × Realizado — dia a dia</div>
+
+      <div class="matriz-scroll">
+        <table class="tbl-matriz">
+          <thead>
+            <tr class="linha-dias">
+              <th class="col-categoria"></th>
+              @for (col of colunasDias; track col.iso) {
+                <th class="col-dia" colspan="2">
+                  <span class="dia-mes">{{ col.diaMes }}</span>
+                  <span class="dia-semana">{{ col.diaSemana }}</span>
+                </th>
+              }
+            </tr>
+            <tr class="linha-subheader">
+              <th class="col-categoria">Categoria</th>
+              @for (col of colunasDias; track col.iso) {
+                <th class="sub-previsto">Prev</th>
+                <th class="sub-realizado">Real</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (linha of linhasMatriz; track linha.id) {
+              <tr [ngClass]="classeLinha(linha)">
+                <td class="col-categoria">{{ linha.label }}</td>
+                @for (cel of linha.celulas; track $index) {
+                  <td class="num" [ngClass]="classeValor(cel.previsto)"
+                      [matTooltip]="'R$ ' + moeda(cel.previsto)">{{ moedaCurta(cel.previsto) }}</td>
+                  <td class="num" [ngClass]="classeValor(cel.realizado)"
+                      [matTooltip]="'R$ ' + moeda(cel.realizado)">{{ moedaCurta(cel.realizado) }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="tbl-legenda">
+        <mat-icon>info</mat-icon>
+        <span>Valores abreviados (mil/mi). Passe o mouse na célula para ver o valor exato. "Prev" = título vencendo no dia · "Real" = pagamento efetivado no dia.</span>
+      </div>
+    </div>
+
+    <!-- VENCIDO A PAGAR (bloco separado) -->
+    @if (vencidoLista.length) {
+      <div class="card">
+        <div class="card-title"><mat-icon>report</mat-icon> Vencido a pagar — posição a regularizar (janela {{ vencidoCorteDias >= 3650 ? 'total' : vencidoCorteDias + ' dias' }})</div>
+        <table class="tbl">
+          <thead>
+            <tr><th>Categoria</th><th class="num">Valor</th><th class="num">Qtd. títulos</th></tr>
+          </thead>
+          <tbody>
+            @for (v of vencidoLista; track v.categoria) {
+              <tr>
+                <td>{{ v.categoria }}</td>
+                <td class="num val-neg">R$ {{ moeda(v.valor) }}</td>
+                <td class="num">{{ v.qtd }}</td>
+              </tr>
+            }
+            <tr class="linha-aperto">
+              <td><strong>Total</strong></td>
+              <td class="num val-neg"><strong>R$ {{ moeda(vencidoTotal) }}</strong></td>
+              <td class="num"></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="tbl-legenda">
+          <mat-icon>info</mat-icon>
+          <span>Títulos que venceram antes do período e seguem em aberto. Não entram na matriz do fluxo — é dívida a regularizar. Ajuste a janela no filtro acima.</span>
+        </div>
+      </div>
+    }
+  }
+
+  } <!-- fim aba diário -->
+
+</div>

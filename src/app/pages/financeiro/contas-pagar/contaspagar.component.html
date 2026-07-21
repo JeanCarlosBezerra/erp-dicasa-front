@@ -1,0 +1,162 @@
+<div class="cc-page">
+
+  <div class="page-header">
+    <p class="page-tag">FINANCEIRO</p>
+    <h1>Contas a Pagar</h1>
+    <p class="page-desc">Acompanhamento de títulos a pagar por vencimento, categoria e forma de pagamento</p>
+  </div>
+
+  <!-- aviso temporário de mock -->
+  <div class="filtro-erro" style="background:#FFF7ED;color:#9A3412;border-color:#FED7AA">
+    <mat-icon>construction</mat-icon>
+    Tela em demonstração — dados ilustrativos para validação visual. A integração com o CISS entra na próxima etapa.
+  </div>
+
+  <div class="filter-bar">
+    <div class="filtro-group">
+      <label>Data inicial <span class="obrigatorio">*</span></label>
+      <input type="date" [(ngModel)]="dataInicio">
+    </div>
+    <div class="filtro-group">
+      <label>Data final <span class="filtro-opcional">(opcional — período de pagamento)</span></label>
+      <input type="date" [(ngModel)]="dataFim" [min]="dataInicio">
+    </div>
+    <div class="filtro-group">
+      <label>Empresa</label>
+      <select [(ngModel)]="empresaFiltro">
+        <option value="">Todas as empresas</option>
+        <option value="1">HCAB</option><option value="2">SHRM</option>
+        <option value="6">HCVR</option><option value="7">HCAM</option><option value="8">ATACADO</option>
+      </select>
+    </div>
+    <div class="filtro-group">
+      <label>Fornecedor</label>
+      <input type="text" [(ngModel)]="fornecedorFiltro" placeholder="Nome do fornecedor...">
+    </div>
+    <button class="btn-limpar" (click)="limpar()"><mat-icon>clear</mat-icon> Limpar</button>
+    <button class="btn-buscar" (click)="buscar()"><mat-icon>search</mat-icon> Buscar</button>
+  </div>
+
+  @if (carregando) {
+    <div class="loading-state"><mat-icon>hourglass_top</mat-icon> Carregando contas a pagar...</div>
+  }
+
+  @if (!carregando && dadosCarregados) {
+
+    <div class="periodo-label">
+      <mat-icon>calendar_today</mat-icon> {{ labelPeriodo }}
+      <span class="modo-chip">demonstração</span>
+    </div>
+
+    <!-- ════ KPIs ════ -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <span class="kpi-label">Total a pagar</span>
+        <strong class="kpi-value kpi-info">R$ {{ moeda(totalPagarBruto) }}</strong>
+        <span class="kpi-sub kpi-saldo">saldo em aberto: R$ {{ moeda(totalPagarSaldo) }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">A vencer</span>
+        <strong class="kpi-value kpi-ok">R$ {{ moeda(aVencer) }}</strong>
+        <span class="kpi-sub">desembolso futuro programado</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Vencido — em atraso</span>
+        <strong class="kpi-value kpi-danger">{{ pct(pctVencido) }} — R$ {{ moeda(vencidoAtraso) }}</strong>
+        <span class="kpi-sub">regularizar — risco de protesto / juros</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Vence em 7 dias</span>
+        <strong class="kpi-value kpi-warn">R$ {{ moeda(vence7dias) }}</strong>
+        <span class="kpi-sub">prioridade de caixa da semana</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Pago no período</span>
+        <strong class="kpi-value kpi-info">R$ {{ moeda(pagoPeriodo) }}</strong>
+        <span class="kpi-sub">saídas confirmadas</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Maior credor</span>
+        <strong class="kpi-value kpi-juridico">R$ {{ moeda(topFornecedores[0].valor) }}</strong>
+        <span class="kpi-sub">{{ topFornecedores[0].nome }}</span>
+      </div>
+    </div>
+
+    <div class="painel-grid">
+
+      <!-- esquerda: a pagar por situação × categoria -->
+      <div class="card">
+        <div class="card-title"><mat-icon>account_balance_wallet</mat-icon> Títulos a pagar — por situação</div>
+        <table class="tbl">
+          <thead><tr><th>Situação</th><th>Categoria</th><th class="num">Títulos</th><th class="num">Valor</th></tr></thead>
+          <tbody>
+            @for (l of linhasAVencer; track l.categoria; let first = $first) {
+              <tr>
+                @if (first) { <td [attr.rowspan]="linhasAVencer.length" class="td-situacao"><span class="badge badge-vencer">A vencer</span></td> }
+                <td>{{ l.categoria }}</td>
+                <td class="num">{{ l.totalTitulos | number }}</td>
+                <td class="num td-saldo">{{ moeda(l.valorTotal) }}</td>
+              </tr>
+            }
+            <tr class="subtotal-row"><td colspan="2">Subtotal a vencer</td><td></td><td class="num td-saldo">{{ moeda(subTotalAVencer) }}</td></tr>
+            @for (l of linhasVencido; track l.categoria; let first = $first) {
+              <tr>
+                @if (first) { <td [attr.rowspan]="linhasVencido.length" class="td-situacao"><span class="badge badge-vencido">Vencido</span></td> }
+                <td>{{ l.categoria }}</td>
+                <td class="num">{{ l.totalTitulos | number }}</td>
+                <td class="num td-saldo">{{ moeda(l.valorTotal) }}</td>
+              </tr>
+            }
+            <tr class="subtotal-row"><td colspan="2">Subtotal vencido</td><td></td><td class="num kpi-warn">{{ moeda(subTotalVencido) }}</td></tr>
+            <tr class="total-geral-row"><td colspan="3">Total geral a pagar</td><td class="num td-saldo">{{ moeda(subTotalAVencer + subTotalVencido) }}</td></tr>
+          </tbody>
+        </table>
+        <div class="tbl-legenda">
+          <mat-icon>info</mat-icon>
+          <span><strong>A vencer</strong> = desembolso futuro. <strong>Vencido</strong> = em atraso, ação imediata. Lançamento permanece no CISS; aqui é só leitura.</span>
+        </div>
+      </div>
+
+      <!-- direita: pago + maiores credores -->
+      <div class="painel-direita">
+        <div class="card">
+          <div class="card-title"><mat-icon>check_circle</mat-icon> Pago no período — por forma</div>
+          <table class="tbl">
+            <thead><tr><th>Forma de pagamento</th><th class="num">Total (R$)</th></tr></thead>
+            <tbody>
+              @for (p of pagos; track p.forma) {
+                <tr><td>{{ p.forma }}</td><td class="num">{{ moeda(p.valorTotal) }}</td></tr>
+              }
+              <tr class="total-pago-row"><td>Total pago</td><td class="num">{{ moeda(totalPago) }}</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="card destaques-card">
+          <div class="card-title"><mat-icon>groups</mat-icon> Maiores credores</div>
+          @for (f of topFornecedores; track f.nome) {
+            <div class="destaque">
+              <span class="destaque-label">{{ f.nome }}</span>
+              <span class="destaque-valor">R$ {{ moeda(f.valor) }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- faixas forward (próximos desembolsos) -->
+    <div class="card faixas-card">
+      <div class="card-title"><mat-icon>schedule</mat-icon> Vencimentos a pagar — próximos desembolsos</div>
+      <div class="faixas-grid">
+        @for (f of faixas; track f.label) {
+          <div class="faixa" [ngClass]="nivelClass(f.nivel)">
+            <div class="faixa-label">{{ f.label }}</div>
+            <div class="faixa-valor">R$ {{ moeda(f.valor) }}</div>
+            <div class="faixa-qtd">{{ f.qtd | number }} títulos</div>
+            <div class="faixa-acao">{{ f.acao }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

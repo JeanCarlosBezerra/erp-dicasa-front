@@ -4,6 +4,13 @@ import { Observable, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { tap, catchError } from 'rxjs/operators';
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Interface alinhada com o backend (colaborador.repository.ts).
+// O desconto único (descontoValor/descontoPerc) foi SUBSTITUÍDO por dois pares:
+//   • Produto   (negociação do vendedor no balcão)
+//   • Financeiro (condição de pagamento / política da loja)
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface ColaboradorProdutividade {
   idVendedor: number;
   nome:       string;
@@ -12,8 +19,14 @@ export interface ColaboradorProdutividade {
   lucro:      number;
   margem:     number;
   devolucoes: number;
-  descontoValor: number;  // ← adicionar
-  descontoPerc: number;   // ← adicionar
+
+  // ── Desconto de PRODUTO ──
+  descontoProdutoValor: number;
+  descontoProdutoPerc:  number;
+
+  // ── Desconto FINANCEIRO ──
+  descontoFinanceiroValor: number;
+  descontoFinanceiroPerc:  number;
 }
 
 @Injectable({ providedIn: 'root' })

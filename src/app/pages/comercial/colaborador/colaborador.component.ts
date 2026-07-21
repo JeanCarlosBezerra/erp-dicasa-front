@@ -36,6 +36,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 export class ColaboradorComponent implements OnInit {
   dataSource = new MatTableDataSource<ColaboradorProdutividade>([]);
 
+  // ── Colunas: desconto agora separado em PRODUTO e FINANCEIRO ──
   displayedColumns = [
     'idVendedor',
     'nome',
@@ -43,8 +44,10 @@ export class ColaboradorComponent implements OnInit {
     'faturamento',
     'lucro',
     'margem',
-    'descontoValor',   // ← novo
-    'descontoPerc',    // ← novo
+    'descontoProdutoValor',      // ← novo (produto R$)
+    'descontoProdutoPerc',       // ← novo (produto %)
+    'descontoFinanceiroValor',   // ← novo (financeiro R$)
+    'descontoFinanceiroPerc',    // ← novo (financeiro %)
     'devolucoes',
   ];
 
@@ -89,11 +92,17 @@ export class ColaboradorComponent implements OnInit {
   }
 
   exportarExcel() {
-    const headers = ['#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG', 'Desc. R$', 'Desc. %', 'Devol.'];
+    const headers = [
+      '#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG',
+      'Desc. Prod. R$', 'Desc. Prod. %',
+      'Desc. Fin. R$', 'Desc. Fin. %',
+      'Devol.'
+    ];
     const rows = this.dataSource.data.map((row: ColaboradorProdutividade) => [
       row.idVendedor, row.nome, row.qtdvenda,
       row.faturamento, row.lucro, `${row.margem}%`,
-      row.descontoValor, `${row.descontoPerc}%`,
+      row.descontoProdutoValor, `${row.descontoProdutoPerc}%`,
+      row.descontoFinanceiroValor, `${row.descontoFinanceiroPerc}%`,
       row.devolucoes
     ]);
     this.exportService.exportToExcel(headers, rows, 'produtividade-colaborador');
@@ -109,12 +118,18 @@ export class ColaboradorComponent implements OnInit {
   }
 
   exportarPDF() {
-    const headers = ['#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG', 'Desc. R$', 'Desc. %', 'Devol.'];
+    const headers = [
+      '#', 'Nome', 'Vendas', 'Fatur. Líq', 'Lucro Líq', '%MG',
+      'Desc. Prod. R$', 'Desc. Prod. %',
+      'Desc. Fin. R$', 'Desc. Fin. %',
+      'Devol.'
+    ];
     const rows = this.dataSource.data.map((row: ColaboradorProdutividade) => [
       row.idVendedor, row.nome, row.qtdvenda,
       row.faturamento.toFixed(2), row.lucro.toFixed(2),
       `${row.margem.toFixed(2)}%`,
-      row.descontoValor.toFixed(2), `${row.descontoPerc.toFixed(2)}%`,
+      row.descontoProdutoValor.toFixed(2), `${row.descontoProdutoPerc.toFixed(2)}%`,
+      row.descontoFinanceiroValor.toFixed(2), `${row.descontoFinanceiroPerc.toFixed(2)}%`,
       row.devolucoes
     ]);
     const empresasSelecionadasNomes = this.empresas

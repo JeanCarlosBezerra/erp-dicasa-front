@@ -1,0 +1,187 @@
+/* Fluxo de Caixa — reaproveita a linguagem visual do Crédito & Cobrança / Contas a Pagar.
+   Se você já tem variáveis globais (cores), pode trocar os hex pelos seus tokens. */
+
+.cc-page { padding: 22px 26px; max-width: 1280px; margin: 0 auto; color: #1f2733; }
+
+.page-header { margin-bottom: 14px;
+  .page-tag { color: #6d5ae6; font-weight: 700; font-size: 12px; letter-spacing: .08em; margin: 0; }
+  h1 { font-size: 30px; font-weight: 800; margin: 2px 0 4px; }
+  .page-desc { color: #6b7280; font-size: 14px; margin: 0; }
+}
+
+/* ════ Abas ════ */
+.tabs-bar { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid #eceff3; }
+.tab-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 16px; border: none; background: transparent; cursor: pointer;
+  font-size: 14px; font-weight: 600; color: #6b7280;
+  border-bottom: 2.5px solid transparent; margin-bottom: -1px;
+  mat-icon { font-size: 18px; height: 18px; width: 18px; }
+  &:hover { color: #374151; }
+  &.tab-ativa { color: #6d5ae6; border-bottom-color: #6d5ae6; }
+}
+
+.badge-mock {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A;
+  border-radius: 20px; padding: 5px 12px; font-size: 12px; font-weight: 700;
+  margin-bottom: 14px;
+  mat-icon { font-size: 16px; height: 16px; width: 16px; }
+}
+
+.filtro-aviso, .filtro-erro, .alerta-caixa {
+  display: flex; align-items: center; gap: 8px; border: 1px solid; border-radius: 10px;
+  padding: 10px 14px; font-size: 13px; margin-bottom: 16px;
+  mat-icon { font-size: 20px; height: 20px; width: 20px; }
+}
+.filtro-aviso { background: #EEF2FF; color: #3730A3; border-color: #C7D2FE; }
+.filtro-aviso-warn { background: #FFF7ED; color: #9A3412; border-color: #FDBA74; }
+.filtro-erro  { background: #FEF2F2; color: #991B1B; border-color: #FECACA; }
+.alerta-caixa { background: #FEF2F2; color: #B00020; border-color: #FCA5A5; font-weight: 500; }
+
+.filter-bar {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; margin-bottom: 18px;
+  .filtro-group { display: flex; flex-direction: column; gap: 4px;
+    label { font-size: 11px; font-weight: 700; color: #6b7280; text-transform: uppercase; letter-spacing: .03em; }
+    input, select { height: 38px; border: 1px solid #d1d5db; border-radius: 8px; padding: 0 10px; font-size: 14px; min-width: 190px; background: #fff; }
+  }
+  .btn-buscar, .btn-limpar { height: 38px; border-radius: 8px; padding: 0 16px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer; font-size: 14px; border: 1px solid transparent;
+    mat-icon { font-size: 18px; height: 18px; width: 18px; } }
+  .btn-buscar { background: #6d5ae6; color: #fff; }
+  .btn-limpar { background: #fff; color: #6b7280; border-color: #d1d5db; }
+}
+
+.loading-state { display: flex; align-items: center; gap: 8px; color: #6b7280; padding: 30px; justify-content: center; }
+
+/* KPIs */
+.kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 16px; }
+.kpi-grid-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+.kpi-card { background: #fff; border: 1px solid #eceff3; border-radius: 14px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03); display: flex; flex-direction: column; gap: 4px;
+  &.kpi-card-alerta { border-color: #FCA5A5; background: #FFFBFB; }
+  .kpi-label { font-size: 12px; color: #6b7280; }
+  .kpi-value { font-size: 22px; font-weight: 800; line-height: 1.15; }
+  .kpi-sub { font-size: 11px; color: #9ca3af; }
+}
+.kpi-info { color: #2563EB; } .kpi-ok { color: #16A34A; } .kpi-danger { color: #DC2626; } .kpi-warn { color: #B26A00; }
+
+/* Card genérico */
+.card { background: #fff; border: 1px solid #eceff3; border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; box-shadow: 0 1px 2px rgba(0,0,0,.03);
+  .card-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; color: #374151; margin-bottom: 14px;
+    mat-icon { color: #6d5ae6; font-size: 20px; height: 20px; width: 20px; } }
+}
+
+/* Gráfico SVG */
+.grafico { width: 100%; height: auto; display: block;
+  .area { fill: rgba(37,99,235,.10); }
+  .zero-line { stroke: #9ca3af; stroke-width: 1; stroke-dasharray: 4 3; }
+  .zero-text { fill: #9ca3af; font-size: 11px; }
+  .linha-saldo { fill: none; stroke: #2563EB; stroke-width: 2.5; stroke-linejoin: round; }
+  .ponto { fill: #2563EB; }
+  .ponto-neg { fill: #DC2626; }
+  .bar-entra { fill: #16A34A; opacity: .55; }
+  .bar-sai { fill: #DC2626; opacity: .55; }
+  .eixo-x { fill: #9ca3af; font-size: 11px; }
+}
+.legenda-grafico { display: flex; gap: 18px; justify-content: center; margin-top: 6px; font-size: 12px;
+  .lg-saldo { color: #2563EB; font-weight: 600; } .lg-entra { color: #16A34A; } .lg-sai { color: #DC2626; }
+}
+
+/* Tabela semanal */
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px;
+  th, td { padding: 9px 12px; border-bottom: 1px solid #f0f2f5; text-align: left; }
+  th { color: #6b7280; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .02em; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .periodo { color: #6b7280; }
+  .td-saldo { font-weight: 700; }
+  .val-pos { color: #16A34A; } .val-neg { color: #DC2626; }
+  .linha-aperto { background: #FFF7F7; td { font-weight: 600; } }
+}
+.tbl-legenda { display: flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 12px; color: #6b7280;
+  mat-icon { font-size: 16px; height: 16px; width: 16px; } }
+
+/* ════════════════════════════════════════════ */
+/* MATRIZ DIÁRIO (Previsto × Realizado)          */
+/* ════════════════════════════════════════════ */
+.card-matriz { padding: 16px 0 18px 18px; }
+
+.matriz-scroll {
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-right: 18px;
+}
+
+.tbl-matriz {
+  border-collapse: collapse;
+  font-size: 12.5px;
+  white-space: nowrap;
+
+  th, td { padding: 7px 10px; border-bottom: 1px solid #f0f2f5; }
+
+  .col-categoria {
+    position: sticky; left: 0; z-index: 2;
+    background: #fff;
+    text-align: left;
+    min-width: 190px;
+    box-shadow: 2px 0 4px rgba(0,0,0,.04);
+    font-weight: 500;
+  }
+
+  thead {
+    .col-categoria { background: #fafbfc; z-index: 3; }
+    th { color: #6b7280; font-weight: 700; text-align: center; background: #fafbfc; }
+  }
+
+  .linha-dias .col-dia {
+    text-align: center; padding: 8px 10px 2px;
+    .dia-mes { display: block; font-size: 13px; font-weight: 800; color: #374151; }
+    .dia-semana { display: block; font-size: 10px; color: #9ca3af; text-transform: uppercase; }
+  }
+
+  .linha-subheader {
+    .sub-previsto, .sub-realizado {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em;
+      text-align: right; min-width: 78px;
+    }
+    .sub-previsto { color: #9333EA; }
+    .sub-realizado { color: #0D9488; }
+  }
+
+  tbody tr:hover { background: #FAFAFF; }
+
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .val-pos { color: #16A34A; } .val-neg { color: #DC2626; } .val-zero { color: #C7CBD1; }
+
+  /* linhas de item (recuadas) */
+  .linha-indent .col-categoria { padding-left: 26px; color: #4b5563; font-weight: 400; font-size: 12px; }
+
+  /* linhas de destaque (Saldo Inicial, Entrada, Saída, Saldo do Dia, Saldo Acumulado) */
+  .linha-destaque {
+    td { font-weight: 700; }
+    .col-categoria { color: #1f2733; }
+  }
+  .linha-saldo-inicial, .linha-saldo-acumulado { background: #F5F3FF;
+    .col-categoria { background: #F5F3FF; }
+  }
+  .linha-entrada-total { background: #F0FDF4;
+    .col-categoria { background: #F0FDF4; color: #166534; }
+  }
+  .linha-saida-total { background: #FEF2F2;
+    .col-categoria { background: #FEF2F2; color: #991B1B; }
+  }
+  .linha-saldo-dia { border-top: 2px solid #e5e7eb; }
+
+  /* linha "Vencido" — sinalizada como pendência de regra de negócio */
+  .linha-saida-vencido {
+    .col-categoria { color: #B45309; font-style: italic; }
+    background: #FFFBEB;
+  }
+}
+
+/* ── ajustes aba diário real ── */
+.tbl-matriz {
+  .linha-saida-semclassif {
+    .col-categoria { color: #B45309; font-style: italic; }
+    background: #FFFBEB;
+  }
+}

@@ -24,6 +24,8 @@ import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
 import { EncomendasComponent } from './pages/compras/encomendas/encomendas.component';
 import { CreditoCobrancaComponent } from './pages/financeiro/credito-cobranca/creditocobranca.component';
 import { MeuPainelComponent } from './pages/comercial/meu-painel/meu-painel.component';
+import { ContasPagarComponent } from './pages/financeiro/contas-pagar/contaspagar.component';
+import { FluxoCaixaComponent } from './pages/financeiro/fluxo-caixa/fluxocaixa.component';
 
 
 const guard = (role: string) => () => {
@@ -53,6 +55,8 @@ export const routes: Routes = [
 
       // Financeiro
       { path: 'financeiro/credito-cobranca', component: CreditoCobrancaComponent, canActivate: [guard('MOD_FINANCEIRO')] },
+      { path: 'financeiro/contas-pagar',     component: ContasPagarComponent,     canActivate: [guard('MOD_FINANCEIRO')] },
+      { path: 'financeiro/fluxo-caixa',     component: FluxoCaixaComponent,     canActivate: [guard('MOD_FINANCEIRO')] },
 
       // Pedidos
       { path: 'pedidos-list', component: PedidosListComponent, canActivate: [guard('MOD_PEDIDOS')] },
