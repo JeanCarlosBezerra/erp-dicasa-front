@@ -26,6 +26,9 @@ import { CreditoCobrancaComponent } from './pages/financeiro/credito-cobranca/cr
 import { MeuPainelComponent } from './pages/comercial/meu-painel/meu-painel.component';
 import { ContasPagarComponent } from './pages/financeiro/contas-pagar/contaspagar.component';
 import { FluxoCaixaComponent } from './pages/financeiro/fluxo-caixa/fluxocaixa.component';
+import { PremiacaoComponent } from './pages/comercial/premiacao/premiacao.component';
+import { DreComponent } from './pages/financeiro/dre/dre.component';
+
 
 
 const guard = (role: string) => () => {
@@ -57,6 +60,7 @@ export const routes: Routes = [
       { path: 'financeiro/credito-cobranca', component: CreditoCobrancaComponent, canActivate: [guard('MOD_FINANCEIRO')] },
       { path: 'financeiro/contas-pagar',     component: ContasPagarComponent,     canActivate: [guard('MOD_FINANCEIRO')] },
       { path: 'financeiro/fluxo-caixa',     component: FluxoCaixaComponent,     canActivate: [guard('MOD_FINANCEIRO')] },
+      { path: 'financeiro/dre', component: DreComponent, canActivate: [guard('FIN_DRE')] },
 
       // Pedidos
       { path: 'pedidos-list', component: PedidosListComponent, canActivate: [guard('MOD_PEDIDOS')] },
@@ -67,6 +71,7 @@ export const routes: Routes = [
       { path: 'comercial/faturamento', component: FaturamentoComponent,         canActivate: [guard('COM_FATURAMENTO')] },
       { path: 'comercial/metas',       component: MetasComponent,               canActivate: [guard('COM_METAS')] },
       { path: 'comercial/meu-painel', component: MeuPainelComponent, canActivate: [guard('COM_MEU_PAINEL')] },
+      { path: 'comercial/premiacao', component: PremiacaoComponent, canActivate: [guard('COM_COLABORADOR')] },
 
       { path: 'compras/encomendas', component: EncomendasComponent, canActivate: [guard('MOD_COMPRAS')] },
 

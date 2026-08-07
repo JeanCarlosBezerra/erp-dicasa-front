@@ -1,0 +1,134 @@
+<div class="dre-shell">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <span class="eyebrow">Financeiro</span>
+      <h1>DRE Gerencial</h1>
+      <p>
+        Cascata de resultado por Nota Fiscal emitida — Receita Bruta → Impostos → Devoluções →
+        Receita Líquida → CMV → Desconto → Lucro Bruto. Clique nas linhas para destrinchar por
+        divisão e seção de produto.
+      </p>
+    </div>
+    <div class="hero-right">
+      <div class="hero-stat">
+        <span class="stat-label">Lucro Bruto</span>
+        <strong>{{ lucroBruto | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        <small>Margem {{ margemBrutaPerc * 100 | number:'1.1-1' }}% sobre receita</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILTROS -->
+  <section class="filtros">
+    <div class="filtro-campo">
+      <label>Data início</label>
+      <input type="date" [(ngModel)]="dataInicio" />
+    </div>
+    <div class="filtro-campo">
+      <label>Data fim</label>
+      <input type="date" [(ngModel)]="dataFim" />
+    </div>
+
+    <mat-form-field appearance="outline" class="filtro-empresa">
+      <mat-label>Empresas</mat-label>
+      <mat-select [(ngModel)]="empresasSelecionadas" multiple (selectionChange)="onEmpresasChange()">
+        <mat-select-trigger>{{ empresasResumo }}</mat-select-trigger>
+        <div class="select-acoes">
+          <button type="button" class="link-acao" (click)="selecionarTodas($event)">Selecionar todas</button>
+          <span class="sep">·</span>
+          <button type="button" class="link-acao" (click)="limparSelecao($event)">Limpar</button>
+        </div>
+        <mat-option *ngFor="let e of empresas" [value]="e.id">
+          {{ e.id }} — {{ e.apelido }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" class="btn-filtrar" (click)="carregar()" [disabled]="carregando">
+      <mat-icon>filter_alt</mat-icon> {{ carregando ? 'Carregando...' : 'Filtrar' }}
+    </button>
+  </section>
+
+  <!-- CASCATA -->
+  <section class="table-section">
+    <div class="table-header">
+      <div>
+        <span class="section-eyebrow">Demonstrativo — NF Emitida</span>
+        <h2>Cascata de Resultado</h2>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <table class="dre-table">
+        <thead>
+          <tr>
+            <th class="col-conta" rowspan="2">Conta</th>
+            <th class="col-grupo grupo-nf" colspan="2">NF Emitida</th>
+            <th class="col-grupo grupo-ped" colspan="2">Pedido</th>
+            <th class="col-grupo grupo-dif" rowspan="2">Diferença<br><small>(Pedido − NF)</small></th>
+          </tr>
+          <tr>
+            <th class="col-valor grupo-nf">Valor (R$)</th>
+            <th class="col-pct grupo-nf">% Rec.</th>
+            <th class="col-valor grupo-ped">Valor (R$)</th>
+            <th class="col-pct grupo-ped">% Rec.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let l of linhasVisiveis"
+              class="linha"
+              [class.linha-conta]="l.tipo === 'conta'"
+              [class.linha-subtotal]="l.ehSubtotal"
+              [class.linha-cat-1]="l.tipo === 'categoria' && l.nivel === 1"
+              [class.linha-cat-2]="l.tipo === 'categoria' && l.nivel === 2"
+              [class.clicavel]="l.temFilhos"
+              (click)="toggle(l)">
+            <td class="col-conta">
+              <span class="indent" [style.padding-left.px]="l.nivel * 24">
+                <mat-icon *ngIf="l.temFilhos" class="chevron" [class.aberto]="l.expandido">chevron_right</mat-icon>
+                <span *ngIf="!l.temFilhos && l.tipo === 'categoria'" class="dot">•</span>
+                {{ l.descricao }}
+              </span>
+            </td>
+
+            <!-- NF Emitida -->
+            <td class="col-valor" [class.neg]="l.valorNf !== null && l.valorNf < 0" [class.pos]="l.valorNf !== null && l.valorNf >= 0 && l.tipo === 'conta'">
+              <ng-container *ngIf="l.valorNf !== null; else nd">{{ l.valorNf | currency:'BRL':'symbol':'1.2-2' }}</ng-container>
+            </td>
+            <td class="col-pct">
+              <span *ngIf="l.pctNf !== null">{{ l.pctNf * 100 | number:'1.1-1' }}%</span>
+            </td>
+
+            <!-- Pedido -->
+            <td class="col-valor col-ped" [class.neg]="l.valorPedido !== null && l.valorPedido < 0" [class.pos]="l.valorPedido !== null && l.valorPedido >= 0 && l.tipo === 'conta'">
+              <ng-container *ngIf="l.valorPedido !== null; else nd">{{ l.valorPedido | currency:'BRL':'symbol':'1.2-2' }}</ng-container>
+            </td>
+            <td class="col-pct col-ped">
+              <span *ngIf="l.pctPedido !== null">{{ l.pctPedido * 100 | number:'1.1-1' }}%</span>
+            </td>
+
+            <!-- Diferença (Pedido − NF) -->
+            <td class="col-valor col-dif" [class.dif-pos]="l.diferenca !== null && l.diferenca > 0" [class.dif-neg]="l.diferenca !== null && l.diferenca < 0">
+              <ng-container *ngIf="l.diferenca !== null; else semdif">
+                {{ l.diferenca > 0 ? '+' : '' }}{{ l.diferenca | currency:'BRL':'symbol':'1.2-2' }}
+              </ng-container>
+            </td>
+
+            <ng-template #nd><span class="nd">n/d</span></ng-template>
+            <ng-template #semdif><span class="nd">—</span></ng-template>
+          </tr>
+
+          <tr *ngIf="!carregando && linhasVisiveis.length === 0">
+            <td colspan="6" class="vazio">Nenhum dado no período selecionado. Ajuste os filtros e tente novamente.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="nota-pedido">
+      <mat-icon>info</mat-icon>
+      A coluna "Pedido" (fonte gerencial CISS) não separa impostos e desconto — esses aparecem como "n/d". O drill-down por categoria está disponível apenas na NF Emitida.
+    </p>
+  </section>
+</div>

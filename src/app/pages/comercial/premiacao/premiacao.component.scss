@@ -1,0 +1,31 @@
+:host { display: block; }
+
+.premiacao-tabs-shell {
+  display: block;
+}
+
+.tab-content {
+  padding-top: 20px;
+}
+
+.tab-label {
+  margin-left: 8px;
+  font-weight: 700;
+}
+
+::ng-deep .premiacao-tabs .mat-mdc-tab-header {
+  border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+  margin-bottom: 4px;
+}
+::ng-deep .premiacao-tabs .mdc-tab__text-label {
+  color: #64748b;
+  font-size: 15px;
+}
+::ng-deep .premiacao-tabs .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: #172554;
+  font-weight: 800;
+}
+::ng-deep .premiacao-tabs .mat-mdc-tab .mdc-tab-indicator__content--underline {
+  border-color: #172554;
+  border-top-width: 3px;
+}

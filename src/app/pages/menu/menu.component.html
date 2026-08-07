@@ -99,6 +99,11 @@
                 routerLink="/menu/financeiro/fluxo-caixa" routerLinkActive="active-submenu">
                 <mat-icon>account_balance_wallet</mat-icon> Fluxo de caixa
               </button>
+                @if (auth.hasRole('FIN_DRE')) {
+                  <button mat-button class="submenu-btn" routerLink="/menu/financeiro/dre" routerLinkActive="active-submenu">
+                    <mat-icon>account_balance</mat-icon> DRE Gerencial
+                  </button>
+                }
             </div>
           </mat-expansion-panel>
         }
@@ -137,6 +142,12 @@
                 <button mat-button class="submenu-btn"
                   routerLink="/menu/comercial/meu-painel" routerLinkActive="active-submenu">
                   <mat-icon>person</mat-icon> Meu Painel
+                </button>
+              }
+              @if (auth.hasRole('COM_PREMIACAO')) {
+                <button mat-button class="submenu-btn"
+                  routerLink="/menu/comercial/premiacao" routerLinkActive="active-submenu">
+                  <mat-icon>emoji_events</mat-icon> Premiação
                 </button>
               }
             </div>

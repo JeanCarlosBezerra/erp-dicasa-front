@@ -1,0 +1,130 @@
+<div class="premiacao-shell">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <span class="eyebrow">Comercial · RH</span>
+      <h1>Premiação de Vendedores</h1>
+      <p>
+        Cálculo automático do bônus por faixa de faturamento e lucratividade, aplicando a
+        regra da "dobradinha" e a elegibilidade por setor.
+      </p>
+    </div>
+    <div class="hero-right">
+      <div class="hero-stat">
+        <span class="stat-label">Total do mês</span>
+        <strong>{{ totalPremiacao | currency:'BRL':'symbol':'1.2-2' }}</strong>
+        <small>{{ qtdElegiveis }} vendedores elegíveis</small>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAIXAS (referência da regra) -->
+  <section class="faixas-card">
+    <span class="section-eyebrow">Faixas do bônus (regra da Diretoria)</span>
+    <div class="faixas-grid">
+      <div class="faixa-item" *ngFor="let f of faixas">
+        <div class="faixa-num">Faixa {{ f.faixa }}</div>
+        <div class="faixa-venda">{{ f.valorVenda | currency:'BRL':'symbol':'1.0-0' }}</div>
+        <div class="faixa-lucro">Lucr. {{ f.vlLucratividade | currency:'BRL':'symbol':'1.0-0' }}</div>
+        <div class="faixa-premio">{{ f.premiacao | currency:'BRL':'symbol':'1.0-0' }}</div>
+      </div>
+    </div>
+    <p class="faixas-nota">
+      <mat-icon>info</mat-icon>
+      O vendedor precisa atingir faturamento <strong>e</strong> lucratividade da mesma faixa. Se
+      atingir faturamento maior mas lucratividade menor, prevalece a <strong>menor faixa</strong>
+      ("dobradinha"). Setores PISOS, Atacado e Concept só a partir da Faixa 2.
+    </p>
+  </section>
+
+  <!-- TABELA -->
+  <section class="table-section">
+    <div class="table-header">
+      <div>
+        <span class="section-eyebrow">Resultado do mês</span>
+        <h2>Bônus por vendedor</h2>
+      </div>
+      <button mat-flat-button color="primary" class="btn-fechar" disabled
+        matTooltip="Disponível na versão final">
+        <mat-icon>lock</mat-icon> Fechar mês
+      </button>
+    </div>
+
+    <div class="table-card">
+      <table mat-table [dataSource]="dataSource" class="full-width">
+
+        <ng-container matColumnDef="idVendedor">
+          <th mat-header-cell *matHeaderCellDef>#</th>
+          <td mat-cell *matCellDef="let r">{{ r.idVendedor }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="nome">
+          <th mat-header-cell *matHeaderCellDef>Vendedor</th>
+          <td mat-cell *matCellDef="let r">{{ r.nome }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="loja">
+          <th mat-header-cell *matHeaderCellDef>Loja</th>
+          <td mat-cell *matCellDef="let r">{{ r.loja }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="setor">
+          <th mat-header-cell *matHeaderCellDef>Setor</th>
+          <td mat-cell *matCellDef="let r">
+            <span class="tag-setor" [class.tag-restrito]="r.setor !== 'PADRAO'">{{ r.setor }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="vendaRealizada">
+          <th mat-header-cell *matHeaderCellDef>Venda realizada</th>
+          <td mat-cell *matCellDef="let r">{{ r.vendaRealizada | currency:'BRL':'symbol':'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="lucroRealizado">
+          <th mat-header-cell *matHeaderCellDef>Lucro realizado</th>
+          <td mat-cell *matCellDef="let r">{{ r.lucroRealizado | currency:'BRL':'symbol':'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="faixaFaturamento">
+          <th mat-header-cell *matHeaderCellDef matTooltip="Faixa atingida pelo faturamento">Fx. Fat.</th>
+          <td mat-cell *matCellDef="let r">
+            <span class="chip-faixa">{{ r.faixaFaturamento || '—' }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="faixaLucratividade">
+          <th mat-header-cell *matHeaderCellDef matTooltip="Faixa atingida pela lucratividade">Fx. Lucr.</th>
+          <td mat-cell *matCellDef="let r">
+            <span class="chip-faixa">{{ r.faixaLucratividade || '—' }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="faixaElegivel">
+          <th mat-header-cell *matHeaderCellDef matTooltip="Menor faixa entre faturamento e lucratividade (dobradinha)">Fx. Elegível</th>
+          <td mat-cell *matCellDef="let r">
+            <span class="chip-faixa"
+              [class.chip-ok]="r.faixaElegivel > 0"
+              [class.chip-zero]="r.faixaElegivel === 0"
+              [matTooltip]="r.observacao || ''"
+              [matTooltipDisabled]="!r.observacao">
+              {{ r.faixaElegivel || '0' }}
+              <mat-icon *ngIf="r.observacao" class="icon-info">info</mat-icon>
+            </span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="premiacao">
+          <th mat-header-cell *matHeaderCellDef>Premiação</th>
+          <td mat-cell *matCellDef="let r">
+            <strong [class.premio-valor]="r.premiacao > 0" [class.premio-zero]="r.premiacao === 0">
+              {{ r.premiacao | currency:'BRL':'symbol':'1.2-2' }}
+            </strong>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </div>
+  </section>
+</div>

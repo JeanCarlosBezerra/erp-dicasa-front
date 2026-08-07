@@ -1,0 +1,23 @@
+<div class="premiacao-tabs-shell">
+  <mat-tab-group class="premiacao-tabs" animationDuration="200ms">
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>emoji_events</mat-icon>
+        <span class="tab-label">Vendedores</span>
+      </ng-template>
+      <div class="tab-content">
+        <app-premiacao-vendedor></app-premiacao-vendedor>
+      </div>
+    </mat-tab>
+
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <mat-icon>workspace_premium</mat-icon>
+        <span class="tab-label">Gestores</span>
+      </ng-template>
+      <div class="tab-content">
+        <app-premiacao-gestor></app-premiacao-gestor>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

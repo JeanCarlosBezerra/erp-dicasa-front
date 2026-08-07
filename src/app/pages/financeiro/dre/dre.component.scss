@@ -1,0 +1,116 @@
+:host { display: block; }
+
+.dre-shell { display: flex; flex-direction: column; gap: 20px; padding-bottom: 28px; }
+
+/* HERO */
+.hero {
+  display: flex; justify-content: space-between; align-items: stretch; gap: 20px;
+  padding: 28px; border-radius: 28px; color: #fff;
+  background: radial-gradient(circle at top right, rgba(59,130,246,.16), transparent 26%),
+              linear-gradient(135deg,#0f172a 0%,#111827 55%,#172554 100%);
+  box-shadow: 0 22px 50px rgba(15,23,42,.14);
+}
+.eyebrow { display: inline-block; margin-bottom: 10px; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #93c5fd; }
+.hero h1 { margin: 0 0 10px; font-size: 40px; font-weight: 900; line-height: 1.05; }
+.hero p { margin: 0; max-width: 660px; color: rgba(255,255,255,.78); font-size: 15px; line-height: 1.6; }
+.hero-right { display: flex; align-items: flex-start; justify-content: flex-end; min-width: 240px; }
+.hero-stat { min-width: 220px; padding: 18px 20px; border-radius: 22px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.10); }
+.stat-label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: #93c5fd; margin-bottom: 8px; }
+.hero-stat strong { display: block; font-size: 26px; font-weight: 800; margin-bottom: 4px; }
+.hero-stat small { color: rgba(255,255,255,.72); font-size: 13px; }
+
+/* FILTROS */
+.filtros {
+  display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap;
+  padding: 18px; border-radius: 22px; background: rgba(255,255,255,.86);
+  border: 1px solid rgba(148,163,184,.14); box-shadow: 0 10px 24px rgba(15,23,42,.06);
+}
+.filtro-campo { display: flex; flex-direction: column; gap: 6px; }
+.filtro-campo label { font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+.filtro-campo input {
+  padding: 10px 12px; border-radius: 12px; border: 1px solid #e2e8f0;
+  background: #f8fafc; font-size: 14px; color: #334155; height: 44px; box-sizing: border-box;
+}
+.filtro-empresa { min-width: 260px; }
+/* remove o espaço extra que o mat-form-field reserva embaixo (hint/error),
+   deixando o select alinhado com os inputs de data */
+::ng-deep .filtro-empresa .mat-mdc-form-field-subscript-wrapper { display: none; }
+::ng-deep .filtro-empresa .mat-mdc-text-field-wrapper { background: #f8fafc; border-radius: 12px; }
+
+.btn-filtrar { height: 44px; border-radius: 14px; font-weight: 700; align-self: flex-start; margin-top: 22px; }
+
+/* ações dentro do dropdown de empresas */
+.select-acoes {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-bottom: 1px solid #f1f5f9;
+  position: sticky; top: 0; background: #fff; z-index: 1;
+}
+.link-acao {
+  background: none; border: none; cursor: pointer; padding: 2px 4px;
+  color: #2563eb; font-weight: 700; font-size: 13px;
+}
+.link-acao:hover { text-decoration: underline; }
+.select-acoes .sep { color: #cbd5e1; }
+
+/* TABELA */
+.table-section { display: flex; flex-direction: column; gap: 12px; }
+.section-eyebrow { display: inline-block; margin-bottom: 6px; font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: #2563eb; }
+.table-header h2 { margin: 0; font-size: 26px; font-weight: 900; color: #0f172a; }
+
+.table-card {
+  background: rgba(255,255,255,.9); border: 1px solid rgba(148,163,184,.14);
+  border-radius: 24px; box-shadow: 0 12px 28px rgba(15,23,42,.06); padding: 12px; overflow-x: auto;
+}
+.dre-table { width: 100%; border-collapse: collapse; min-width: 640px; }
+.dre-table thead th {
+  text-align: right; padding: 12px 16px; font-size: 12px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .04em; color: #1e3a8a; background: #eff6ff;
+}
+.dre-table thead th.col-conta { text-align: left; }
+.dre-table thead th:first-child { border-top-left-radius: 12px; }
+.dre-table thead th:last-child { border-top-right-radius: 12px; }
+
+.col-valor, .col-pct { text-align: right; white-space: nowrap; }
+.dre-table td { padding: 11px 16px; font-size: 14px; border-bottom: 1px solid #f1f5f9; }
+
+/* cabeçalho agrupado: NF (azul) x Pedido (roxo) */
+.col-grupo { text-align: center; font-size: 12px; }
+.grupo-nf { background: #eff6ff; color: #1e3a8a; }
+.grupo-ped { background: #f5f3ff; color: #6d28d9; }
+.grupo-dif { background: #fffbeb; color: #b45309; text-align: right; }
+.col-ped { background: #faf9ff; }
+.col-dif { background: #fffdf5; font-weight: 700; }
+.dif-pos { color: #16a34a; }
+.dif-neg { color: #dc2626; }
+.nd { color: #cbd5e1; font-style: italic; font-size: 12px; }
+
+.indent { display: inline-flex; align-items: center; gap: 4px; }
+.chevron { font-size: 18px; width: 18px; height: 18px; color: #94a3b8; transition: transform .15s; }
+.chevron.aberto { transform: rotate(90deg); color: #2563eb; }
+.dot { color: #cbd5e1; margin-right: 6px; }
+
+.clicavel { cursor: pointer; }
+.clicavel:hover { background: #f8fafc; }
+
+/* linha-conta = linhas da cascata (Receita, Impostos...) */
+.linha-conta td { font-weight: 700; color: #0f172a; }
+/* subtotais (Receita Líquida, Lucro Bruto) destacados */
+.linha-subtotal td { font-weight: 900; background: #f0fdf4; border-top: 2px solid #bbf7d0; border-bottom: 1px solid #bbf7d0; color: #166534; }
+/* categorias no drill-down */
+.linha-cat-1 td { color: #475569; background: #fbfdff; }
+.linha-cat-2 td { color: #64748b; font-size: 13px; }
+
+.neg { color: #dc2626; }
+.pos { color: #16a34a; }
+
+.vazio { text-align: center; color: #94a3b8; padding: 32px; font-style: italic; }
+
+.nota-pedido {
+  display: flex; align-items: center; gap: 8px; margin: 0; padding: 12px 16px;
+  border-radius: 12px; background: #fef9c3; color: #854d0e; font-size: 13px;
+}
+.nota-pedido mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+@media (max-width: 1024px) {
+  .hero { flex-direction: column; }
+}
