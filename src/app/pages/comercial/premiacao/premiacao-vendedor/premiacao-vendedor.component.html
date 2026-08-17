@@ -6,16 +6,38 @@
       <h1>Premiação de Vendedores</h1>
       <p>
         Cálculo automático do bônus por faixa de faturamento e lucratividade, aplicando a
-        regra da "dobradinha" e a elegibilidade por setor.
+        regra da "dobradinha" e a elegibilidade por empresa (Atacado e Concept).
       </p>
     </div>
     <div class="hero-right">
       <div class="hero-stat">
-        <span class="stat-label">Total do mês</span>
+        <span class="stat-label">Total do período</span>
         <strong>{{ totalPremiacao | currency:'BRL':'symbol':'1.2-2' }}</strong>
         <small>{{ qtdElegiveis }} vendedores elegíveis</small>
       </div>
     </div>
+  </section>
+
+  <!-- SELETOR DE PERÍODO -->
+  <section class="periodo-bar">
+    <mat-form-field appearance="outline" class="campo-periodo">
+      <mat-label>Mês</mat-label>
+      <mat-select [(value)]="mesSelecionado">
+        <mat-option *ngFor="let m of meses" [value]="m.v">{{ m.n }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="campo-periodo">
+      <mat-label>Ano</mat-label>
+      <mat-select [(value)]="anoSelecionado">
+        <mat-option *ngFor="let a of anos" [value]="a">{{ a }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" class="btn-filtrar" (click)="carregar()" [disabled]="carregando">
+      <mat-icon>filter_alt</mat-icon>
+      {{ carregando ? 'Carregando...' : 'Filtrar' }}
+    </button>
   </section>
 
   <!-- FAIXAS (referência da regra) -->
@@ -33,7 +55,7 @@
       <mat-icon>info</mat-icon>
       O vendedor precisa atingir faturamento <strong>e</strong> lucratividade da mesma faixa. Se
       atingir faturamento maior mas lucratividade menor, prevalece a <strong>menor faixa</strong>
-      ("dobradinha"). Setores PISOS, Atacado e Concept só a partir da Faixa 2.
+      ("dobradinha"). Atacado e Concept só a partir da Faixa 2.
     </p>
   </section>
 
@@ -41,7 +63,7 @@
   <section class="table-section">
     <div class="table-header">
       <div>
-        <span class="section-eyebrow">Resultado do mês</span>
+        <span class="section-eyebrow">Resultado do período</span>
         <h2>Bônus por vendedor</h2>
       </div>
       <button mat-flat-button color="primary" class="btn-fechar" disabled
@@ -63,16 +85,9 @@
           <td mat-cell *matCellDef="let r">{{ r.nome }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="loja">
+        <ng-container matColumnDef="idEmpresa">
           <th mat-header-cell *matHeaderCellDef>Loja</th>
-          <td mat-cell *matCellDef="let r">{{ r.loja }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="setor">
-          <th mat-header-cell *matHeaderCellDef>Setor</th>
-          <td mat-cell *matCellDef="let r">
-            <span class="tag-setor" [class.tag-restrito]="r.setor !== 'PADRAO'">{{ r.setor }}</span>
-          </td>
+          <td mat-cell *matCellDef="let r">{{ nomeLoja(r.idEmpresa) }}</td>
         </ng-container>
 
         <ng-container matColumnDef="vendaRealizada">
@@ -87,16 +102,12 @@
 
         <ng-container matColumnDef="faixaFaturamento">
           <th mat-header-cell *matHeaderCellDef matTooltip="Faixa atingida pelo faturamento">Fx. Fat.</th>
-          <td mat-cell *matCellDef="let r">
-            <span class="chip-faixa">{{ r.faixaFaturamento || '—' }}</span>
-          </td>
+          <td mat-cell *matCellDef="let r"><span class="chip-faixa">{{ r.faixaFaturamento || '—' }}</span></td>
         </ng-container>
 
         <ng-container matColumnDef="faixaLucratividade">
           <th mat-header-cell *matHeaderCellDef matTooltip="Faixa atingida pela lucratividade">Fx. Lucr.</th>
-          <td mat-cell *matCellDef="let r">
-            <span class="chip-faixa">{{ r.faixaLucratividade || '—' }}</span>
-          </td>
+          <td mat-cell *matCellDef="let r"><span class="chip-faixa">{{ r.faixaLucratividade || '—' }}</span></td>
         </ng-container>
 
         <ng-container matColumnDef="faixaElegivel">
@@ -125,6 +136,10 @@
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
       </table>
+
+      <div class="empty" *ngIf="!carregando && dataSource.data.length === 0">
+        Nenhum vendedor encontrado para o período.
+      </div>
     </div>
   </section>
 </div>

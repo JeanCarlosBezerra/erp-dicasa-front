@@ -22,26 +22,6 @@
 
       <mat-accordion class="submenu-accordion" [multi]="false">
 
-        <!-- Pedidos -->
-        @if (auth.hasRole('MOD_PEDIDOS')) {
-          <mat-expansion-panel>
-            <mat-expansion-panel-header class="menu-btn">
-              <mat-panel-title>
-                <mat-icon class="menu-icon">inventory_2</mat-icon>
-                <span class="menu-title-text">Pedidos</span>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <div class="submenu-wrapper">
-              <button mat-button class="submenu-btn" routerLink="/menu/pedidos-list" routerLinkActive="active-submenu">
-                <mat-icon>description</mat-icon> Consultar
-              </button>
-              <button mat-button class="submenu-btn" disabled>
-                <mat-icon>add_circle</mat-icon> Novo Pedido
-              </button>
-            </div>
-          </mat-expansion-panel>
-        }
-
         @if (auth.hasRole('MOD_ESTOQUE')) {
           <mat-expansion-panel>
             <mat-expansion-panel-header class="menu-btn">
@@ -71,7 +51,7 @@
             <div class="submenu-wrapper">
               <button mat-button class="submenu-btn"
                 routerLink="/menu/relatorios" routerLinkActive="active-submenu">
-                <mat-icon>download</mat-icon> Estoque
+                <mat-icon>download</mat-icon> Relatórios
               </button>
             </div>
           </mat-expansion-panel>
@@ -128,6 +108,11 @@
                   <mat-icon>groups</mat-icon> Colaborador
                 </button>
               }
+              @if (auth.hasRole('COM_COLABORADOR')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/comercial/colaborador-cadastro" routerLinkActive="active-submenu">
+                  <mat-icon>manage_accounts</mat-icon> Cadastro de Colaboradores
+                </button>
+              }
               @if (auth.hasRole('COM_FATURAMENTO')) {
                 <button mat-button class="submenu-btn" routerLink="/menu/comercial/faturamento" routerLinkActive="active-submenu">
                   <mat-icon>bar_chart</mat-icon> Análise de Faturamento
@@ -171,31 +156,6 @@
           </mat-expansion-panel>
         }
 
-        <!-- Compras Estratégicas -->
-        @if (auth.hasRole('MOD_COMPRAS')) {
-          <mat-expansion-panel>
-            <mat-expansion-panel-header class="menu-btn">
-              <mat-panel-title>
-                <mat-icon class="menu-icon">insights</mat-icon>
-                <span class="menu-title-text">Compras Estratégicas</span>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <div class="submenu-wrapper">
-              <button mat-button class="submenu-btn" routerLink="/menu/compras-estrategicas/resumo-executivo" routerLinkActive="active-submenu">
-                <mat-icon>dashboard</mat-icon> Resumo Executivo
-              </button>
-              <button mat-button class="submenu-btn" routerLink="/menu/compras-estrategicas/analise-fornecedores" routerLinkActive="active-submenu">
-                <mat-icon>groups</mat-icon> Análise de Fornecedores
-              </button>
-              <button mat-button class="submenu-btn" routerLink="/menu/compras-estrategicas/analise-produtos" routerLinkActive="active-submenu">
-                <mat-icon>inventory_2</mat-icon> Análise de Produtos
-              </button>
-              <button mat-button class="submenu-btn" routerLink="/menu/compras-estrategicas/analise-spend-abc" routerLinkActive="active-submenu">
-                <mat-icon>query_stats</mat-icon> Análise de Spend & ABC
-              </button>
-            </div>
-          </mat-expansion-panel>
-        }
 
         <!-- RH -->
         @if (auth.hasRole('MOD_RH')) {

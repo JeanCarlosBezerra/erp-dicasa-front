@@ -28,6 +28,7 @@ import { ContasPagarComponent } from './pages/financeiro/contas-pagar/contaspaga
 import { FluxoCaixaComponent } from './pages/financeiro/fluxo-caixa/fluxocaixa.component';
 import { PremiacaoComponent } from './pages/comercial/premiacao/premiacao.component';
 import { DreComponent } from './pages/financeiro/dre/dre.component';
+import { ColaboradorCadastroComponent } from './pages/comercial/colaborador-cadastro/colaborador-cadastro.component';
 
 
 
@@ -72,17 +73,12 @@ export const routes: Routes = [
       { path: 'comercial/metas',       component: MetasComponent,               canActivate: [guard('COM_METAS')] },
       { path: 'comercial/meu-painel', component: MeuPainelComponent, canActivate: [guard('COM_MEU_PAINEL')] },
       { path: 'comercial/premiacao', component: PremiacaoComponent, canActivate: [guard('COM_COLABORADOR')] },
+      { path: 'comercial/colaborador-cadastro',  component: ColaboradorCadastroComponent, canActivate: [guard('COM_COLABORADOR')],},
 
       { path: 'compras/encomendas', component: EncomendasComponent, canActivate: [guard('MOD_COMPRAS')] },
 
       // Estoque
       { path: 'estoque/alertas', component: AlertasComponent, canActivate: [guard('MOD_ESTOQUE')] },
-
-      // Compras Estratégicas
-      { path: 'compras-estrategicas/resumo-executivo',     component: ResumoExecutivoComponent,     canActivate: [guard('MOD_COMPRAS')] },
-      { path: 'compras-estrategicas/analise-fornecedores', component: AnaliseFornecedoresComponent,  canActivate: [guard('MOD_COMPRAS')] },
-      { path: 'compras-estrategicas/analise-produtos',     component: AnaliseProdutosComponent,     canActivate: [guard('MOD_COMPRAS')] },
-      { path: 'compras-estrategicas/analise-spend-abc',    component: AnaliseSpendAbcComponent,     canActivate: [guard('MOD_COMPRAS')] },
 
       // RH
       { path: 'rh/avaliacao-desempenho', component: AvaliacaoDesempenhoComponent, canActivate: [guard('RH_DASHBOARD')] },

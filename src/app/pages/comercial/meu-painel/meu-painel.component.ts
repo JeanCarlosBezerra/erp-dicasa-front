@@ -186,8 +186,10 @@ export class MeuPainelComponent {
         .map(r => parseInt(r.replace('COM_EMPRESA_', ''), 10))
         .filter(n => !isNaN(n));
 
-      // Gestor = tem permissão de empresa mas não é só vendedor
-      this.isGestor = this.isAdmin || this.empresasPermitidas.length > 0;
+      const temColaborador = roles.includes('COM_COLABORADOR');
+
+      // Gestor = admin OU tem COM_COLABORADOR. COM_EMPRESA_X é só escopo de loja.
+      this.isGestor = this.isAdmin || temColaborador;
 
       this.cdr.detectChanges();
     } catch { }
@@ -274,7 +276,8 @@ carregarEmpresas() {
       this.dadosCarregados = true;
       this.carregando = false;
       if (!this.isGestor) {
-        this.meusDados = this.identificarVendedorLogado(dados);
+        // Backend já devolveu SÓ o vendedor logado. Pega a linha principal (sem -DEV).
+        this.meusDados = dados.find(v => !v.nome.includes('-DEV(Reentrega)')) ?? dados[0] ?? null;
       }
       this.cdr.detectChanges();
     },
@@ -286,14 +289,6 @@ carregarEmpresas() {
   });
 }
 
-  private identificarVendedorLogado(dados: VendedorDados[]): VendedorDados | null {
-    if (!this.nomeUsuario) return null;
-    const termos = this.nomeUsuario.toLowerCase()
-      .replace(/[._-]/g, ' ').split(' ').filter(t => t.length > 1);
-    return dados.find(v =>
-      termos.every(t => v.nome.toLowerCase().includes(t))
-    ) ?? null;
-  }
 
   selecionarVendedor(v: VendedorDados) {
     this.vendedorSelecionado = v;

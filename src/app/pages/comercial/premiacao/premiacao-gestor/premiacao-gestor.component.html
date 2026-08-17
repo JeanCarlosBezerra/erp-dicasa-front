@@ -5,18 +5,39 @@
       <span class="eyebrow">Comercial · RH</span>
       <h1>Premiação de Gestores</h1>
       <p>
-        Três indicadores independentes — Faturamento (16%), Margem (14%) e Ticket Médio (13%) —
-        cada um com meta própria. Os percentuais atingidos somam, limitados ao teto de 50% da
-        prestação de serviços.
+        Três indicadores independentes — Faturamento, Margem e Ticket Médio.
+        A partir de 90% da meta libera-se o percentual em faixas (90% / 100% / 105%); os valores somam.
       </p>
     </div>
     <div class="hero-right">
       <div class="hero-stat">
-        <span class="stat-label">Total do mês</span>
+        <span class="stat-label">Total do período</span>
         <strong>{{ totalPremiacao | currency:'BRL':'symbol':'1.2-2' }}</strong>
         <small>{{ qtdPremiados }} gestores premiados</small>
       </div>
     </div>
+  </section>
+
+  <!-- SELETOR DE PERÍODO -->
+  <section class="periodo-bar">
+    <mat-form-field appearance="outline" class="campo-periodo">
+      <mat-label>Mês</mat-label>
+      <mat-select [(value)]="mesSelecionado">
+        <mat-option *ngFor="let m of meses" [value]="m.v">{{ m.n }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="campo-periodo">
+      <mat-label>Ano</mat-label>
+      <mat-select [(value)]="anoSelecionado">
+        <mat-option *ngFor="let a of anos" [value]="a">{{ a }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <button mat-flat-button color="primary" class="btn-filtrar" (click)="carregar()" [disabled]="carregando">
+      <mat-icon>filter_alt</mat-icon>
+      {{ carregando ? 'Carregando...' : 'Filtrar' }}
+    </button>
   </section>
 
   <!-- INDICADORES (referência) -->
@@ -26,12 +47,12 @@
       <div class="ind-item">
         <mat-icon>trending_up</mat-icon>
         <div class="ind-nome">Faturamento</div>
-        <div class="ind-peso">até 16%</div>
+        <div class="ind-peso">até 20%</div>
       </div>
       <div class="ind-item">
-        <mat-icon>percent</mat-icon>
-        <div class="ind-nome">Margem de Lucro</div>
-        <div class="ind-peso">até 14%</div>
+        <mat-icon>savings</mat-icon>
+        <div class="ind-nome">Margem (Lucro R$)</div>
+        <div class="ind-peso">até 17%</div>
       </div>
       <div class="ind-item">
         <mat-icon>receipt_long</mat-icon>
@@ -41,98 +62,87 @@
     </div>
     <p class="ind-nota">
       <mat-icon>info</mat-icon>
-      Cada indicador que atingir 100% da meta libera seu percentual. Os valores somam e são
-      aplicados sobre a prestação de serviços, com teto de 50%.
+      Faixas por atingimento: 90% / 100% / 105% da meta. Máximo possível: 50% da prestação de serviço.
     </p>
   </section>
 
   <!-- TABELA -->
-  <section class="table-section">
-    <div class="table-header">
-      <div>
-        <span class="section-eyebrow">Resultado do mês</span>
-        <h2>Bônus por gestor</h2>
-      </div>
+  <section class="tabela-card">
+    <table mat-table [dataSource]="dataSource" class="gestor-table">
+
+      <ng-container matColumnDef="nome">
+        <th mat-header-cell *matHeaderCellDef>Gestor</th>
+        <td mat-cell *matCellDef="let g">{{ g.nome }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="faturamento">
+        <th mat-header-cell *matHeaderCellDef class="num">Fat. atingido</th>
+        <td mat-cell *matCellDef="let g" class="num">{{ g.faturamento.atingido | currency:'BRL':'symbol':'1.0-0' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="faturamentoPerc">
+        <th mat-header-cell *matHeaderCellDef class="num">% Fat</th>
+        <td mat-cell *matCellDef="let g" class="num"
+            [matTooltip]="'Meta: ' + (g.faturamento.meta | currency:'BRL':'symbol':'1.0-0')">
+          <span class="pct" [class.pct-ok]="g.faturamento.percentual >= 0.90" [class.pct-no]="g.faturamento.percentual < 0.90">
+            {{ g.faturamento.percentual | percent:'1.1-1' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="margem">
+        <th mat-header-cell *matHeaderCellDef class="num">Margem (R$)</th>
+        <td mat-cell *matCellDef="let g" class="num">{{ g.margem.atingido | currency:'BRL':'symbol':'1.0-0' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="margemPerc">
+        <th mat-header-cell *matHeaderCellDef class="num">% Margem</th>
+        <td mat-cell *matCellDef="let g" class="num"
+            [matTooltip]="'Meta: ' + (g.margem.meta | currency:'BRL':'symbol':'1.0-0')">
+          <span class="pct" [class.pct-ok]="g.margem.percentual >= 0.90" [class.pct-no]="g.margem.percentual < 0.90">
+            {{ g.margem.percentual | percent:'1.1-1' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="ticketMedio">
+        <th mat-header-cell *matHeaderCellDef class="num">Ticket Médio</th>
+        <td mat-cell *matCellDef="let g" class="num">{{ g.ticketMedio.atingido | currency:'BRL':'symbol':'1.2-2' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="ticketMedioPerc">
+        <th mat-header-cell *matHeaderCellDef class="num">% T.M.</th>
+        <td mat-cell *matCellDef="let g" class="num"
+            [matTooltip]="g.ticketMedio.meta > 0 ? ('Meta: ' + (g.ticketMedio.meta | currency:'BRL':'symbol':'1.2-2')) : 'Sem meta cadastrada'">
+          <span class="pct" [class.pct-ok]="g.ticketMedio.percentual >= 0.90" [class.pct-no]="g.ticketMedio.percentual < 0.90">
+            {{ g.ticketMedio.meta > 0 ? (g.ticketMedio.percentual | percent:'1.1-1') : '—' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="premioTotalPerc">
+        <th mat-header-cell *matHeaderCellDef class="num">Prêmio %</th>
+        <td mat-cell *matCellDef="let g" class="num">
+          <span class="premio-badge" [class.zero]="g.premioTotalPerc === 0">
+            {{ g.premioTotalPerc | percent:'1.0-0' }}
+          </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="premiacao">
+        <th mat-header-cell *matHeaderCellDef class="num">Premiação</th>
+        <td mat-cell *matCellDef="let g" class="num premio-valor" [class.zero]="g.premiacao === 0">
+          {{ g.premiacao | currency:'BRL':'symbol':'1.2-2' }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <div class="empty" *ngIf="!carregando && dataSource.data.length === 0">
+      Nenhum gestor encontrado para o período selecionado.
     </div>
-
-    <div class="table-card">
-      <table mat-table [dataSource]="dataSource" class="full-width">
-
-        <ng-container matColumnDef="nome">
-          <th mat-header-cell *matHeaderCellDef>Gestor</th>
-          <td mat-cell *matCellDef="let r">
-            <div class="gestor-nome">{{ r.nome }}</div>
-            <div class="gestor-base">Base {{ r.prestacaoServico | currency:'BRL':'symbol':'1.0-0' }}</div>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="faturamento">
-          <th mat-header-cell *matHeaderCellDef>Faturamento</th>
-          <td mat-cell *matCellDef="let r">
-            <div class="ind-pct">{{ (r.faturamento.percentual * 100) | number:'1.1-1' }}%</div>
-            <div class="ind-val">{{ r.faturamento.atingido | currency:'BRL':'symbol':'1.0-0' }}</div>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="faturamentoPerc">
-          <th mat-header-cell *matHeaderCellDef>%</th>
-          <td mat-cell *matCellDef="let r">
-            <span class="premio-pct" [class.pct-ok]="r.faturamento.premioPerc > 0" [class.pct-no]="r.faturamento.premioPerc === 0">
-              {{ r.faturamento.premioPerc > 0 ? '+' + (r.faturamento.premioPerc * 100 | number:'1.0-0') + '%' : '—' }}
-            </span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="margem">
-          <th mat-header-cell *matHeaderCellDef>Margem</th>
-          <td mat-cell *matCellDef="let r">
-            <div class="ind-pct">{{ (r.margem.percentual * 100) | number:'1.1-1' }}%</div>
-            <div class="ind-val">{{ r.margem.atingido | currency:'BRL':'symbol':'1.0-0' }}</div>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="margemPerc">
-          <th mat-header-cell *matHeaderCellDef>%</th>
-          <td mat-cell *matCellDef="let r">
-            <span class="premio-pct" [class.pct-ok]="r.margem.premioPerc > 0" [class.pct-no]="r.margem.premioPerc === 0">
-              {{ r.margem.premioPerc > 0 ? '+' + (r.margem.premioPerc * 100 | number:'1.0-0') + '%' : '—' }}
-            </span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="ticketMedio">
-          <th mat-header-cell *matHeaderCellDef>Ticket Médio</th>
-          <td mat-cell *matCellDef="let r">
-            <div class="ind-pct">{{ (r.ticketMedio.percentual * 100) | number:'1.1-1' }}%</div>
-            <div class="ind-val">{{ r.ticketMedio.atingido | currency:'BRL':'symbol':'1.2-2' }}</div>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="ticketMedioPerc">
-          <th mat-header-cell *matHeaderCellDef>%</th>
-          <td mat-cell *matCellDef="let r">
-            <span class="premio-pct" [class.pct-ok]="r.ticketMedio.premioPerc > 0" [class.pct-no]="r.ticketMedio.premioPerc === 0">
-              {{ r.ticketMedio.premioPerc > 0 ? '+' + (r.ticketMedio.premioPerc * 100 | number:'1.0-0') + '%' : '—' }}
-            </span>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="premioTotalPerc">
-          <th mat-header-cell *matHeaderCellDef matTooltip="Soma dos indicadores atingidos, com teto de 50%">Prêmio %</th>
-          <td mat-cell *matCellDef="let r">
-            <strong class="total-pct">{{ (r.premioTotalPerc * 100) | number:'1.0-0' }}%</strong>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="premiacao">
-          <th mat-header-cell *matHeaderCellDef>Premiação</th>
-          <td mat-cell *matCellDef="let r">
-            <strong [class.premio-valor]="r.premiacao > 0" [class.premio-zero]="r.premiacao === 0">
-              {{ r.premiacao | currency:'BRL':'symbol':'1.2-2' }}
-            </strong>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-      </table>
-    </div>
+    <div class="empty" *ngIf="carregando">Carregando dados do período...</div>
   </section>
 </div>

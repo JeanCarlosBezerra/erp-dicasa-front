@@ -75,6 +75,7 @@
             <th class="col-empresa">Empresa</th>
             <th class="col-meta">Meta Faturamento (R$)</th>
             <th class="col-meta">Meta Margem (%)</th>
+            <th class="col-meta">Meta Ticket Médio (R$)</th>
             <th class="col-diaria">Meta Diária</th>
             <th class="col-acao">Salvar</th>
           </tr>
@@ -115,6 +116,19 @@
               </div>
             </td>
 
+            <td class="col-meta">
+              <div class="input-wrap">
+                <input class="meta-input"
+                  type="text"
+                  inputmode="decimal"
+                  [(ngModel)]="row._editTicket"
+                  (focus)="selectAll($event)"
+                  (blur)="onTicketBlur(row)"
+                  placeholder="0,00" />
+                <span class="input-suffix">R$</span>
+              </div>
+            </td>
+
             <td class="col-diaria">
               <span class="meta-diaria-val">
                 R$ {{ formatMoney(diasUteisMes ? row.meta_fat / diasUteisMes : 0) }}
@@ -135,6 +149,7 @@
           <tr class="totais-row">
             <td><strong>TOTAL</strong></td>
             <td><strong>R$ {{ formatMoney(totalMetaFat) }}</strong></td>
+            <td>—</td>
             <td>—</td>
             <td><strong>R$ {{ formatMoney(metaDiaria) }}</strong></td>
             <td></td>

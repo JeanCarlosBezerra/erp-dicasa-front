@@ -25,6 +25,8 @@ interface MetaRow {
   _editMargem?: string;
   _salvando?: boolean;
   _salvo?: boolean;
+  meta_ticket_medio: number;
+  _editTicket?: string;
 }
 
 const MESES = [
@@ -96,6 +98,8 @@ export class MetasComponent {
             meta_margem: Number(existing?.meta_margem || 0),
             _editFat:   this.formatMoney(Number(existing?.meta_fat || 0)),
             _editMargem: ((Number(existing?.meta_margem || 0)) * 100).toLocaleString('pt-BR', { maximumFractionDigits: 4, useGrouping: false }),
+            meta_ticket_medio: Number(existing?.meta_ticket_medio || 0),
+            _editTicket: this.formatMoney(Number(existing?.meta_ticket_medio || 0)),
           };
         });
         this.carregando = false;
@@ -122,17 +126,19 @@ export class MetasComponent {
 
   salvar(row: MetaRow) {
     // Parseia os valores editados
-    row.meta_fat    = this.parseMoney(row._editFat || '0');
-    row.meta_margem = Number(String(row._editMargem || '0').replace(',', '.')) / 100;
+    row.meta_fat          = this.parseMoney(row._editFat || '0');
+    row.meta_margem       = Number(String(row._editMargem || '0').replace(',', '.')) / 100;
+    row.meta_ticket_medio = this.parseMoney(row._editTicket || '0');
     row._salvando   = true;
     this.cdr.detectChanges();
 
     this.http.post<any>(`${environment.apiUrl}/comercial/metas`, {
-      id_empresa:  row.id_empresa,
-      mes:         row.mes,
-      ano:         row.ano,
-      meta_fat:    row.meta_fat,
-      meta_margem: row.meta_margem,
+      id_empresa:        row.id_empresa,
+      mes:               row.mes,
+      ano:               row.ano,
+      meta_fat:          row.meta_fat,
+      meta_margem:       row.meta_margem,
+      meta_ticket_medio: row.meta_ticket_medio,
     }).subscribe({
       next: (res) => {
         row.id = res.id;
@@ -171,6 +177,12 @@ export class MetasComponent {
     const n = Number(String(row._editMargem || '0').replace(',', '.'));
     row.meta_margem = (isFinite(n) ? Math.max(0, Math.min(100, n)) : 0) / 100;
     row._editMargem = (row.meta_margem * 100).toLocaleString('pt-BR', { maximumFractionDigits: 4, useGrouping: false });
+    this.cdr.detectChanges();
+  }
+  onTicketBlur(row: MetaRow) {
+    const n = this.parseMoney(row._editTicket || '0');
+    row.meta_ticket_medio = n;
+    row._editTicket = this.formatMoney(n);
     this.cdr.detectChanges();
   }
 

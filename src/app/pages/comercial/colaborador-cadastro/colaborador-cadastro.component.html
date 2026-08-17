@@ -1,0 +1,156 @@
+<div class="cad-shell">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <span class="eyebrow">Comercial · RH</span>
+      <h1>Colaboradores</h1>
+      <p>Cadastro de vendedores, gestores e assistentes. Edite tipo, loja, código e demais dados.</p>
+    </div>
+    <div class="hero-right">
+      <button mat-flat-button color="primary" (click)="novo()">
+        <mat-icon>add</mat-icon> Novo colaborador
+      </button>
+    </div>
+  </section>
+
+  <!-- FILTROS -->
+  <section class="filtros-bar">
+    <mat-form-field appearance="outline" class="campo-tipo">
+      <mat-label>Tipo</mat-label>
+      <mat-select [(value)]="filtroTipo" (selectionChange)="carregar()">
+        <mat-option *ngFor="let t of tipos" [value]="t.v">{{ t.n }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="campo-busca">
+      <mat-label>Buscar por nome</mat-label>
+      <input matInput [(ngModel)]="busca" (ngModelChange)="onBusca()" placeholder="Digite o nome...">
+      <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+  </section>
+
+  <!-- TABELA -->
+  <section class="tabela-card">
+    <table mat-table [dataSource]="dataSource" class="cad-table">
+
+      <ng-container matColumnDef="nome">
+        <th mat-header-cell *matHeaderCellDef>Nome</th>
+        <td mat-cell *matCellDef="let c">{{ c.nome }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="tipo">
+        <th mat-header-cell *matHeaderCellDef>Tipo</th>
+        <td mat-cell *matCellDef="let c">
+          <span class="chip-tipo" [ngClass]="'tipo-' + (c.tipo || '').toLowerCase()">{{ c.tipo }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="cargo">
+        <th mat-header-cell *matHeaderCellDef>Cargo</th>
+        <td mat-cell *matCellDef="let c">{{ c.cargo || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="loja">
+        <th mat-header-cell *matHeaderCellDef>Loja</th>
+        <td mat-cell *matCellDef="let c">{{ nomeLoja(c.id_empresa_erp) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="idclifor_erp">
+        <th mat-header-cell *matHeaderCellDef>Cód. CISS</th>
+        <td mat-cell *matCellDef="let c">{{ c.idclifor_erp || '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="ativo">
+        <th mat-header-cell *matHeaderCellDef>Situação</th>
+        <td mat-cell *matCellDef="let c">
+          <span class="chip-ativo" [class.inativo]="!c.ativo">{{ c.ativo ? 'Ativo' : 'Inativo' }}</span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="acoes">
+        <th mat-header-cell *matHeaderCellDef class="col-acoes">Ações</th>
+        <td mat-cell *matCellDef="let c" class="col-acoes">
+          <button mat-icon-button color="primary" (click)="editar(c)" matTooltip="Editar">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="inativar(c)" matTooltip="Inativar" *ngIf="c.ativo">
+            <mat-icon>block</mat-icon>
+          </button>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+
+    <div class="empty" *ngIf="!carregando && dataSource.data.length === 0">
+      Nenhum colaborador encontrado.
+    </div>
+    <div class="empty" *ngIf="carregando">Carregando...</div>
+  </section>
+
+  <!-- MODAL DE EDIÇÃO/CRIAÇÃO -->
+  <div class="modal-overlay" *ngIf="editando" (click)="cancelar()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h2>{{ editando.id ? 'Editar colaborador' : 'Novo colaborador' }}</h2>
+
+      <div class="form-grid">
+        <mat-form-field appearance="outline" class="col-full">
+          <mat-label>Nome</mat-label>
+          <input matInput [(ngModel)]="editando.nome">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Tipo</mat-label>
+          <mat-select [(value)]="editando.tipo">
+            <mat-option *ngFor="let t of tiposEdicao" [value]="t.v">{{ t.n }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Cargo</mat-label>
+          <input matInput [(ngModel)]="editando.cargo" placeholder="Ex.: VENDEDOR I">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Loja</mat-label>
+          <mat-select [(value)]="editando.id_empresa_erp">
+            <mat-option [value]="null">— Nenhuma —</mat-option>
+            <mat-option *ngFor="let e of empresas" [value]="e.id">{{ e.nome }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Código CISS</mat-label>
+          <input matInput type="number" [(ngModel)]="editando.idclifor_erp">
+        </mat-form-field>
+
+        <!-- CAMPOS CONDICIONAIS: só GESTOR (Opção 2) -->
+        <ng-container *ngIf="editando.tipo === 'GESTOR'">
+          <mat-form-field appearance="outline">
+            <mat-label>Prestação de serviço (R$)</mat-label>
+            <input matInput type="number" [(ngModel)]="editando.prestacao_servico">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Início do contrato</mat-label>
+            <input matInput type="date" [(ngModel)]="editando.data_inicio">
+          </mat-form-field>
+        </ng-container>
+
+        <div class="col-full ativo-toggle">
+          <label>
+            <input type="checkbox" [(ngModel)]="editando.ativo"> Ativo
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-acoes">
+        <button mat-stroked-button (click)="cancelar()" [disabled]="salvando">Cancelar</button>
+        <button mat-flat-button color="primary" (click)="salvar()" [disabled]="salvando">
+          {{ salvando ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
