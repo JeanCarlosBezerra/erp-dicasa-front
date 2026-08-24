@@ -29,6 +29,19 @@ interface LinhaVisivel {
   diferenca: number | null;
 }
 
+// linha do modo empilhado (uma coluna só, NF e Pedido em blocos separados)
+interface LinhaEmpilhada {
+  tipo: 'cabecalho' | 'conta' | 'categoria';
+  nivel: number;
+  chave: string;
+  descricao: string;
+  ehSubtotal: boolean;
+  temFilhos: boolean;
+  expandido: boolean;
+  valor: number | null;
+  pct: number | null;
+}
+
 @Component({
   selector: 'app-dre',
   standalone: true,
@@ -55,6 +68,9 @@ export class DreComponent implements OnInit {
   linhasVisiveis: LinhaVisivel[] = [];
   private expandidos = new Set<string>();
   carregando = false;
+    // Layout: 'lado' = duas colunas (NF | Pedido | Diferença) · 'empilhado' = formato da planilha da diretoria
+  modoVisao: 'lado' | 'empilhado' = 'lado';
+  linhasEmpilhadas: LinhaEmpilhada[] = [];
 
   // KPIs (baseados na NF, a fonte principal detalhada)
   receitaBruta = 0;
@@ -79,6 +95,12 @@ export class DreComponent implements OnInit {
     ev.stopPropagation();
     this.empresasSelecionadas = this.empresas.map((e) => Number(e.id));
     this.carregar();
+    this.cdr.detectChanges();
+  }
+
+  alternarModo(modo: 'lado' | 'empilhado'): void {
+    this.modoVisao = modo;
+    if (modo === 'empilhado') this.reconstruirEmpilhado();
     this.cdr.detectChanges();
   }
 
@@ -136,12 +158,71 @@ export class DreComponent implements OnInit {
     this.margemBrutaPerc = rb ? lb / rb : 0;
   }
 
-  toggle(linha: LinhaVisivel): void {
+  toggle(linha: { temFilhos: boolean; chave: string }): void {
     if (!linha.temFilhos) return;
     if (this.expandidos.has(linha.chave)) this.expandidos.delete(linha.chave);
     else this.expandidos.add(linha.chave);
     this.reconstruirLinhas();
+    if (this.modoVisao === 'empilhado') this.reconstruirEmpilhado();
     this.cdr.detectChanges();
+  }
+
+    /** Monta a visão empilhada: bloco NF Emitida, depois bloco Pedido (formato da planilha) */
+  private reconstruirEmpilhado(): void {
+    if (!this.cascataNf) { this.linhasEmpilhadas = []; return; }
+    const out: LinhaEmpilhada[] = [];
+    const val = (v: number | null | undefined) => (v === null || v === undefined) ? null : Number(v);
+
+    // helper: monta as linhas de uma cascata (com drill-down) sob um prefixo de chave
+    const montarBloco = (cascata: CascataDRE | null, prefixo: string, comDrill: boolean) => {
+      if (!cascata) return;
+      for (const linha of cascata.linhas) {
+        const chaveConta = `${prefixo}c:${linha.codigo}`;
+        const temFilhos = comDrill && !!linha.filhos?.length;
+        const expandido = this.expandidos.has(chaveConta);
+
+        out.push({
+          tipo: 'conta', nivel: 0, chave: chaveConta,
+          descricao: linha.descricao, ehSubtotal: linha.tipo === 'subtotal',
+          temFilhos, expandido,
+          valor: val(linha.valor), pct: linha.percentualReceita,
+        });
+
+        if (temFilhos && expandido) {
+          for (const div of linha.filhos!) {
+            const chaveDiv = `${chaveConta}|d:${div.nome}`;
+            const divTemFilhos = !!div.filhos?.length;
+            const divExpandido = this.expandidos.has(chaveDiv);
+            out.push({
+              tipo: 'categoria', nivel: 1, chave: chaveDiv,
+              descricao: div.nome, ehSubtotal: false,
+              temFilhos: divTemFilhos, expandido: divExpandido,
+              valor: val(div.valor), pct: null,
+            });
+            if (divTemFilhos && divExpandido) {
+              for (const sec of div.filhos!) {
+                out.push({
+                  tipo: 'categoria', nivel: 2, chave: `${chaveDiv}|s:${sec.nome}`,
+                  descricao: sec.nome, ehSubtotal: false,
+                  temFilhos: false, expandido: false,
+                  valor: val(sec.valor), pct: null,
+                });
+              }
+            }
+          }
+        }
+      }
+    };
+
+    // Bloco 1 — NF Emitida (com drill-down)
+    out.push({ tipo: 'cabecalho', nivel: 0, chave: 'h:nf', descricao: 'Receita Bruta (só NF emitida)', ehSubtotal: false, temFilhos: false, expandido: false, valor: null, pct: null });
+    montarBloco(this.cascataNf, 'nf:', true);
+
+    // Bloco 2 — Pedido (sem drill-down, o CISS não fornece categoria)
+    out.push({ tipo: 'cabecalho', nivel: 0, chave: 'h:ped', descricao: 'Receita Bruta (só PEDIDO)', ehSubtotal: false, temFilhos: false, expandido: false, valor: null, pct: null });
+    montarBloco(this.cascataPedido, 'ped:', false);
+
+    this.linhasEmpilhadas = out;
   }
 
   /** Combina NF + Pedido por código de linha e achata para a tabela */

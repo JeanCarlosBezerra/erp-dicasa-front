@@ -114,3 +114,18 @@
 @media (max-width: 1024px) {
   .hero { flex-direction: column; }
 }
+
+.layout-toggle {
+  display: flex; gap: 8px; margin: 0 0 16px;
+  .toggle-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border: 1px solid #d0d7e2; border-radius: 8px;
+    background: #fff; cursor: pointer; font-weight: 600; color: #64748b;
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+    &.ativo { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+  }
+}
+.dre-empilhada .linha-cabecalho {
+  background: #fbbf24; font-weight: 700;
+  td { padding: 10px 16px; }
+}

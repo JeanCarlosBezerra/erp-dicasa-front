@@ -50,6 +50,19 @@
     </button>
   </section>
 
+    <!-- TOGGLE DE LAYOUT -->
+  <div class="layout-toggle">
+    <button type="button" class="toggle-btn" [class.ativo]="modoVisao === 'lado'" (click)="alternarModo('lado')">
+      <mat-icon>view_column</mat-icon> Lado a lado
+    </button>
+    <button type="button" class="toggle-btn" [class.ativo]="modoVisao === 'empilhado'" (click)="alternarModo('empilhado')">
+      <mat-icon>table_rows</mat-icon> Empilhado
+    </button>
+  </div>
+
+  <!-- MODO LADO A LADO (atual) -->
+    <div class="table-card" *ngIf="modoVisao === 'lado'">
+      <table class="dre-table">
   <!-- CASCATA -->
   <section class="table-section">
     <div class="table-header">
@@ -131,4 +144,45 @@
       A coluna "Pedido" (fonte gerencial CISS) não separa impostos e desconto — esses aparecem como "n/d". O drill-down por categoria está disponível apenas na NF Emitida.
     </p>
   </section>
+      </table>
+    </div>
+
+    <!-- MODO EMPILHADO (formato da planilha da diretoria) -->
+    <div class="table-card" *ngIf="modoVisao === 'empilhado'">
+      <table class="dre-table dre-empilhada">
+        <thead>
+          <tr>
+            <th class="col-conta">Conta</th>
+            <th class="col-valor">Valor (R$)</th>
+            <th class="col-pct">% Rec.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let l of linhasEmpilhadas"
+              class="linha"
+              [class.linha-cabecalho]="l.tipo === 'cabecalho'"
+              [class.linha-subtotal]="l.ehSubtotal"
+              [class.linha-cat-1]="l.tipo === 'categoria' && l.nivel === 1"
+              [class.linha-cat-2]="l.tipo === 'categoria' && l.nivel === 2"
+              [class.clicavel]="l.temFilhos"
+              (click)="toggle(l)">
+            <td class="col-conta">
+              <span class="indent" [style.padding-left.px]="l.nivel * 24">
+                <mat-icon *ngIf="l.temFilhos" class="chevron" [class.aberto]="l.expandido">chevron_right</mat-icon>
+                <span *ngIf="!l.temFilhos && l.tipo === 'categoria'" class="dot">•</span>
+                {{ l.descricao }}
+              </span>
+            </td>
+            <td class="col-valor" [class.neg]="l.valor !== null && l.valor < 0" [class.pos]="l.valor !== null && l.valor >= 0 && l.tipo === 'conta'">
+              <ng-container *ngIf="l.valor !== null; else ndE">{{ l.valor | currency:'BRL':'symbol':'1.2-2' }}</ng-container>
+            </td>
+            <td class="col-pct">
+              <span *ngIf="l.pct !== null">{{ l.pct * 100 | number:'1.1-1' }}%</span>
+            </td>
+            <ng-template #ndE><span class="nd">n/d</span></ng-template>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
 </div>
