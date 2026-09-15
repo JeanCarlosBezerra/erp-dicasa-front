@@ -21,7 +21,7 @@
 
   <div class="filtro-aviso">
     <mat-icon>info</mat-icon>
-    <span>Projeção considera <strong>recebíveis a prazo</strong> (carnê/boleto) e <strong>contas a pagar</strong>. Vendas à vista/cartão do PDV serão incluídas após definição da regra de entrada de caixa.</span>
+    <span>Projeção de entrada = <strong>recebíveis a prazo</strong> (data certa) + <strong>estimativa de cartão</strong> (média das últimas 8 semanas). Saída = <strong>contas a pagar</strong>. A venda à vista futura (dinheiro/PIX) não é projetada, por ser imprevisível.</span>
   </div>
 
   <div class="filter-bar">
@@ -38,6 +38,9 @@
       </select>
     </div>
     <button class="btn-limpar" (click)="limpar()"><mat-icon>clear</mat-icon> Limpar</button>
+    <button class="btn-limpar" (click)="puxarSaldoBancos()" [disabled]="carregandoSaldo">
+      <mat-icon>account_balance</mat-icon> {{ carregandoSaldo ? 'Puxando...' : 'Puxar saldo dos bancos' }}
+    </button>
     <button class="btn-buscar" (click)="buscar()"><mat-icon>refresh</mat-icon> Projetar</button>
   </div>
 
@@ -51,12 +54,12 @@
       <div class="kpi-card">
         <span class="kpi-label">Saldo inicial (hoje)</span>
         <strong class="kpi-value kpi-info">R$ {{ moeda(dados.saldoInicial) }}</strong>
-        <span class="kpi-sub">informado manualmente</span>
+                <span class="kpi-sub">saldo em caixa/banco</span>
       </div>
       <div class="kpi-card">
         <span class="kpi-label">Entram (próx. 4 semanas)</span>
         <strong class="kpi-value kpi-ok">R$ {{ moeda(dados.entra30) }}</strong>
-        <span class="kpi-sub">recebíveis a prazo</span>
+                <span class="kpi-sub">a prazo + cartão estimado</span>
       </div>
       <div class="kpi-card">
         <span class="kpi-label">Saem (próx. 4 semanas)</span>
@@ -120,7 +123,11 @@
             <tr [class.linha-aperto]="w.semana === dados.semanaMenorSaldo">
               <td>{{ w.label }}</td>
               <td class="periodo">{{ w.periodo }}</td>
-              <td class="num val-pos">{{ moeda(w.entrada) }}</td>
+                <td class="num val-pos"
+                  [matTooltip]="'A prazo: R$ ' + moeda(w.entradaAPrazo) + '  ·  Cartão (estimado): R$ ' + moeda(w.entradaCartaoEstimado)">
+                {{ moeda(w.entrada) }}
+                @if (w.entradaCartaoEstimado > 0) { <span class="tag-est">est.</span> }
+              </td>
               <td class="num val-neg">{{ moeda(w.saida) }}</td>
               <td class="num" [ngClass]="classeSaldo(w.net)">{{ w.net >= 0 ? '+' : '' }}{{ moeda(w.net) }}</td>
               <td class="num td-saldo" [ngClass]="classeSaldo(w.saldoAcumulado)">{{ moeda(w.saldoAcumulado) }}</td>

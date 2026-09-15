@@ -354,6 +354,19 @@ export class FluxoCaixaComponent {
 
   get vencidoLista(): VencidoCategoria[] { return this.respostaDiario?.vencido ?? []; }
 
+  carregandoSaldo = false;
+  puxarSaldoBancos() {
+    this.carregandoSaldo = true; this.cdr.detectChanges();
+    this.api.getSaldoBancos(this.empresaFiltro || undefined).subscribe({
+      next: (r) => {
+        this.saldoInicial = Math.round(r.total * 100) / 100; // preenche o campo
+        this.carregandoSaldo = false;
+        this.buscar();  // re-projeta com o saldo real
+      },
+      error: () => { this.carregandoSaldo = false; this.cdr.detectChanges(); },
+    });
+  }
+
   private formatarDataInput(d: Date): string {
     const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;

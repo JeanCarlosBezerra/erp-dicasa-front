@@ -1,11 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface SemanaFluxo {
   semana: number; label: string; periodo: string;
   entrada: number; saida: number; net: number; saldoAcumulado: number;
+    entradaAPrazo: number;          // ← adiciona
+  entradaCartaoEstimado: number;  // ← adiciona
 }
 export interface FluxoResponse {
   saldoInicial: number;
@@ -13,6 +15,7 @@ export interface FluxoResponse {
   semanas: SemanaFluxo[];
   menorSaldo: number; semanaMenorSaldo: number; saldoFinal: number;
   entra30: number; sai30: number;
+  temEstimativaCartao: boolean;   // ← adiciona
 }
 
 // ── Tipos da visão Diária (Previsto × Realizado) ──
@@ -45,6 +48,13 @@ export class FluxoCaixaService {
     const params: any = { saldoInicial: String(saldoInicial || 0) };
     if (empresa) params.empresa = empresa;
     return this.http.get<FluxoResponse>(`${this.base}/projecao`, { params });
+  }
+
+  getSaldoBancos(empresa?: string) {
+    let params = new HttpParams();
+    if (empresa) params = params.set('idempresa', empresa);
+    return this.http.get<{ total: number; contas: {id:number;nome:string;saldo:number}[] }>(
+      `${this.base}/saldo-bancos`, { params });   // ← mesmo prefixo dos outros métodos
   }
 
   getDiario(
