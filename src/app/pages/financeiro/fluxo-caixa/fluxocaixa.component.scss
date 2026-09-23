@@ -185,3 +185,50 @@
     background: #FFFBEB;
   }
 }
+
+/* Tabela de faturamento mais compacta (fonte menor, menos padding) */
+.tbl-fat {
+  font-size: 12px;
+ 
+  th, td {
+    padding: 4px 8px;          /* era ~8px 12px na matriz normal */
+    white-space: nowrap;
+  }
+  th.num, td.num { text-align: right; }
+ 
+  .col-categoria { text-align: left; }
+}
+ 
+/* Linha-categoria clicável */
+.linha-fat.clicavel { cursor: pointer; }
+.linha-fat.clicavel:hover { background: rgba(99, 102, 241, 0.06); }
+ 
+/* Chevron que gira ao abrir */
+.tbl-fat .chevron {
+  font-size: 16px;
+  vertical-align: middle;
+  transition: transform 0.15s ease;
+  color: #6366f1;
+}
+.tbl-fat .chevron.aberto { transform: rotate(90deg); }
+ 
+/* Linhas de empresa (drill-down) — recuadas e mais leves */
+.linha-fat-emp {
+  background: rgba(0, 0, 0, 0.015);
+  font-size: 11.5px;
+  color: #555;
+}
+.linha-fat-emp .indent-emp { padding-left: 26px; display: inline-block; }
+.linha-fat-emp td.num { color: #555; }
+
+.tag-parcial {
+  display: inline-block; font-size: 9px; font-weight: 600;
+  color: #b45309; background: #fef3c7; border-radius: 4px;
+  padding: 1px 4px; margin-left: 4px; vertical-align: middle;
+}
+
+.ajuda-i {
+  font-size: 18px; color: #6366f1; cursor: help;
+  vertical-align: middle; margin-left: 6px;
+}
+.tooltip-ajuda { white-space: pre-line; max-width: 340px; font-size: 12px; }

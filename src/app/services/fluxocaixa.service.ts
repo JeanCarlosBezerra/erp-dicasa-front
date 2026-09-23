@@ -39,6 +39,17 @@ export interface FluxoDiarioResponse {
   vencidoCorteDias: number;
 }
 
+export interface FaturamentoEmpresa { idEmpresa: number; nome: string; valores: number[]; total: number; }
+export interface FaturamentoLinha {
+  chave: string; valores: number[]; total: number; media: number;
+  empresas: FaturamentoEmpresa[];
+}
+export interface FaturamentoResponse {
+  competencias: string[];
+  porConta: FaturamentoLinha[];
+  porForma: FaturamentoLinha[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class FluxoCaixaService {
   private http = inject(HttpClient);
@@ -48,6 +59,12 @@ export class FluxoCaixaService {
     const params: any = { saldoInicial: String(saldoInicial || 0) };
     if (empresa) params.empresa = empresa;
     return this.http.get<FluxoResponse>(`${this.base}/projecao`, { params });
+  }
+
+  getFaturamento(dataInicio: string, dataFim: string, empresa?: string): Observable<FaturamentoResponse> {
+    const params: any = { dataInicio, dataFim };
+    if (empresa) params.empresa = empresa;
+    return this.http.get<FaturamentoResponse>(`${this.base}/faturamento`, { params });
   }
 
   getSaldoBancos(empresa?: string) {

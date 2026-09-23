@@ -5,13 +5,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
   FluxoCaixaService, FluxoResponse,
-  FluxoDiarioResponse, CelulaDiaria, VencidoCategoria,
+  FluxoDiarioResponse, CelulaDiaria, VencidoCategoria, FaturamentoResponse, FaturamentoLinha,
 } from '../../../services/fluxocaixa.service';
 
 interface PontoLinha { x: number; y: number; saldo: number; label: string; neg: boolean; }
 interface BarraSem  { x: number; wE: number; yE: number; hE: number; yS: number; hS: number; }
 
-type AbaFluxo = 'semanal' | 'diario';
+type AbaFluxo = 'semanal' | 'diario' | 'faturamento';
 type TipoLinha =
   | 'saldo-inicial' | 'entrada-total' | 'entrada-item'
   | 'saida-total' | 'saida-item' | 'saida-semclassif'
@@ -48,10 +48,21 @@ export class FluxoCaixaComponent {
   abaAtiva: AbaFluxo = 'semanal';
   setAba(aba: AbaFluxo) {
     this.abaAtiva = aba;
-    if (aba === 'diario' && !this.dadosDiarioCarregados && !this.carregandoDiario) {
-      this.buscarDiario();
-    }
+    if (aba === 'diario' && !this.dadosDiarioCarregados && !this.carregandoDiario) this.buscarDiario();
+    if (aba === 'faturamento' && !this.fatCarregado && !this.carregandoFat) this.buscarFaturamento();
     this.cdr.detectChanges();
+  }
+
+  fatAbertos = new Set<string>();
+ 
+  toggleFat(eixo: 'forma' | 'conta', chave: string) {
+    const k = `${eixo}:${chave}`;
+    if (this.fatAbertos.has(k)) this.fatAbertos.delete(k);
+    else this.fatAbertos.add(k);
+    this.cdr.detectChanges();
+  }
+  fatAberto(eixo: 'forma' | 'conta', chave: string): boolean {
+    return this.fatAbertos.has(`${eixo}:${chave}`);
   }
 
   saldoInicial = 0;
@@ -71,6 +82,74 @@ export class FluxoCaixaComponent {
 
   constructor() {
     afterNextRender(() => { this.buscar(); this.cdr.detectChanges(); });
+  }
+
+  dataInicioFat = this.formatarDataInput(this.primeiroDiaMesesAtras(5)); // 6 meses
+  dataFimFat = this.formatarDataInput(new Date());
+  empresaFiltroFat = '';
+  carregandoFat = false;
+  fatCarregado = false;
+  erroFat = '';
+  fat: FaturamentoResponse | null = null;
+ 
+  private primeiroDiaMesesAtras(n: number): Date {
+    const d = new Date(); d.setMonth(d.getMonth() - n); d.setDate(1); return d;
+  }
+ 
+  labelMes(comp: string): string {
+    // '2025-07' -> 'Jul/25'
+    const [y, m] = comp.split('-');
+    const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    return `${meses[Number(m) - 1]}/${y.slice(2)}`;
+  }
+ 
+  labelChaveFat(ch: string): string {
+    const map: Record<string,string> = {
+      CARTAO: 'Cartão', DINHEIRO_PIX: 'Dinheiro/Pix', BOLETO: 'Boleto',
+      CHEQUE_MORADIA: 'Cheque/Moradia', OUTROS: 'Outros',
+    };
+    return map[ch] ?? ch;
+  }
+ 
+  // variação % do último mês vs penúltimo, por linha
+  // mês corrente (parcial) — não usar como base de variação
+  private mesCorrente(): string {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  }
+  ehMesParcial(comp: string): boolean {
+    return comp === this.mesCorrente();
+  }
+
+  variacaoFat(linha: FaturamentoLinha): number {
+    if (!this.fat) return 0;
+    // pega só meses COMPLETOS (exclui o corrente/parcial)
+    const idxCompletos = this.fat.competencias
+      .map((c, i) => ({ c, i }))
+      .filter(x => !this.ehMesParcial(x.c))
+      .map(x => x.i);
+    if (idxCompletos.length < 2) return 0;
+    const ult = linha.valores[idxCompletos[idxCompletos.length - 1]];
+    const pen = linha.valores[idxCompletos[idxCompletos.length - 2]];
+    return pen > 0 ? ((ult - pen) / pen) * 100 : 0;
+  }
+ 
+  // totais por mês (rodapé), pra um eixo
+  totaisPorMes(linhas: FaturamentoLinha[]): number[] {
+    if (!this.fat) return [];
+    return this.fat.competencias.map((_, i) => linhas.reduce((s, l) => s + (l.valores[i] ?? 0), 0));
+  }
+ 
+  buscarFaturamento() {
+    this.erroFat = '';
+    const ini = this.parseDataInput(this.dataInicioFat);
+    const fim = this.parseDataInput(this.dataFimFat);
+    if (!ini || !fim || fim < ini) { this.erroFat = 'Verifique o intervalo de datas.'; this.cdr.detectChanges(); return; }
+    this.carregandoFat = true; this.cdr.detectChanges();
+    this.api.getFaturamento(this.dataInicioFat, this.dataFimFat, this.empresaFiltroFat || undefined).subscribe({
+      next: (r) => { this.fat = r; this.carregandoFat = false; this.fatCarregado = true; this.cdr.detectChanges(); },
+      error: (e) => { console.error('Erro faturamento', e); this.erroFat = 'Não foi possível carregar.'; this.carregandoFat = false; this.cdr.detectChanges(); },
+    });
   }
 
   buscar() {
