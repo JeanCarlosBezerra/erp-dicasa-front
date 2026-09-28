@@ -18,7 +18,7 @@ export class ContasPagarService {
   private http = inject(HttpClient);
   private base = `${environment.apiUrl}/financeiro/contas-pagar`;
 
-  getPainel(dataInicio: string, dataFim?: string, empresa?: string, incluirPre = true): Observable<PainelPagar> {
+  getPainel(dataInicio: string, dataFim?: string, empresa?: string, incluirPre = false): Observable<PainelPagar> {
     const params: any = { dataInicio, incluirPre: String(incluirPre) };
     if (dataFim) params.dataFim = dataFim;
     if (empresa) params.empresa = empresa;

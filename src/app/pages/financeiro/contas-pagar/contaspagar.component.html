@@ -6,12 +6,6 @@
     <p class="page-desc">Acompanhamento de títulos a pagar por vencimento, categoria e forma de pagamento</p>
   </div>
 
-  <!-- aviso temporário de mock -->
-  <div class="filtro-erro" style="background:#FFF7ED;color:#9A3412;border-color:#FED7AA">
-    <mat-icon>construction</mat-icon>
-    Tela em demonstração — dados ilustrativos para validação visual. A integração com o CISS entra na próxima etapa.
-  </div>
-
   <div class="filter-bar">
     <div class="filtro-group">
       <label>Data inicial <span class="obrigatorio">*</span></label>
@@ -25,13 +19,13 @@
       <label>Empresa</label>
       <select [(ngModel)]="empresaFiltro">
         <option value="">Todas as empresas</option>
-        <option value="1">HCAB</option><option value="2">SHRM</option>
-        <option value="6">HCVR</option><option value="7">HCAM</option><option value="8">ATACADO</option>
+          <option value="1">HCAB</option>
+          <option value="2">Concept</option>
+          <option value="6">HCAM</option>
+          <option value="8">HCVR</option>
+          <option value="9">CDAM</option>
+          <option value="10">Atacado</option>
       </select>
-    </div>
-    <div class="filtro-group">
-      <label>Fornecedor</label>
-      <input type="text" [(ngModel)]="fornecedorFiltro" placeholder="Nome do fornecedor...">
     </div>
     <button class="btn-limpar" (click)="limpar()"><mat-icon>clear</mat-icon> Limpar</button>
     <button class="btn-buscar" (click)="buscar()"><mat-icon>search</mat-icon> Buscar</button>
@@ -45,7 +39,6 @@
 
     <div class="periodo-label">
       <mat-icon>calendar_today</mat-icon> {{ labelPeriodo }}
-      <span class="modo-chip">demonstração</span>
     </div>
 
     <!-- ════ KPIs ════ -->
@@ -77,8 +70,8 @@
       </div>
       <div class="kpi-card">
         <span class="kpi-label">Maior credor</span>
-        <strong class="kpi-value kpi-juridico">R$ {{ moeda(topFornecedores[0].valor) }}</strong>
-        <span class="kpi-sub">{{ topFornecedores[0].nome }}</span>
+        <strong class="kpi-value kpi-juridico">R$ {{ moeda(topFornecedores[0]?.valor) }}</strong>
+        <span class="kpi-sub">{{ topFornecedores[0]?.nome ?? '—' }}</span>
       </div>
     </div>
 
