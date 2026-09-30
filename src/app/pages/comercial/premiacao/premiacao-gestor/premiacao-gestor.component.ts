@@ -1,3 +1,4 @@
+import { MatButtonModule } from '@angular/material/button'; // ADICIONAR este import
 import { Component, inject, ChangeDetectorRef, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -14,7 +15,7 @@ import { BonusGestor } from '../../../../models/premiacao.model';
   standalone: true,
   imports: [
     CommonModule, FormsModule, MatTableModule, MatIconModule,
-    MatTooltipModule, MatFormFieldModule, MatSelectModule,
+    MatTooltipModule, MatFormFieldModule, MatSelectModule, MatButtonModule,
   ],
   templateUrl: './premiacao-gestor.component.html',
   styleUrl: './premiacao-gestor.component.scss',
@@ -25,6 +26,27 @@ export class PremiacaoGestorComponent {
 
   dataSource = new MatTableDataSource<BonusGestor>([]);
   carregando = false;
+
+    exportando = false;
+
+  exportarPdf(): void {
+    this.exportando = true;
+    this.svc.exportarPdfGestor(this.mesSelecionado, this.anoSelecionado).subscribe({
+      next: (blob) => {
+        this.baixarArquivo(blob, `premiacao-gestores-${this.mesSelecionado}-${this.anoSelecionado}.pdf`);
+        this.exportando = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.exportando = false; this.cdr.detectChanges(); },
+    });
+  }
+  
+  private baixarArquivo(blob: Blob, nome: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = nome; a.click();
+    window.URL.revokeObjectURL(url);
+  }
 
   displayedColumns = [
     'nome',

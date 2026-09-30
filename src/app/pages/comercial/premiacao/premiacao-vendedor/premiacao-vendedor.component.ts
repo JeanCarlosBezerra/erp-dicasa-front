@@ -28,6 +28,27 @@ export class PremiacaoVendedorComponent {
   faixas: FaixaBonusVendedor[] = [];
   carregando = false;
 
+  exportando = false;
+
+  exportarPdf(): void {
+    this.exportando = true;
+    this.svc.exportarPdfVendedor(this.mesSelecionado, this.anoSelecionado).subscribe({
+      next: (blob) => {
+        this.baixarArquivo(blob, `premiacao-vendedores-${this.mesSelecionado}-${this.anoSelecionado}.pdf`);
+        this.exportando = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.exportando = false; this.cdr.detectChanges(); },
+    });
+  }
+  
+  private baixarArquivo(blob: Blob, nome: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = nome; a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
   displayedColumns = [
     'idVendedor', 'nome', 'idEmpresa',
     'vendaRealizada', 'lucroRealizado',

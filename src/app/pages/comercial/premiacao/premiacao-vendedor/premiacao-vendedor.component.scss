@@ -149,3 +149,46 @@
   .hero { flex-direction: column; }
   .faixas-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .btn-fechar {
+    margin-left: 8px;
+  }
+}
+
+.periodo-bar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  background: rgba(255,255,255,0.86);
+  border: 1px solid rgba(148,163,184,0.14);
+  border-radius: 14px; padding: 12px 16px;
+}
+.campo-periodo { width: 160px; }
+.periodo-bar .btn-filtrar { height: 44px; border-radius: 14px; }
+
+.btn-exportar {
+  height: 44px;
+  border-radius: 14px;
+  font-weight: 700;
+  padding: 0 16px;
+  margin-left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #2563eb;
+  border: 1.5px solid #2563eb !important;
+  background: #fff;
+  transition: background .15s ease;
+  mat-icon { font-size: 18px; width: 18px; height: 18px; margin-right: 2px; }
+  &:hover:not([disabled]) { background: #eff6ff; }
+  &[disabled] { opacity: .5; cursor: not-allowed; }
+}
+.campo-periodo {
+  width: 160px;
+  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+}

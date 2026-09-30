@@ -38,6 +38,12 @@
       <mat-icon>filter_alt</mat-icon>
       {{ carregando ? 'Carregando...' : 'Filtrar' }}
     </button>
+    <button mat-stroked-button color="primary" class="btn-exportar"
+      (click)="exportarPdf()" [disabled]="exportando || dataSource.data.length === 0">
+      <mat-icon>picture_as_pdf</mat-icon>
+      {{ exportando ? 'Gerando...' : 'Exportar PDF' }}
+    </button>
+
   </section>
 
   <!-- INDICADORES (referência) -->

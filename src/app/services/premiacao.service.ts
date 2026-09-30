@@ -48,4 +48,18 @@ export class PremiacaoService {
       { params: { mes: String(mes), ano: String(ano) } },
     );
   }
+
+  exportarPdfVendedor(mes: number, ano: number): Observable<Blob> {
+    return this.http.get(`${this.api}/comercial/premiacao/vendedor/pdf`, {
+      params: { mes: String(mes), ano: String(ano) },
+      responseType: 'blob',
+    });
+  }
+  
+  exportarPdfGestor(mes: number, ano: number): Observable<Blob> {
+    return this.http.get(`${this.api}/comercial/premiacao/gestor/pdf`, {
+      params: { mes: String(mes), ano: String(ano) },
+      responseType: 'blob',
+    });
+  }
 }
