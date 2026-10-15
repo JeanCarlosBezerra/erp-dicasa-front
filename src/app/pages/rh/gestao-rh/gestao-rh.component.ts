@@ -113,14 +113,19 @@ export class GestaoRhComponent {
   }
 
   // === COLABORADORES ===
+  // id_cargo do colaborador ao abrir o modal (para saber se o RH trocou o cargo)
+  private idCargoOriginal: number | null = null;
+
   abrirNovoColaborador() {
     this.editandoId = null;
+    this.idCargoOriginal = null;
     this.formColaborador = { ativo: true, tipo: 1 };
     this.modalColaborador = true;
   }
 
   editarColaborador(c: any) {
   this.editandoId = c.id;
+  this.idCargoOriginal = c.id_cargo ?? null;
   this.formColaborador = {
     ...c,
     // Garante que o input date recebe yyyy-MM-dd
@@ -135,8 +140,15 @@ export class GestaoRhComponent {
     // Preenche campo texto empresa a partir do id
     const emp = this.empresas.find(e => e.id == this.formColaborador.id_empresa);
     if (emp) this.formColaborador.empresa = emp.codigo;
+    // O texto do cargo guarda o nível (I, II, III, JR, SR...). Só é sobrescrito pelo nome
+    // oficial quando está vazio ou quando o RH trocou o cargo do colaborador.
     const cargo = this.cargos.find(c => c.id == this.formColaborador.id_cargo);
-    if (cargo) this.formColaborador.cargo = cargo.nome_cargo;
+    if (cargo) {
+      const trocouCargo = this.formColaborador.id_cargo != this.idCargoOriginal;
+      if (!this.formColaborador.cargo || trocouCargo) {
+        this.formColaborador.cargo = cargo.nome_cargo;
+      }
+    }
 
     const req = this.editandoId
       ? this.http.put(`${this.api}/rh/gestao/colaboradores/${this.editandoId}`, this.formColaborador)

@@ -14,6 +14,10 @@ export class AvaliacaoService {
     return this.http.get<any[]>(`${this.api}/rh/avaliacao/cargos`);
   }
 
+  getCompetenciasPorId(idCargo: number) {
+    return this.http.get<any[]>(`${this.api}/rh/avaliacao/competencias-por-id/${idCargo}`);
+  }
+
   getColaboradores(filial?: string): Observable<any[]> {
     const url = filial
       ? `${this.api}/rh/avaliacao/colaboradores?filial=${filial}`

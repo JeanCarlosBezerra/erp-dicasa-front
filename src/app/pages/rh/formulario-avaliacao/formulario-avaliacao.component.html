@@ -92,7 +92,13 @@
 
   <div class="info-group">
     <label>Cargo</label>
-    <div class="campo-readonly" [class.vazio]="!form.cargo">{{ form.cargo || 'Aguardando...' }}</div>
+    <div class="campo-readonly" [class.vazio]="!form.cargoOficial && !form.cargo">
+      {{ form.cargoOficial || form.cargo || (semCargo ? 'Sem cargo' : 'Aguardando...') }}
+    </div>
+    <small *ngIf="form.cargoOficial && form.cargo && form.cargoOficial !== form.cargo"
+      style="display:block;margin-top:2px;font-size:11px;color:#6b7280;">
+      Posição: {{ form.cargo }}
+    </small>
   </div>
 
   <div class="info-group">
@@ -372,7 +378,13 @@
 
 <div class="empty-state" *ngIf="!tecnicas.length && !comportamentais.length && form.cargo">
   <mat-icon>info</mat-icon>
-  <p>Nenhuma competência cadastrada para <strong>{{ form.cargo }}</strong>.</p>
+  <p>Nenhuma competência cadastrada para <strong>{{ form.cargoOficial || form.cargo }}</strong>.</p>
+</div>
+
+<!-- Colaborador sem cargo vinculado -->
+<div class="empty-state" *ngIf="semCargo && form.matricula">
+  <mat-icon>info</mat-icon>
+  <p>Colaborador sem cargo vinculado. Peça ao RH para definir o cargo em Gestão de RH, aba Colaboradores.</p>
 </div>
 
 <!-- ════════ MODAL ════════ -->

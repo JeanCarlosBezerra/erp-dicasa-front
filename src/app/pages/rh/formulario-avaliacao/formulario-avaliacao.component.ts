@@ -20,7 +20,9 @@ interface Competencia {
 interface Colaborador {
   matricula: string;
   nome: string;
-  cargo: string;
+  cargo: string;              // texto original do colaborador (guarda o nível: I, II, III, JR, SR...)
+  id_cargo?: number | null;   // vínculo com rh_cargos (usado para buscar as competências)
+  cargo_oficial?: string | null; // nome oficial do cargo em rh_cargos
   filial: string;
   setor: string;
 }
@@ -37,7 +39,16 @@ export class FormularioAvaliacaoComponent {
   private cdr = inject(ChangeDetectorRef);
   private router = inject(Router);
 
-  form = { nome: '', matricula: '', cargo: '', filial: '', setor: '' };
+  form = this.formVazio();
+  semCargo = false; // colaborador sem cargo vinculado: RH precisa definir em Gestão de RH
+
+  private formVazio() {
+    return {
+      nome: '', matricula: '', cargo: '', filial: '', setor: '',
+      cargoOficial: '',
+      id_cargo: null as number | null,
+    };
+  }
 
   cargos: string[] = [];
   colaboradores: Colaborador[] = [];
@@ -266,37 +277,50 @@ export class FormularioAvaliacaoComponent {
     window.print();
   }
 
-  private carregarCargoPeloColaborador(c: Colaborador) {
-    if (!c.cargo) return;
-    this.form.cargo = c.cargo;
+  private aplicarCompetencias(comps: any[]) {
+    this.tecnicas = comps
+      .filter((x: any) => x.tipo === 'TECNICA')
+      .map((x: any) => ({ ...x, notaAuto: null, notaGestor: null }));
+    this.comportamentais = comps
+      .filter((x: any) => x.tipo === 'COMPORTAMENTAL')
+      .map((x: any) => ({ ...x, notaAuto: null, notaGestor: null }));
     this.cdr.detectChanges();
-    this.avalSvc.getCompetencias(c.cargo).subscribe({
-      next: (comps: any[]) => {
-        this.tecnicas = comps
-          .filter((x: any) => x.tipo === 'TECNICA')
-          .map((x: any) => ({ ...x, notaAuto: null, notaGestor: null }));
-        this.comportamentais = comps
-          .filter((x: any) => x.tipo === 'COMPORTAMENTAL')
-          .map((x: any) => ({ ...x, notaAuto: null, notaGestor: null }));
-        this.cdr.detectChanges();
-        this.carregarNotas();
-      }
-    });
+    this.carregarNotas();
   }
 
+  private carregarCargoPeloColaborador(c: Colaborador) {
+    this.semCargo = false;
+    this.form.id_cargo     = c.id_cargo ?? null;
+    this.form.cargoOficial = c.cargo_oficial || '';
+
+    // Sem texto e sem vínculo: não há como achar competências
+    if (!c.cargo && !c.id_cargo) {
+      this.form.cargo = '';
+      this.semCargo = true;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // Mantém o texto original (com o nível) para exibição e para gravar nas notas
+    this.form.cargo = c.cargo || c.cargo_oficial || '';
+    this.cdr.detectChanges();
+
+    // Busca pelo id do cargo (mesmo vínculo da tela de Gestão); por nome só se não houver id
+    const req$ = c.id_cargo
+      ? this.avalSvc.getCompetenciasPorId(c.id_cargo)
+      : this.avalSvc.getCompetencias(c.cargo);
+
+    req$.subscribe({ next: (comps: any[]) => this.aplicarCompetencias(comps) });
+  }
+
+  // Escolha manual de cargo na lista (gestor)
   onCargoChange() {
     if (!this.form.cargo) return;
+    this.semCargo = false;
+    this.form.id_cargo = null;
+    this.form.cargoOficial = this.form.cargo;
     this.avalSvc.getCompetencias(this.form.cargo).subscribe({
-      next: (comps: any[]) => {
-        this.tecnicas = comps
-          .filter((c: any) => c.tipo === 'TECNICA')
-          .map((c: any) => ({ ...c, notaAuto: null, notaGestor: null }));
-        this.comportamentais = comps
-          .filter((c: any) => c.tipo === 'COMPORTAMENTAL')
-          .map((c: any) => ({ ...c, notaAuto: null, notaGestor: null }));
-        this.cdr.detectChanges();
-        this.carregarNotas();
-      }
+      next: (comps: any[]) => this.aplicarCompetencias(comps)
     });
   }
 
@@ -444,7 +468,8 @@ carregarNotas() {
       this.tentarCarregarProprio(0);
       return;
     }
-    this.form = { nome: '', matricula: '', cargo: '', filial: '', setor: '' };
+    this.form = this.formVazio();
+    this.semCargo = false;
     this.tecnicas = []; this.comportamentais = [];
     this.observacoes = ''; this.modoGestor = false;
     this.autoAvaliacaoSalva   = false;
