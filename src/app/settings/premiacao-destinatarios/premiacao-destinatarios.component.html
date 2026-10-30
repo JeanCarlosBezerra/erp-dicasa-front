@@ -1,0 +1,96 @@
+<div class="page-header">
+  <h1>Premiação: destinatários de e-mail</h1>
+  <p class="page-desc">Quem recebe o PDF oficial quando a premiação de uma competência é confirmada</p>
+</div>
+
+<!-- SITUAÇÃO DO ENVIO -->
+<div class="status-card" *ngIf="info"
+  [class.status-teste]="info.modoTeste"
+  [class.status-erro]="!info.smtpConfigurado">
+  <mat-icon>{{ !info.smtpConfigurado ? 'error_outline' : (info.modoTeste ? 'science' : 'verified') }}</mat-icon>
+  <div>
+    <strong *ngIf="!info.smtpConfigurado">Servidor de e-mail (SMTP) não configurado</strong>
+    <strong *ngIf="info.smtpConfigurado && info.modoTeste">Modo teste ativo</strong>
+    <strong *ngIf="info.smtpConfigurado && !info.modoTeste">Envio em produção</strong>
+    <small *ngIf="!info.smtpConfigurado">A confirmação funciona, mas nenhum e-mail sai até o T.I. configurar o SMTP.</small>
+    <small *ngIf="info.smtpConfigurado && info.modoTeste">
+      Todos os e-mails estão indo só para {{ info.testePara || '(MAIL_TESTE_PARA não definido)' }}. A lista abaixo ainda não recebe nada.
+    </small>
+    <small *ngIf="info.smtpConfigurado && !info.modoTeste">
+      Os destinatários ativos abaixo recebem o PDF a cada confirmação.
+    </small>
+    <small *ngIf="info.remetente">Remetente: {{ info.remetente }}</small>
+  </div>
+</div>
+
+<!-- NOVO DESTINATÁRIO -->
+<div class="user-card novo-card">
+  <div class="permissions-label">Adicionar destinatário</div>
+  <form class="form-linha" (ngSubmit)="adicionar()">
+    <input type="text" name="nome" [(ngModel)]="novo.nome" placeholder="Nome (ex.: Patrícia, RH)" maxlength="120" required />
+    <input type="email" name="email" [(ngModel)]="novo.email" placeholder="email@dicasanet.com.br" maxlength="160" required />
+    <select name="tipo" [(ngModel)]="novo.tipo">
+      <option *ngFor="let t of tipos" [value]="t.v">{{ t.n }}</option>
+    </select>
+    <button type="submit" class="btn-save"
+      [disabled]="ocupadoId === 'novo' || novo.nome.trim().length < 2 || !novo.email.includes('@')">
+      {{ ocupadoId === 'novo' ? 'Adicionando...' : 'Adicionar' }}
+    </button>
+  </form>
+</div>
+
+<!-- RETORNO -->
+<div class="msg" *ngIf="mensagem" [class.msg-ok]="mensagem.tipo === 'ok'" [class.msg-erro]="mensagem.tipo === 'erro'">
+  <mat-icon>{{ mensagem.tipo === 'ok' ? 'check_circle' : 'error' }}</mat-icon>
+  <span>{{ mensagem.texto }}</span>
+</div>
+
+<div class="lista-header" *ngIf="linhas.length">
+  <span class="permissions-label">Cadastrados</span>
+  <span class="count">{{ qtdAtivos }} ativo(s) de {{ linhas.length }}</span>
+</div>
+
+<!-- LISTA -->
+<div class="user-card" *ngFor="let l of linhas" [class.inativo]="!l.ativo">
+  <div class="user-header">
+    <div class="user-info">
+      <div class="user-name">{{ l.nome }}</div>
+      <div class="user-meta">{{ l.email }} • {{ rotuloTipo(l.tipo) }}</div>
+    </div>
+    <div class="user-actions">
+      <label class="ativo-toggle">
+        Ativo
+        <input type="checkbox" [(ngModel)]="l.ativo" />
+      </label>
+      <button class="btn-save" (click)="salvar(l)" [disabled]="!alterado(l) || ocupadoId === l.id">
+        {{ ocupadoId === l.id ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="form-linha">
+    <input type="text" [(ngModel)]="l.nome" maxlength="120" aria-label="Nome" />
+    <input type="email" [(ngModel)]="l.email" maxlength="160" aria-label="E-mail" />
+    <select [(ngModel)]="l.tipo" aria-label="Recebe">
+      <option *ngFor="let t of tipos" [value]="t.v">{{ t.n }}</option>
+    </select>
+  </div>
+
+  <div class="user-bottom">
+    <button class="btn-text" (click)="testar(l)" [disabled]="ocupadoId === l.id || !info?.smtpConfigurado">
+      Enviar e-mail de teste
+    </button>
+    <button class="btn-text btn-danger" (click)="remover(l)" [disabled]="ocupadoId === l.id">
+      Remover
+    </button>
+  </div>
+</div>
+
+<div class="empty-state" *ngIf="!carregando && !linhas.length">
+  <mat-icon>mail_outline</mat-icon>
+  <p>Nenhum destinatário cadastrado. Sem destinatário, a confirmação grava os valores, mas o e-mail fica como falha.</p>
+</div>
+
+<div class="empty-state" *ngIf="carregando">
+  <p>Carregando...</p>
+</div>

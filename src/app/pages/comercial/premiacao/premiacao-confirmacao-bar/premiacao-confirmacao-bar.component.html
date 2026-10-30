@@ -1,0 +1,126 @@
+<section class="conf-bar"
+  [class.is-confirmada]="status?.confirmada"
+  [class.is-aberta]="status && !status.confirmada">
+
+  <div class="conf-linha">
+    <!-- SITUAÇÃO -->
+    <div class="conf-info">
+      <ng-container *ngIf="carregandoStatus && !status">
+        <mat-icon class="ic">hourglass_empty</mat-icon>
+        <div class="conf-texto"><strong>Verificando situação da competência...</strong></div>
+      </ng-container>
+
+      <ng-container *ngIf="status">
+        <ng-container *ngIf="status.confirmada && status.confirmacao as c; else aberta">
+          <mat-icon class="ic ic-ok">verified</mat-icon>
+          <div class="conf-texto">
+            <strong>
+              Valores confirmados e travados
+              <span class="tag-versao" *ngIf="c.versao > 1">versão {{ c.versao }}</span>
+            </strong>
+            <small>
+              por {{ c.confirmadoPor }} em {{ c.confirmadoEm | date:'dd/MM/yyyy HH:mm':'-0300' }}
+              · código {{ c.codigoConferencia }}
+            </small>
+            <small class="conf-email" [class.falha]="c.emailStatus !== 'ENVIADO'">
+              <mat-icon>{{ c.emailStatus === 'ENVIADO' ? 'mark_email_read' : 'error_outline' }}</mat-icon>
+              E-mail {{ rotuloEmail(c) }}
+            </small>
+            <small class="conf-alerta" *ngIf="!c.integridadeOk">
+              <mat-icon>warning</mat-icon>
+              Os valores gravados não conferem com o código de conferência. Avise o T.I. antes de pagar.
+            </small>
+          </div>
+        </ng-container>
+
+        <ng-template #aberta>
+          <mat-icon class="ic ic-aberta">{{ status.competenciaEncerrada ? 'lock_open' : 'schedule' }}</mat-icon>
+          <div class="conf-texto">
+            <strong>{{ status.competenciaEncerrada ? 'Aguardando confirmação' : 'Competência em andamento' }}</strong>
+            <small>
+              {{ status.competenciaEncerrada
+                  ? 'Valores calculados ao vivo: podem mudar até a confirmação.'
+                  : 'A confirmação fica disponível depois do fim do mês.' }}
+            </small>
+            <small class="conf-reabertura" *ngIf="status.ultimaReabertura as r">
+              <mat-icon>history</mat-icon>
+              Versão {{ r.versao }} reaberta por {{ r.reabertoPor }} em {{ r.reabertoEm | date:'dd/MM/yyyy HH:mm':'-0300' }}: {{ r.motivo }}
+            </small>
+          </div>
+        </ng-template>
+      </ng-container>
+    </div>
+
+    <!-- AÇÕES -->
+    <div class="conf-acoes" *ngIf="status && modo === 'nenhum'">
+      <button *ngIf="!status.confirmada && podeConfirmar"
+        mat-flat-button color="primary"
+        [disabled]="!status.competenciaEncerrada || semDados || processando"
+        [matTooltip]="tooltipConfirmar"
+        (click)="abrir('confirmar')">
+        <mat-icon>lock</mat-icon> Confirmar valores
+      </button>
+
+      <button *ngIf="status.confirmada && podeConfirmar"
+        mat-stroked-button
+        [disabled]="processando"
+        matTooltip="Envia de novo o PDF oficial aos destinatários cadastrados"
+        (click)="reenviar()">
+        <mat-icon>forward_to_inbox</mat-icon> {{ processando ? 'Enviando...' : 'Reenviar e-mail' }}
+      </button>
+
+      <button *ngIf="status.confirmada && podeReabrir"
+        mat-stroked-button color="warn"
+        [disabled]="processando"
+        matTooltip="Destrava os valores para correção. Exige motivo e fica registrado."
+        (click)="abrir('reabrir')">
+        <mat-icon>lock_reset</mat-icon> Reabrir
+      </button>
+    </div>
+  </div>
+
+  <!-- PAINEL: CONFIRMAR -->
+  <div class="conf-painel" *ngIf="modo === 'confirmar'">
+    <p>
+      Confirmar a premiação de <strong>{{ rotuloTipo }}</strong> de <strong>{{ competencia }}</strong>?
+    </p>
+    <ul>
+      <li>Total: <strong>{{ totalPremiacao | currency:'BRL':'symbol':'1.2-2' }}</strong> para {{ qtdPremiados }} {{ rotuloTipo }} premiados.</li>
+      <li>Os valores da tela serão gravados e ficarão travados (metas da competência também).</li>
+      <li>O PDF oficial será enviado por e-mail ao RH.</li>
+      <li>Depois disso, só quem tem permissão de reabrir consegue alterar.</li>
+    </ul>
+    <div class="painel-acoes">
+      <button mat-button (click)="cancelar()" [disabled]="processando">Cancelar</button>
+      <button mat-flat-button color="primary" (click)="confirmar()" [disabled]="processando">
+        <mat-icon>lock</mat-icon> {{ processando ? 'Confirmando e enviando...' : 'Sim, confirmar valores' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- PAINEL: REABRIR -->
+  <div class="conf-painel painel-reabrir" *ngIf="modo === 'reabrir'">
+    <p>
+      Reabrir <strong>{{ rotuloTipo }}</strong> de <strong>{{ competencia }}</strong>?
+      A versão atual será cancelada e o RH será avisado para não usar o PDF enviado.
+    </p>
+    <label class="campo-motivo">
+      Motivo da reabertura (obrigatório)
+      <textarea [(ngModel)]="motivo" rows="3" maxlength="500"
+        placeholder="Ex.: devolução lançada depois do fechamento alterou o faturamento da loja HCAM"></textarea>
+      <span class="contador">{{ motivo.trim().length }}/500 · mínimo 10</span>
+    </label>
+    <div class="painel-acoes">
+      <button mat-button (click)="cancelar()" [disabled]="processando">Cancelar</button>
+      <button mat-flat-button color="warn" (click)="reabrir()" [disabled]="processando || motivo.trim().length < 10">
+        <mat-icon>lock_reset</mat-icon> {{ processando ? 'Reabrindo...' : 'Reabrir competência' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- RETORNO -->
+  <div class="conf-msg" *ngIf="mensagem" [ngClass]="'msg-' + mensagem.tipo">
+    <mat-icon>{{ mensagem.tipo === 'ok' ? 'check_circle' : (mensagem.tipo === 'aviso' ? 'info' : 'error') }}</mat-icon>
+    <span>{{ mensagem.texto }}</span>
+  </div>
+</section>

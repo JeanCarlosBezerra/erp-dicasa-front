@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   BonusVendedor,
@@ -9,11 +8,17 @@ import {
   FaixaBonusVendedor,
   ParametroIndicadorGestor,
 } from '../models/premiacao.model';
+import {
+  ResultadoConfirmacao,
+  StatusCompetencia,
+  TipoPremiacao,
+} from '../models/premiacao-confirmacao.model';
 
 @Injectable({ providedIn: 'root' })
 export class PremiacaoService {
   private http = inject(HttpClient);
   private readonly api = environment.apiUrl; // ex.: https://api-erp.dicasaweb.com.br
+  private readonly apiConfirmacao = `${this.api}/comercial/premiacao/confirmacao`;
 
   /** Faixas oficiais do bônus do vendedor (Regras da Diretoria) */
   private readonly faixasVendedor: FaixaBonusVendedor[] = [
@@ -32,7 +37,7 @@ export class PremiacaoService {
   getFaixasVendedor(): FaixaBonusVendedor[] { return this.faixasVendedor; }
   getParametrosGestor(): ParametroIndicadorGestor[] { return this.parametrosGestor; }
 
-  // ── GESTORES — agora REAL, vindo do backend (CISS) ──
+  // ── GESTORES (competência confirmada vem da foto gravada; aberta vem do cálculo ao vivo) ──
   getBonusGestores(mes: number, ano: number): Observable<BonusGestor[]> {
     return this.http.get<BonusGestor[]>(
       `${this.api}/comercial/premiacao/gestor`,
@@ -40,8 +45,7 @@ export class PremiacaoService {
     );
   }
 
-  // ── VENDEDORES — ainda mock (backend do vendedor é fase seguinte) ──
-  // ── VENDEDORES — agora REAL (CISS) ──
+  // ── VENDEDORES (mesma regra) ──
   getBonusVendedores(mes: number, ano: number): Observable<BonusVendedor[]> {
     return this.http.get<BonusVendedor[]>(
       `${this.api}/comercial/premiacao/vendedor`,
@@ -55,11 +59,30 @@ export class PremiacaoService {
       responseType: 'blob',
     });
   }
-  
+
   exportarPdfGestor(mes: number, ano: number): Observable<Blob> {
     return this.http.get(`${this.api}/comercial/premiacao/gestor/pdf`, {
       params: { mes: String(mes), ano: String(ano) },
       responseType: 'blob',
     });
+  }
+
+  // ── CONFIRMAÇÃO DE VALORES ──
+  getStatusConfirmacao(tipo: TipoPremiacao, mes: number, ano: number): Observable<StatusCompetencia> {
+    return this.http.get<StatusCompetencia>(`${this.apiConfirmacao}/status`, {
+      params: { tipo, mes: String(mes), ano: String(ano) },
+    });
+  }
+
+  confirmarValores(tipo: TipoPremiacao, mes: number, ano: number): Observable<ResultadoConfirmacao> {
+    return this.http.post<ResultadoConfirmacao>(`${this.apiConfirmacao}/confirmar`, { tipo, mes, ano });
+  }
+
+  reenviarEmail(tipo: TipoPremiacao, mes: number, ano: number): Observable<ResultadoConfirmacao> {
+    return this.http.post<ResultadoConfirmacao>(`${this.apiConfirmacao}/reenviar-email`, { tipo, mes, ano });
+  }
+
+  reabrirCompetencia(tipo: TipoPremiacao, mes: number, ano: number, motivo: string): Observable<StatusCompetencia> {
+    return this.http.post<StatusCompetencia>(`${this.apiConfirmacao}/reabrir`, { tipo, mes, ano, motivo });
   }
 }

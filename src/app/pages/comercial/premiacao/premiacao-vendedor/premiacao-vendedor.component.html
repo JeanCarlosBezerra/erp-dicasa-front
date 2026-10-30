@@ -39,11 +39,22 @@
       {{ carregando ? 'Carregando...' : 'Filtrar' }}
     </button>
     <button mat-stroked-button color="primary" class="btn-exportar"
-        (click)="exportarPdf()" [disabled]="exportando || dataSource.data.length === 0">
+        (click)="exportarPdf()" [disabled]="exportando || carregando || dataSource.data.length === 0">
         <mat-icon>picture_as_pdf</mat-icon>
         {{ exportando ? 'Gerando...' : 'Exportar PDF' }}
     </button>
   </section>
+
+  <!-- CONFIRMAÇÃO DE VALORES -->
+  <app-premiacao-confirmacao-bar
+    tipo="VENDEDOR"
+    [mes]="mesCarregado"
+    [ano]="anoCarregado"
+    [totalPremiacao]="totalPremiacao"
+    [qtdPremiados]="qtdElegiveis"
+    [semDados]="carregando || dataSource.data.length === 0"
+    (alterado)="recarregar()">
+  </app-premiacao-confirmacao-bar>
 
   <!-- FAIXAS (referência da regra) -->
   <section class="faixas-card">
@@ -71,10 +82,6 @@
         <span class="section-eyebrow">Resultado do período</span>
         <h2>Bônus por vendedor</h2>
       </div>
-      <button mat-flat-button color="primary" class="btn-fechar" disabled
-        matTooltip="Disponível na versão final">
-        <mat-icon>lock</mat-icon> Fechar mês
-      </button>
     </div>
 
     <div class="table-card">
@@ -145,6 +152,7 @@
       <div class="empty" *ngIf="!carregando && dataSource.data.length === 0">
         Nenhum vendedor encontrado para o período.
       </div>
+      <div class="empty" *ngIf="carregando">Carregando dados do período...</div>
     </div>
   </section>
 </div>

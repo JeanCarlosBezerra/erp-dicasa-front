@@ -9,6 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { PremiacaoService } from '../../../../services/premiacao.service';
 import { BonusVendedor, FaixaBonusVendedor } from '../../../../models/premiacao.model';
+import { PremiacaoConfirmacaoBarComponent } from '../premiacao-confirmacao-bar/premiacao-confirmacao-bar.component';
 
 @Component({
   selector: 'app-premiacao-vendedor',
@@ -16,6 +17,7 @@ import { BonusVendedor, FaixaBonusVendedor } from '../../../../models/premiacao.
   imports: [
     CommonModule, FormsModule, MatTableModule, MatIconModule,
     MatTooltipModule, MatButtonModule, MatFormFieldModule, MatSelectModule,
+    PremiacaoConfirmacaoBarComponent,
   ],
   templateUrl: './premiacao-vendedor.component.html',
   styleUrl: './premiacao-vendedor.component.scss',
@@ -27,27 +29,7 @@ export class PremiacaoVendedorComponent {
   dataSource = new MatTableDataSource<BonusVendedor>([]);
   faixas: FaixaBonusVendedor[] = [];
   carregando = false;
-
   exportando = false;
-
-  exportarPdf(): void {
-    this.exportando = true;
-    this.svc.exportarPdfVendedor(this.mesSelecionado, this.anoSelecionado).subscribe({
-      next: (blob) => {
-        this.baixarArquivo(blob, `premiacao-vendedores-${this.mesSelecionado}-${this.anoSelecionado}.pdf`);
-        this.exportando = false;
-        this.cdr.detectChanges();
-      },
-      error: () => { this.exportando = false; this.cdr.detectChanges(); },
-    });
-  }
-  
-  private baixarArquivo(blob: Blob, nome: string): void {
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = nome; a.click();
-    window.URL.revokeObjectURL(url);
-  }
 
   displayedColumns = [
     'idVendedor', 'nome', 'idEmpresa',
@@ -69,6 +51,10 @@ export class PremiacaoVendedorComponent {
   mesSelecionado = this.hoje.getMonth() === 0 ? 12 : this.hoje.getMonth();
   anoSelecionado = this.hoje.getMonth() === 0 ? this.hoje.getFullYear() - 1 : this.hoje.getFullYear();
 
+  /** Competência que está NA TELA (muda só no Filtrar). A barra de confirmação usa esta. */
+  mesCarregado = this.mesSelecionado;
+  anoCarregado = this.anoSelecionado;
+
   meses = [
     { v: 1, n: 'Janeiro' }, { v: 2, n: 'Fevereiro' }, { v: 3, n: 'Março' },
     { v: 4, n: 'Abril' }, { v: 5, n: 'Maio' }, { v: 6, n: 'Junho' },
@@ -86,8 +72,12 @@ export class PremiacaoVendedorComponent {
   }
 
   carregar(): void {
+    this.mesCarregado = this.mesSelecionado;
+    this.anoCarregado = this.anoSelecionado;
     this.carregando = true;
-    this.svc.getBonusVendedores(this.mesSelecionado, this.anoSelecionado).subscribe({
+    this.cdr.detectChanges();
+
+    this.svc.getBonusVendedores(this.mesCarregado, this.anoCarregado).subscribe({
       next: (rows) => {
         this.dataSource.data = rows;
         this.totalPremiacao = rows.reduce((acc, r) => acc + r.premiacao, 0);
@@ -97,9 +87,37 @@ export class PremiacaoVendedorComponent {
       },
       error: () => {
         this.dataSource.data = [];
+        this.totalPremiacao = 0;
+        this.qtdElegiveis = 0;
         this.carregando = false;
         this.cdr.detectChanges();
       },
     });
+  }
+
+  /** Recarrega a tabela da MESMA competência (depois de confirmar ou reabrir). */
+  recarregar(): void {
+    this.mesSelecionado = this.mesCarregado;
+    this.anoSelecionado = this.anoCarregado;
+    this.carregar();
+  }
+
+  exportarPdf(): void {
+    this.exportando = true;
+    this.svc.exportarPdfVendedor(this.mesCarregado, this.anoCarregado).subscribe({
+      next: (blob) => {
+        this.baixarArquivo(blob, `premiacao-vendedores-${this.mesCarregado}-${this.anoCarregado}.pdf`);
+        this.exportando = false;
+        this.cdr.detectChanges();
+      },
+      error: () => { this.exportando = false; this.cdr.detectChanges(); },
+    });
+  }
+
+  private baixarArquivo(blob: Blob, nome: string): void {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = nome; a.click();
+    window.URL.revokeObjectURL(url);
   }
 }

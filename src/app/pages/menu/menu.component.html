@@ -192,7 +192,7 @@
         }
 
         <!-- Configurações -->
-        @if (auth.hasRole('MOD_CONFIGURACOES')) {
+        @if (auth.hasAnyRole('MOD_CONFIGURACOES', 'CFG_PREMIACAO_DESTINATARIOS')) {
           <mat-expansion-panel class="config-panel">
             <mat-expansion-panel-header class="menu-btn">
               <mat-panel-title>
@@ -206,9 +206,16 @@
                   <mat-icon>admin_panel_settings</mat-icon> Permissões
                 </button>
               }
-              <button mat-button class="submenu-btn" routerLink="/menu/settings/geral" routerLinkActive="active-submenu">
-                <mat-icon>tune</mat-icon> Geral
-              </button>
+              @if (auth.hasRole('CFG_PREMIACAO_DESTINATARIOS')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/settings/premiacao-destinatarios" routerLinkActive="active-submenu">
+                  <mat-icon>forward_to_inbox</mat-icon> E-mails da Premiação
+                </button>
+              }
+              @if (auth.hasRole('MOD_CONFIGURACOES')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/settings/geral" routerLinkActive="active-submenu">
+                  <mat-icon>tune</mat-icon> Geral
+                </button>
+              }
             </div>
           </mat-expansion-panel>
         }

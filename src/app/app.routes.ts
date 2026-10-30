@@ -29,6 +29,7 @@ import { FluxoCaixaComponent } from './pages/financeiro/fluxo-caixa/fluxocaixa.c
 import { PremiacaoComponent } from './pages/comercial/premiacao/premiacao.component';
 import { DreComponent } from './pages/financeiro/dre/dre.component';
 import { ColaboradorCadastroComponent } from './pages/comercial/colaborador-cadastro/colaborador-cadastro.component';
+import { PremiacaoDestinatariosComponent } from './settings/premiacao-destinatarios/premiacao-destinatarios.component';
 
 
 
@@ -72,7 +73,7 @@ export const routes: Routes = [
       { path: 'comercial/faturamento', component: FaturamentoComponent,         canActivate: [guard('COM_FATURAMENTO')] },
       { path: 'comercial/metas',       component: MetasComponent,               canActivate: [guard('COM_METAS')] },
       { path: 'comercial/meu-painel', component: MeuPainelComponent, canActivate: [guard('COM_MEU_PAINEL')] },
-      { path: 'comercial/premiacao', component: PremiacaoComponent, canActivate: [guard('COM_COLABORADOR')] },
+      { path: 'comercial/premiacao', component: PremiacaoComponent, canActivate: [guard('COM_PREMIACAO')] },   // era COM_COLABORADOR
       { path: 'comercial/colaborador-cadastro',  component: ColaboradorCadastroComponent, canActivate: [guard('COM_COLABORADOR')],},
 
       { path: 'compras/encomendas', component: EncomendasComponent, canActivate: [guard('MOD_COMPRAS')] },
@@ -88,6 +89,12 @@ export const routes: Routes = [
 
       { path: 'relatorios', component: RelatoriosComponent, canActivate: [guard('MOD_ESTOQUE')] },
 
+      // Configurações: rota própria ANTES do módulo settings (a ordem importa)
+      {
+        path: 'settings/premiacao-destinatarios',
+        component: PremiacaoDestinatariosComponent,
+        canActivate: [guard('CFG_PREMIACAO_DESTINATARIOS')],
+      },
       {
         path: 'settings',
         canActivate: [guard('MOD_CONFIGURACOES')],

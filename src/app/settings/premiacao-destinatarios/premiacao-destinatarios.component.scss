@@ -1,0 +1,105 @@
+// Mesmo visual da tela Usuários & Permissões
+:host { display: block; padding: 2rem; max-width: 1000px; }
+
+.page-header {
+  margin-bottom: 1.5rem;
+  h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; color: #1e1e2f; }
+  .page-desc { font-size: 14px; color: #6b7280; margin: 0; }
+}
+
+.status-card {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 16px; margin-bottom: 16px; border-radius: 12px;
+  background: #e8f6ec; border: 1px solid #b9e2c6; color: #17602e;
+  mat-icon { flex: 0 0 auto; }
+  div { display: flex; flex-direction: column; gap: 2px; }
+  strong { font-size: 14px; }
+  small { font-size: 12px; opacity: 0.9; }
+
+  &.status-teste { background: #fff4e5; border-color: #f0d1a3; color: #8a5300; }
+  &.status-erro  { background: #fdecea; border-color: #f2c2bd; color: #a12a2a; }
+}
+
+.user-card {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 12px;
+  padding: 1.25rem; margin-bottom: 12px;
+  &.inativo { opacity: 0.65; }
+}
+
+.novo-card { border-style: dashed; }
+
+.user-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 12px; flex-wrap: wrap; margin-bottom: 10px;
+}
+
+.user-name { font-size: 15px; font-weight: 600; color: #1e1e2f; }
+.user-meta { font-size: 12px; color: #6b7280; margin-top: 2px; word-break: break-all; }
+
+.user-actions { display: flex; align-items: center; gap: 12px; }
+
+.ativo-toggle {
+  font-size: 13px; color: #6b7280; display: flex; align-items: center; gap: 6px;
+  cursor: pointer;
+  input { accent-color: #534AB7; width: 16px; height: 16px; }
+}
+
+.btn-save {
+  padding: 6px 16px; border: none; border-radius: 8px;
+  background: #534AB7; color: #fff; font-size: 13px; font-weight: 500;
+  cursor: pointer; white-space: nowrap;
+  &:hover:not(:disabled) { background: #3C3489; }
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+.permissions-label {
+  font-size: 11px; font-weight: 600; color: #6b7280;
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px;
+}
+
+.form-linha {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;
+  input, select {
+    padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 8px;
+    font-size: 13px; color: #1e1e2f; background: #fff; min-width: 0;
+  }
+  input[type='text']  { flex: 1 1 180px; }
+  input[type='email'] { flex: 2 1 240px; }
+  select { flex: 0 1 200px; }
+  .btn-save { flex: 0 0 auto; }
+}
+
+.user-bottom { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+.btn-text {
+  background: none; border: 1px solid #e5e7eb; border-radius: 6px;
+  padding: 6px 12px; font-size: 12px; color: #6b7280; cursor: pointer;
+  &:hover:not(:disabled) { background: #f9fafb; }
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+.btn-danger { color: #b23b3b; border-color: #f2c2bd; &:hover:not(:disabled) { background: #fdecea; } }
+
+.lista-header {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin: 20px 0 8px;
+  .count { font-size: 13px; color: #6b7280; }
+}
+
+.msg {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 10px 12px; margin-bottom: 12px; border-radius: 8px; font-size: 13px;
+  mat-icon { flex: 0 0 auto; font-size: 20px; width: 20px; height: 20px; }
+  &.msg-ok   { background: #e8f6ec; color: #17602e; }
+  &.msg-erro { background: #fdecea; color: #a12a2a; }
+}
+
+.empty-state {
+  text-align: center; padding: 3rem; color: #9ca3af;
+  mat-icon { font-size: 40px; width: 40px; height: 40px; color: #d1d5db; }
+  p { font-size: 14px; margin: 8px 0 0; }
+}
+
+@media (max-width: 640px) {
+  :host { padding: 1rem; }
+}
