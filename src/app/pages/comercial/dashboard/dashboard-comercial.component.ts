@@ -28,6 +28,10 @@ type IndicadorCard = {
   apelido: string;
   metaFatProp: number;  // meta proporcional ao período filtrado
   metaMargem: number;   // fração (0.30 = 30%)
+  // 41646: ticket médio
+  qtdVendas: number;
+  ticketMedio: number;  // venda bruta ÷ qtdVendas (igual ao CISS)
+  metaTicket: number;   // meta cheia do mês (não proporcional)
 };
 
 @Component({
@@ -167,7 +171,15 @@ export class DashboardComercialComponent implements OnInit {
           const metaMargem  = Number(metaApi?.meta_margem ?? 0);
           const metaFatProp = metaApi ? this.metaProporcional(metaFatMes, mes, ano) : 0;
 
-          return { idEmpresa: id, apelido, faturamento, lucro, devolucoes, descontoValor, descontoPerc, metaFatProp, metaMargem };
+          // 41646: ticket médio (meta cheia, taxa não se proporcionaliza)
+          const qtdVendas   = Number(i?.qtdVendas   ?? 0) || 0;
+          const ticketMedio = Number(i?.ticketMedio ?? 0) || 0;
+          const metaTicket  = Number(metaApi?.meta_ticket_medio ?? 0) || 0;
+
+          return {
+            idEmpresa: id, apelido, faturamento, lucro, devolucoes, descontoValor, descontoPerc,
+            metaFatProp, metaMargem, qtdVendas, ticketMedio, metaTicket,
+          };
         })
         .filter(c => (c.faturamento ?? 0) > 0 || (c.lucro ?? 0) > 0);
         if (this.empresasPermitidas.length > 0) {
@@ -191,6 +203,10 @@ export class DashboardComercialComponent implements OnInit {
   percLucroVsMeta(c: IndicadorCard): number  { const ml = this.metaLucroEmpresa(c); return ml ? ((c.lucro / ml) - 1) * 100 : 0; }
   saldoLucro(c: IndicadorCard): number       { return c.lucro - this.metaLucroEmpresa(c); }
   margemVar(c: IndicadorCard): number        { return this.margemReal(c) - c.metaMargem; }
+
+  // ── 41646: Ticket médio ──
+  diffTicketValor(c: IndicadorCard): number { return c.metaTicket ? c.ticketMedio - c.metaTicket : 0; }
+  diffTicketPerc(c: IndicadorCard): number  { return c.metaTicket ? ((c.ticketMedio / c.metaTicket) - 1) * 100 : 0; }
 
   moeda(v: number | null | undefined): string {
     return Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });

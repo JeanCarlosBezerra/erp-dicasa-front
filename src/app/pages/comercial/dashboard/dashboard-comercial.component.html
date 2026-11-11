@@ -183,6 +183,26 @@
             <span>Devoluções</span>
             <strong class="bad">R$ {{ moeda(c.devolucoes) }}</strong>
           </div>
+
+          <!-- 41646: Ticket médio (meta cheia × realizado) -->
+          <div class="row row-sep" *ngIf="!modoCompartilhamento">
+            <span>Meta Ticket Médio</span>
+            <strong [class.tkm-sem-meta]="!c.metaTicket">{{ c.metaTicket ? 'R$ ' + moeda(c.metaTicket) : 'Sem meta' }}</strong>
+          </div>
+          <div class="row" *ngIf="!modoCompartilhamento">
+            <span class="tkm-label"
+              matTooltip="Venda bruta (antes das devoluções) ÷ quantidade de vendas. Mesmo cálculo do CISS e da Análise de Faturamento.">
+              Ticket Médio Real <mat-icon class="tkm-info">info_outline</mat-icon>
+            </span>
+            <strong [matTooltip]="c.qtdVendas + ' vendas no período'">R$ {{ moeda(c.ticketMedio) }}</strong>
+          </div>
+          <div class="row" [class.row-sep]="modoCompartilhamento">
+            <span>Diferença Ticket</span>
+            <strong *ngIf="c.metaTicket" [ngClass]="corNum(diffTicketPerc(c))">
+              <ng-container *ngIf="!modoCompartilhamento">R$ {{ signo(diffTicketValor(c)) }}{{ moeda(diffTicketValor(c)) }} · </ng-container>{{ signo(diffTicketPerc(c)) }}{{ pct(diffTicketPerc(c)) }}
+            </strong>
+            <strong *ngIf="!c.metaTicket" class="tkm-sem-meta">—</strong>
+          </div>
         </div>
       </div>
     </div>

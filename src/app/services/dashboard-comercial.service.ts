@@ -12,6 +12,9 @@ export interface IndicadorEmpresa {
   devolucoes: number;
   descontoValor: number;
   descontoPerc: number;
+  qtdVendas: number;    // 41646
+  vendaBruta: number;   // 41646
+  ticketMedio: number;  // 41646: vendaBruta ÷ qtdVendas (igual ao CISS)
 }
 
 export interface MetaEmpresaApi {
@@ -20,7 +23,8 @@ export interface MetaEmpresaApi {
   mes: number;
   ano: number;
   meta_fat: number;
-  meta_margem: number; // fração 0.30 = 30%
+  meta_margem: number;        // fração 0.30 = 30%
+  meta_ticket_medio?: number; // 41646: R$, meta cheia (não proporcional)
 }
 
 @Injectable({ providedIn: 'root' })

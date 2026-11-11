@@ -437,3 +437,7 @@
 .modo-toggle mat-icon { font-size: 17px; width: 17px; height: 17px; }
 .modo-toggle:hover { background: rgba(255,255,255,0.2); color: #fff; }
 .modo-toggle.ativo { background: rgba(34,197,94,0.25); border-color: rgba(34,197,94,0.5); color: #86efac; }
+/* 41646: ticket médio sem meta cadastrada */
+.tkm-sem-meta { color: #9ca3af; font-weight: 400; font-style: italic; }
+.tkm-label { display: inline-flex; align-items: center; gap: 4px; cursor: help; }
+.tkm-info { font-size: 14px; width: 14px; height: 14px; color: #94a3b8; }
