@@ -1,0 +1,210 @@
+<div class="inad-shell">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-left">
+      <span class="eyebrow">Financeiro · Cobrança</span>
+      <h1>Clientes em atraso</h1>
+      <p>
+        Títulos vencidos nos últimos {{ diasMaximo }} dias, com valor atualizado com juros pelo CISS.
+        Cada título é do vendedor que fez a venda.
+      </p>
+      <div class="visao-toggle" *ngIf="ehVendedor && ehGestor">
+        <button type="button" [class.ativo]="visao === 'minha'" (click)="trocarVisao('minha')">
+          <mat-icon>person</mat-icon> Minha carteira
+        </button>
+        <button type="button" [class.ativo]="visao === 'equipe'" (click)="trocarVisao('equipe')">
+          <mat-icon>groups</mat-icon> Equipe
+        </button>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="filtros-card">
+        <mat-form-field appearance="outline" class="campo-lojas" *ngIf="visao === 'equipe'">
+          <mat-label>Lojas</mat-label>
+          <mat-select multiple [(ngModel)]="empresasSelecionadas" placeholder="Todas as lojas permitidas">
+            <mat-option *ngFor="let e of empresas" [value]="e.id">{{ e.id }} · {{ e.apelido }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="botoes">
+          <button mat-flat-button color="primary" (click)="carregar()" [disabled]="carregando">
+            <mat-icon>refresh</mat-icon> {{ carregando ? 'Carregando...' : 'Atualizar' }}
+          </button>
+          <button mat-stroked-button class="btn-claro" (click)="exportar()" [disabled]="exportando || !titulos.length">
+            <mat-icon>download</mat-icon> {{ exportando ? 'Gerando...' : 'Excel' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ERRO -->
+  <div class="aviso aviso-erro" *ngIf="erro">
+    <mat-icon>error_outline</mat-icon><span>{{ erro }}</span>
+  </div>
+
+  <!-- CARREGANDO -->
+  <div class="carregando" *ngIf="carregando && !resumo">
+    <mat-icon>hourglass_top</mat-icon> Consultando os títulos no CISS. Pode levar alguns segundos...
+  </div>
+
+  <ng-container *ngIf="resumo">
+
+    <!-- KPIs -->
+    <section class="kpis">
+      <div class="kpi kpi-destaque">
+        <span class="kpi-label">Total em atraso</span>
+        <strong class="kpi-valor">{{ moeda(resumo.valor) }}</strong>
+        <small>{{ resumo.qtdClientes }} clientes · {{ resumo.qtdTitulos }} títulos</small>
+      </div>
+      <button type="button" class="kpi kpi-faixa" *ngFor="let f of resumo.faixas"
+        [class.selecionada]="faixaSel === f.faixa" [class.vazia]="!f.qtdTitulos"
+        (click)="selecionarFaixa(f.faixa)" [matTooltip]="faixaSel === f.faixa ? 'Clique para tirar o filtro' : 'Clique para filtrar'">
+        <span class="kpi-label">{{ f.faixa }}</span>
+        <strong class="kpi-valor">{{ moeda(f.valor) }}</strong>
+        <small>{{ f.qtdTitulos }} títulos</small>
+      </button>
+    </section>
+
+    <!-- AVISOS DO GESTOR -->
+    <div class="aviso aviso-info" *ngIf="visao === 'equipe' && (semVendedor.qtd || vendedoresSemEmail)">
+      <mat-icon>info_outline</mat-icon>
+      <span>
+        <ng-container *ngIf="semVendedor.qtd">
+          <strong>{{ semVendedor.qtd }} títulos ({{ moeda(semVendedor.valor) }})</strong> não têm vendedor: são acordos e agrupamentos do financeiro.
+        </ng-container>
+        <ng-container *ngIf="vendedoresSemEmail">
+          <strong>{{ vendedoresSemEmail }} vendedor(es)</strong> não recebem o e-mail semanal por falta de e-mail válido no cadastro do CISS.
+        </ng-container>
+      </span>
+    </div>
+
+    <!-- RESUMO POR VENDEDOR (gestor) -->
+    <section class="painel" *ngIf="visao === 'equipe' && vendedores.length">
+      <div class="painel-head">
+        <div>
+          <span class="section-eyebrow">Por vendedor</span>
+          <h2>Carteira em atraso da equipe</h2>
+        </div>
+        <small>Clique num vendedor para ver só os títulos dele.</small>
+      </div>
+      <div class="tabela-wrap">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th>Vendedor</th>
+              <th class="num">Clientes</th>
+              <th class="num">Títulos</th>
+              <th class="num" *ngFor="let f of resumo.faixas">{{ f.faixa }}</th>
+              <th class="num">Total</th>
+              <th>E-mail</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let v of vendedores" class="clicavel" [class.selecionada]="vendedorSel === v.idVendedor"
+              (click)="selecionarVendedor(v.idVendedor)">
+              <td>{{ v.vendedor }}</td>
+              <td class="num">{{ v.qtdClientes }}</td>
+              <td class="num">{{ v.qtdTitulos }}</td>
+              <td class="num" *ngFor="let f of v.faixas" [class.zero]="!f.valor">{{ f.valor ? moeda(f.valor) : '-' }}</td>
+              <td class="num forte">{{ moeda(v.valor) }}</td>
+              <td>
+                <span class="tag tag-ok" *ngIf="v.temEmail">recebe</span>
+                <span class="tag tag-erro" *ngIf="!v.temEmail" [matTooltip]="v.motivoSemEmail || ''">sem e-mail</span>
+              </td>
+            </tr>
+            <tr *ngIf="semVendedor.qtd" class="clicavel linha-sem" [class.selecionada]="vendedorSel === 0" (click)="selecionarVendedor(0)">
+              <td>Sem vendedor (acordos)</td>
+              <td class="num">-</td>
+              <td class="num">{{ semVendedor.qtd }}</td>
+              <td class="num" *ngFor="let f of resumo.faixas">-</td>
+              <td class="num forte">{{ moeda(semVendedor.valor) }}</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TÍTULOS -->
+    <section class="painel">
+      <div class="painel-head">
+        <div>
+          <span class="section-eyebrow">Títulos</span>
+          <h2>{{ filtrados.length }} títulos · {{ moeda(totalFiltrado) }}</h2>
+        </div>
+        <div class="filtros-locais">
+          <mat-form-field appearance="outline" class="campo-busca">
+            <mat-label>Buscar cliente, código ou título</mat-label>
+            <input matInput [(ngModel)]="busca" (ngModelChange)="limite = 200">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="campo-ordem">
+            <mat-label>Ordenar por</mat-label>
+            <mat-select [(ngModel)]="ordem">
+              <mat-option value="atraso">Maior atraso</mat-option>
+              <mat-option value="valor">Maior valor</mat-option>
+            </mat-select>
+          </mat-form-field>
+          <button mat-button *ngIf="busca || faixaSel || vendedorSel !== null" (click)="limparFiltros()">
+            <mat-icon>filter_alt_off</mat-icon> Limpar filtros
+          </button>
+        </div>
+      </div>
+
+      <div class="vazio" *ngIf="!titulos.length && !carregando">
+        <mat-icon>task_alt</mat-icon>
+        <p *ngIf="visao === 'minha'">
+          Nenhum título em atraso nas suas vendas.
+          <small>Se você é vendedor e esperava ver clientes aqui, peça ao T.I. para conferir se o seu login está ligado ao seu cadastro de vendedor.</small>
+        </p>
+        <p *ngIf="visao === 'equipe'">Nenhum título em atraso nas lojas selecionadas.</p>
+      </div>
+
+      <div class="tabela-wrap" *ngIf="titulos.length">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th *ngIf="visao === 'equipe'">Vendedor</th>
+              <th *ngIf="visao === 'equipe'">Loja</th>
+              <th>Cliente</th>
+              <th>Telefone</th>
+              <th>Título</th>
+              <th>Vencimento</th>
+              <th class="num">Atraso</th>
+              <th class="num">Valor original</th>
+              <th class="num">Juros</th>
+              <th class="num">Valor atualizado</th>
+              <th>Forma</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let t of visiveis; trackBy: trackTitulo">
+              <td *ngIf="visao === 'equipe'">{{ t.vendedor || 'Sem vendedor' }}</td>
+              <td *ngIf="visao === 'equipe'">{{ apelido(t.idEmpresa) }}</td>
+              <td>
+                {{ t.cliente }}
+                <small class="sub">cód. {{ t.idCliente }}</small>
+                <span class="tag tag-juridico" *ngIf="t.juridico">jurídico</span>
+              </td>
+              <td>{{ t.telefone || '-' }}</td>
+              <td>{{ t.idTitulo }}-{{ t.digito }}</td>
+              <td>{{ dataBR(t.vencimento) }}</td>
+              <td class="num"><span class="dias" [ngClass]="classeAtraso(t.diasAtraso)">{{ t.diasAtraso }} d</span></td>
+              <td class="num">{{ moeda(t.valorOriginal) }}</td>
+              <td class="num" [class.zero]="!t.juros">{{ t.juros ? moeda(t.juros) : '-' }}</td>
+              <td class="num forte">{{ moeda(t.valorAtualizado) }}</td>
+              <td class="forma">{{ t.formaRecebimento || '-' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mais" *ngIf="filtrados.length > limite">
+        <span>Mostrando {{ limite }} de {{ filtrados.length }}. O Excel traz todos.</span>
+        <button mat-stroked-button (click)="mostrarMais()">Mostrar mais</button>
+      </div>
+    </section>
+  </ng-container>
+</div>

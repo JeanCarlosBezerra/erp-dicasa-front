@@ -5,12 +5,12 @@
     <div class="hero-left">
       <span class="eyebrow">Comercial</span>
       <h1>Cadastro de Metas</h1>
-      <p>Defina a meta mensal de faturamento e margem por empresa. A meta diária é calculada automaticamente dividindo pelo número de dias úteis do mês.</p>
+      <p>Defina a meta mensal por loja, divida entre os setores e ajuste os dias de venda do mês. A meta diária é a meta do mês dividida pelos dias de venda da loja.</p>
     </div>
     <div class="hero-right">
       <div class="hero-info-card">
         <div class="info-item">
-          <span class="info-label">Dias úteis</span>
+          <span class="info-label">Dias de venda</span>
           <span class="info-val">{{ diasUteisMes }}</span>
         </div>
         <div class="info-item">
@@ -41,122 +41,380 @@
       </mat-select>
     </mat-form-field>
 
-    <button class="btn-salvar-todas" (click)="salvarTodas()" matTooltip="Salvar todas as empresas de uma vez">
+    <div class="abas">
+      <button class="aba" [class.ativa]="aba === 'loja'" (click)="trocarAba('loja')">
+        <mat-icon>storefront</mat-icon> Por loja
+      </button>
+      <button class="aba" [class.ativa]="aba === 'setor'" (click)="trocarAba('setor')">
+        <mat-icon>donut_small</mat-icon> Por setor
+      </button>
+      <button class="aba" [class.ativa]="aba === 'dias'" (click)="trocarAba('dias')">
+        <mat-icon>event</mat-icon> Dias de venda
+        <span class="aba-badge" *ngIf="qtdExcecoesMes > 0">{{ qtdExcecoesMes }}</span>
+      </button>
+    </div>
+
+    <button class="btn-salvar-todas" *ngIf="aba === 'loja'" (click)="salvarTodas()" matTooltip="Salvar todas as empresas de uma vez">
       <mat-icon>save_all</mat-icon> Salvar todas
     </button>
   </section>
-
-  <!-- INFO DIARIZAÇÃO -->
-  <div class="diarizacao-info" *ngIf="diasUteisMes > 0">
-    <mat-icon>info_outline</mat-icon>
-    <span>
-      <strong>{{ nomeMes(mesSelecionado) }}/{{ anoSelecionado }}</strong> tem
-      <strong>{{ diasUteisMes }} dias úteis</strong> (excluindo domingos).
-      A meta diária é calculada dividindo a meta mensal por esses dias.
-    </span>
-  </div>
 
   <!-- LOADING -->
   <div class="loading-state" *ngIf="carregando">
     <mat-icon>hourglass_top</mat-icon> Carregando metas...
   </div>
 
-  <!-- TABELA DE METAS -->
-  <section class="tabela-section" *ngIf="!carregando">
-    <div class="tabela-header">
-      <span class="section-eyebrow">Empresas ativas</span>
-      <h2>Metas — {{ nomeMes(mesSelecionado) }} / {{ anoSelecionado }}</h2>
+  <!-- ═══════════════════════ ABA: POR LOJA ═══════════════════════ -->
+  <ng-container *ngIf="!carregando && aba === 'loja'">
+
+    <div class="diarizacao-info" *ngIf="diasUteisMes > 0">
+      <mat-icon>info_outline</mat-icon>
+      <span>
+        <strong>{{ nomeMes(mesSelecionado) }}/{{ anoSelecionado }}</strong> tem
+        <strong>{{ diasUteisMes }} dias de venda</strong> (segunda a sábado<ng-container *ngIf="qtdExcecoesMes > 0">, com {{ qtdExcecoesMes }} ajuste(s) na aba Dias de venda</ng-container>).
+        A meta diária é a meta mensal dividida pelos dias de venda da loja.
+      </span>
     </div>
 
-    <div class="tabela-card">
-      <table class="metas-table">
-        <thead>
-          <tr>
-            <th class="col-empresa">Empresa</th>
-            <th class="col-meta">Meta Faturamento (R$)</th>
-            <th class="col-meta">Meta Margem (%)</th>
-            <th class="col-meta">Meta Ticket Médio (R$)</th>
-            <th class="col-diaria">Meta Diária</th>
-            <th class="col-acao">Salvar</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let row of metas" [class.row-salvo]="row._salvo">
-            <td class="col-empresa">
-              <div class="empresa-cell">
-                <mat-icon class="empresa-icon">grid_view</mat-icon>
-                <span>{{ row.apelido }}</span>
-              </div>
-            </td>
+    <section class="tabela-section">
+      <div class="tabela-header">
+        <span class="section-eyebrow">Empresas ativas</span>
+        <h2>Metas — {{ nomeMes(mesSelecionado) }} / {{ anoSelecionado }}</h2>
+      </div>
 
-            <td class="col-meta">
-              <div class="input-wrap">
-                <input class="meta-input"
-                  type="text"
-                  inputmode="decimal"
-                  [value]="row._editFat"
-                  (focus)="selectAll($event)"
-                  (input)="onFatInput(row, $any($event.target).value)"
-                  (blur)="onFatBlur(row)"
-                  placeholder="0,00" />
-                <span class="input-suffix">R$</span>
-              </div>
-            </td>
+      <div class="tabela-card">
+        <table class="metas-table">
+          <thead>
+            <tr>
+              <th class="col-empresa">Empresa</th>
+              <th class="col-meta">Meta Faturamento (R$)</th>
+              <th class="col-meta">Meta Margem (%)</th>
+              <th class="col-meta">Meta Ticket Médio (R$)</th>
+              <th class="col-diaria">Meta Diária</th>
+              <th class="col-acao">Salvar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of metas" [class.row-salvo]="row._salvo">
+              <td class="col-empresa">
+                <div class="empresa-cell">
+                  <mat-icon class="empresa-icon">grid_view</mat-icon>
+                  <span>{{ row.apelido }}</span>
+                </div>
+              </td>
 
-            <td class="col-meta">
-              <div class="input-wrap">
-                <input class="meta-input"
-                  type="text"
-                  inputmode="decimal"
-                  [(ngModel)]="row._editMargem"
-                  (focus)="selectAll($event)"
-                  (blur)="onMargemBlur(row)"
-                  placeholder="0,00" />
-                <span class="input-suffix">%</span>
-              </div>
-            </td>
+              <td class="col-meta">
+                <div class="input-wrap">
+                  <input class="meta-input"
+                    type="text"
+                    inputmode="decimal"
+                    [value]="row._editFat"
+                    (focus)="selectAll($event)"
+                    (input)="onFatInput(row, $any($event.target).value)"
+                    (blur)="onFatBlur(row)"
+                    placeholder="0,00" />
+                  <span class="input-suffix">R$</span>
+                </div>
+              </td>
 
-            <td class="col-meta">
-              <div class="input-wrap">
-                <input class="meta-input"
-                  type="text"
-                  inputmode="decimal"
-                  [(ngModel)]="row._editTicket"
-                  (focus)="selectAll($event)"
-                  (blur)="onTicketBlur(row)"
-                  placeholder="0,00" />
-                <span class="input-suffix">R$</span>
-              </div>
-            </td>
+              <td class="col-meta">
+                <div class="input-wrap">
+                  <input class="meta-input"
+                    type="text"
+                    inputmode="decimal"
+                    [(ngModel)]="row._editMargem"
+                    (focus)="selectAll($event)"
+                    (blur)="onMargemBlur(row)"
+                    placeholder="0,00" />
+                  <span class="input-suffix">%</span>
+                </div>
+              </td>
 
-            <td class="col-diaria">
-              <span class="meta-diaria-val">
-                R$ {{ formatMoney(diasUteisMes ? row.meta_fat / diasUteisMes : 0) }}
-              </span>
-            </td>
+              <td class="col-meta">
+                <div class="input-wrap">
+                  <input class="meta-input"
+                    type="text"
+                    inputmode="decimal"
+                    [(ngModel)]="row._editTicket"
+                    (focus)="selectAll($event)"
+                    (blur)="onTicketBlur(row)"
+                    placeholder="0,00" />
+                  <span class="input-suffix">R$</span>
+                </div>
+              </td>
 
-            <td class="col-acao">
-              <button class="btn-salvar" (click)="salvar(row)"
-                [class.salvando]="row._salvando"
-                [class.salvo]="row._salvo"
-                [disabled]="row._salvando">
-                <mat-icon>{{ row._salvo ? 'check_circle' : (row._salvando ? 'hourglass_top' : 'save') }}</mat-icon>
-              </button>
-            </td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr class="totais-row">
-            <td><strong>TOTAL</strong></td>
-            <td><strong>R$ {{ formatMoney(totalMetaFat) }}</strong></td>
-            <td>—</td>
-            <td>—</td>
-            <td><strong>R$ {{ formatMoney(metaDiaria) }}</strong></td>
-            <td></td>
-          </tr>
-        </tfoot>
-      </table>
+              <td class="col-diaria">
+                <span class="meta-diaria-val">R$ {{ formatMoney(metaDiariaLoja(row)) }}</span>
+                <span class="dias-loja" *ngIf="diasLoja(row.id_empresa) !== diasUteisMes">
+                  {{ diasLoja(row.id_empresa) }} dias
+                </span>
+              </td>
+
+              <td class="col-acao">
+                <button class="btn-salvar" (click)="salvar(row)"
+                  [class.salvando]="row._salvando"
+                  [class.salvo]="row._salvo"
+                  [disabled]="row._salvando">
+                  <mat-icon>{{ row._salvo ? 'check_circle' : (row._salvando ? 'hourglass_top' : 'save') }}</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="totais-row">
+              <td><strong>TOTAL</strong></td>
+              <td><strong>R$ {{ formatMoney(totalMetaFat) }}</strong></td>
+              <td>—</td>
+              <td>—</td>
+              <td><strong>R$ {{ formatMoney(metaDiaria) }}</strong></td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ═══════════════════════ ABA: POR SETOR ═══════════════════════ -->
+  <ng-container *ngIf="!carregando && aba === 'setor'">
+
+    <div class="diarizacao-info">
+      <mat-icon>info_outline</mat-icon>
+      <span>
+        Setor é o <strong>departamento do vendedor no CISS</strong> (o mesmo do relatório "Vendas por Departamento").
+        A venda conta para o setor em que o vendedor estava no dia da venda.
+      </span>
     </div>
-  </section>
+
+    <section class="setor-toolbar">
+      <mat-form-field appearance="outline" class="filtro-field">
+        <mat-label>Loja</mat-label>
+        <mat-select [(ngModel)]="lojaSetor" (selectionChange)="trocarLojaSetor()">
+          <mat-option *ngFor="let e of empresas" [value]="e.id">{{ e.apelido }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button class="btn-secundario" (click)="sugerirPelaParticipacao()" [disabled]="carregandoSugestao"
+        matTooltip="Divide a meta da loja pela participação de cada setor nas vendas dos 3 meses anteriores. Nada é gravado até você clicar em Salvar setores.">
+        <mat-icon>{{ carregandoSugestao ? 'hourglass_top' : 'auto_awesome' }}</mat-icon>
+        {{ carregandoSugestao ? 'Calculando (pode levar até 1 minuto)...' : 'Sugerir pela participação' }}
+      </button>
+
+      <button class="btn-salvar-todas" (click)="salvarSetores()" [disabled]="!temAlteracaoSetor || salvandoSetores">
+        <mat-icon>{{ salvandoSetores ? 'hourglass_top' : 'save' }}</mat-icon> Salvar setores
+      </button>
+    </section>
+
+    <!-- Distribuição -->
+    <section class="distribuicao" [class.ok]="metaLojaSetor > 0 && naoDistribuido === 0"
+      [class.warn]="naoDistribuido > 0" [class.bad]="naoDistribuido < 0">
+      <div class="dist-item">
+        <span class="info-label">Meta da loja</span>
+        <strong>R$ {{ formatMoney(metaLojaSetor) }}</strong>
+      </div>
+      <div class="dist-item">
+        <span class="info-label">Soma dos setores</span>
+        <strong>R$ {{ formatMoney(totalSetores) }} <small>({{ formatPerc(percDistribuido) }}%)</small></strong>
+      </div>
+      <div class="dist-item">
+        <span class="info-label">{{ naoDistribuido >= 0 ? 'Falta distribuir' : 'Passou da meta da loja' }}</span>
+        <strong>R$ {{ formatMoney(naoDistribuido < 0 ? -naoDistribuido : naoDistribuido) }}</strong>
+      </div>
+      <div class="dist-barra">
+        <div class="dist-fill" [style.width.%]="percDistribuido > 100 ? 100 : percDistribuido"></div>
+      </div>
+    </section>
+
+    <div class="aviso erro" *ngIf="erroSetor"><mat-icon>error_outline</mat-icon> {{ erroSetor }}</div>
+    <div class="aviso" *ngIf="metaLojaSetor === 0 && !erroSetor">
+      <mat-icon>info_outline</mat-icon> Esta loja ainda não tem meta no mês. Cadastre na aba "Por loja" para usar os percentuais.
+    </div>
+
+    <section class="tabela-section">
+      <div class="tabela-header">
+        <span class="section-eyebrow">{{ apelidoLoja(lojaSetor) }}</span>
+        <h2>Metas por setor — {{ nomeMes(mesSelecionado) }} / {{ anoSelecionado }}</h2>
+      </div>
+
+      <div class="tabela-card">
+        <table class="metas-table">
+          <thead>
+            <tr>
+              <th class="col-empresa">Setor</th>
+              <th class="col-hist" *ngIf="periodoSugestao">Participação {{ periodoSugestao }}</th>
+              <th class="col-meta">Meta (R$)</th>
+              <th class="col-perc">% da loja</th>
+              <th class="col-acao"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of setoresDaLoja" [class.row-salvo]="r._salvo" [class.row-alterado]="r._alterado">
+              <td class="col-empresa">
+                <div class="empresa-cell">
+                  <mat-icon class="empresa-icon">groups</mat-icon>
+                  <span>{{ r.departamento }}</span>
+                </div>
+              </td>
+              <td class="col-hist" *ngIf="periodoSugestao">
+                {{ r.participacao != null ? formatPerc(r.participacao * 100) + '%' : '—' }}
+              </td>
+              <td class="col-meta">
+                <div class="input-wrap">
+                  <input class="meta-input" type="text" inputmode="decimal"
+                    [(ngModel)]="r._editFat" (focus)="selectAll($event)" (blur)="onSetorFatBlur(r)" placeholder="0,00" />
+                  <span class="input-suffix">R$</span>
+                </div>
+              </td>
+              <td class="col-perc">
+                <div class="input-wrap">
+                  <input class="meta-input" type="text" inputmode="decimal"
+                    [(ngModel)]="r._editPerc" (focus)="selectAll($event)" (blur)="onSetorPercBlur(r)"
+                    [disabled]="metaLojaSetor === 0" placeholder="0,0" />
+                  <span class="input-suffix">%</span>
+                </div>
+              </td>
+              <td class="col-acao">
+                <button class="btn-icone" (click)="removerSetor(r)" matTooltip="Remover setor">
+                  <mat-icon>{{ r._salvo ? 'check_circle' : (r._salvando ? 'hourglass_top' : 'delete_outline') }}</mat-icon>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="setoresDaLoja.length === 0">
+              <td [attr.colspan]="periodoSugestao ? 5 : 4" class="vazio">
+                Nenhum setor com meta. Use "Sugerir pela participação" ou adicione um setor abaixo.
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="totais-row">
+              <td><strong>TOTAL</strong></td>
+              <td *ngIf="periodoSugestao"></td>
+              <td><strong>R$ {{ formatMoney(totalSetores) }}</strong></td>
+              <td><strong>{{ formatPerc(percDistribuido) }}%</strong></td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="adicionar-setor">
+        <mat-form-field appearance="outline" class="filtro-field larga">
+          <mat-label>Adicionar setor</mat-label>
+          <mat-select [(ngModel)]="novoDepartamento">
+            <mat-option *ngFor="let d of departamentosDisponiveis" [value]="d.id">{{ d.nome }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button class="btn-secundario" (click)="adicionarSetor()" [disabled]="novoDepartamento == null">
+          <mat-icon>add</mat-icon> Adicionar
+        </button>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ═══════════════════════ ABA: DIAS DE VENDA ═══════════════════════ -->
+  <ng-container *ngIf="!carregando && aba === 'dias'">
+
+    <div class="diarizacao-info">
+      <mat-icon>info_outline</mat-icon>
+      <span>
+        Padrão: <strong>segunda a sábado</strong> é dia de venda. Clique num dia para marcar a loja <strong>fechada</strong>
+        (ou um domingo como <strong>aberto</strong>); clique de novo para desfazer. Os feriados do CISS aparecem
+        marcados só como lembrete: quem decide é este calendário. Vale para as metas proporcionais e o ritmo do Dashboard.
+        A premiação continua com a regra dela.
+      </span>
+    </div>
+
+    <section class="setor-toolbar">
+      <mat-form-field appearance="outline" class="filtro-field">
+        <mat-label>Calendário de</mat-label>
+        <mat-select [(ngModel)]="escopoDias" (selectionChange)="trocarEscopoDias()">
+          <mat-option [value]="null">Todas as lojas</mat-option>
+          <mat-option *ngFor="let e of empresas" [value]="e.id">{{ e.apelido }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filtro-field larga">
+        <mat-label>Motivo (opcional)</mat-label>
+        <input matInput [(ngModel)]="descricaoDia" maxlength="120" placeholder="Ex.: Dia do Comerciário" />
+      </mat-form-field>
+
+      <div class="dias-resumo">
+        <span class="info-label">Dias de venda</span>
+        <strong>{{ diasVendaEscopo }}</strong>
+      </div>
+    </section>
+
+    <div class="aviso erro" *ngIf="erroDias"><mat-icon>error_outline</mat-icon> {{ erroDias }}</div>
+
+    <section class="calendario-card">
+      <div class="cal-grid">
+        <div class="cal-head" *ngFor="let s of diasSemana">{{ s }}</div>
+        <ng-container *ngFor="let d of calendario">
+          <div class="cal-vazio" *ngIf="!d"></div>
+          <button class="cal-dia" *ngIf="d"
+            [class.venda]="d.venda" [class.sem-venda]="!d.venda"
+            [class.excecao]="!!d.excecao" [class.herdada]="d.herdada"
+            [class.feriado]="!!d.feriado"
+            [disabled]="gravandoDia"
+            [matTooltip]="tooltipDia(d)" matTooltipClass="tooltip-multilinha"
+            (click)="clicarDia(d)">
+            <span class="cal-num">{{ d.dia }}</span>
+            <span class="cal-tag" *ngIf="d.excecao">{{ d.excecao.tipo === 'FECHADO' ? 'Fechado' : 'Aberto' }}</span>
+            <span class="cal-fer" *ngIf="d.feriado && !d.excecao">{{ d.feriado.descricao }}</span>
+          </button>
+        </ng-container>
+      </div>
+      <div class="cal-legenda">
+        <span><i class="lg venda"></i> Dia de venda</span>
+        <span><i class="lg sem-venda"></i> Sem venda</span>
+        <span><i class="lg excecao"></i> Ajuste deste calendário</span>
+        <span *ngIf="escopoDias != null"><i class="lg herdada"></i> Ajuste de todas as lojas</span>
+        <span><i class="lg feriado"></i> Feriado no CISS</span>
+      </div>
+    </section>
+
+    <div class="aviso" *ngIf="escopoDias == null && lojasComDiasDiferentes.length > 0">
+      <mat-icon>store</mat-icon>
+      Lojas com calendário próprio:
+      <ng-container *ngFor="let l of lojasComDiasDiferentes; let ultimo = last">
+        <strong>{{ l.apelido }}</strong> ({{ l.dias }} dias){{ ultimo ? '' : ', ' }}
+      </ng-container>
+    </div>
+
+    <section class="tabela-section" *ngIf="excecoes.length > 0">
+      <div class="tabela-header">
+        <span class="section-eyebrow">Ajustes do mês</span>
+        <h2>{{ nomeMes(mesSelecionado) }} / {{ anoSelecionado }}</h2>
+      </div>
+      <div class="tabela-card">
+        <table class="metas-table">
+          <thead>
+            <tr>
+              <th>Dia</th>
+              <th>Loja</th>
+              <th>Situação</th>
+              <th>Motivo</th>
+              <th>Cadastrado por</th>
+              <th class="col-acao"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let e of excecoes">
+              <td>{{ dataBr(e.data) }}</td>
+              <td>{{ apelidoLoja(e.id_empresa) }}</td>
+              <td><span class="pill" [class.fechado]="e.tipo === 'FECHADO'">{{ e.tipo === 'FECHADO' ? 'Fechada' : 'Aberta' }}</span></td>
+              <td>{{ e.descricao || '—' }}</td>
+              <td>{{ e.criado_por || '—' }}</td>
+              <td class="col-acao">
+                <button class="btn-icone" (click)="removerExcecao(e)" matTooltip="Remover ajuste">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
 
 </div>

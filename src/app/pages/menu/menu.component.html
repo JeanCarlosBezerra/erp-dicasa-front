@@ -135,6 +135,12 @@
                   <mat-icon>emoji_events</mat-icon> Premiação
                 </button>
               }
+              @if (auth.hasAnyRole('FIN_INADIMPLENCIA', 'FIN_INADIMPLENCIA_GESTOR')) {
+                <button mat-button class="submenu-btn"
+                  routerLink="/menu/comercial/clientes-em-atraso" routerLinkActive="active-submenu">
+                  <mat-icon>money_off</mat-icon> Clientes em atraso
+                </button>
+              }
             </div>
           </mat-expansion-panel>
         }
@@ -192,7 +198,7 @@
         }
 
         <!-- Configurações -->
-        @if (auth.hasAnyRole('MOD_CONFIGURACOES', 'CFG_PREMIACAO_DESTINATARIOS')) {
+        @if (auth.hasAnyRole('MOD_CONFIGURACOES', 'CFG_PREMIACAO_DESTINATARIOS', 'CFG_INADIMPLENCIA')) {
           <mat-expansion-panel class="config-panel">
             <mat-expansion-panel-header class="menu-btn">
               <mat-panel-title>
@@ -209,6 +215,11 @@
               @if (auth.hasRole('CFG_PREMIACAO_DESTINATARIOS')) {
                 <button mat-button class="submenu-btn" routerLink="/menu/settings/premiacao-destinatarios" routerLinkActive="active-submenu">
                   <mat-icon>forward_to_inbox</mat-icon> E-mails da Premiação
+                </button>
+              }
+              @if (auth.hasRole('CFG_INADIMPLENCIA')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/settings/inadimplencia" routerLinkActive="active-submenu">
+                  <mat-icon>mark_email_unread</mat-icon> Inadimplência
                 </button>
               }
               @if (auth.hasRole('MOD_CONFIGURACOES')) {

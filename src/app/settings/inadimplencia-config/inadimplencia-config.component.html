@@ -1,0 +1,227 @@
+<div class="cfg-shell">
+  <header class="cfg-head">
+    <h1>Inadimplência: envio aos vendedores</h1>
+    <p>Quem recebe o consolidado, prévia do que será enviado, envio manual e histórico.</p>
+  </header>
+
+  <!-- MODO -->
+  <section class="banner" [class.banner-teste]="modoTeste" [class.banner-prod]="!modoTeste">
+    <mat-icon>{{ modoTeste ? 'science' : 'verified' }}</mat-icon>
+    <div>
+      <strong>{{ modoTeste ? 'Modo teste ativo' : 'Envio em produção' }}</strong>
+      <small *ngIf="modoTeste">Todos os e-mails vão só para o endereço de teste do servidor. Vendedores e gestores não recebem nada.</small>
+      <small *ngIf="!modoTeste">Os vendedores com e-mail válido e os destinatários ativos abaixo recebem os e-mails.</small>
+      <small *ngIf="previa">
+        Envio automático: <strong>{{ previa.cronAtivo ? 'ligado (toda segunda às 7h)' : 'desligado' }}</strong>.
+        Regras: vencidos até {{ previa.regras.diasMaximoAtraso }} dias · jurídico {{ previa.regras.juridicoNoEmailDoVendedor ? 'vai' : 'não vai' }} para o vendedor.
+      </small>
+    </div>
+  </section>
+
+  <div class="msg" *ngIf="mensagem" [ngClass]="'msg-' + mensagem.tipo">
+    <mat-icon>{{ mensagem.tipo === 'ok' ? 'check_circle' : (mensagem.tipo === 'aviso' ? 'info' : 'error') }}</mat-icon>
+    <span>{{ mensagem.texto }}</span>
+  </div>
+
+  <!-- 1. DESTINATÁRIOS -->
+  <section class="bloco">
+    <div class="bloco-head">
+      <h2>1. Quem recebe o consolidado</h2>
+      <small>Gerentes, financeiro e diretoria. Loja vazia = recebe todas as lojas. Os vendedores recebem pelo e-mail do cadastro do CISS.</small>
+    </div>
+
+    <form class="linha-add" (ngSubmit)="adicionar()">
+      <input name="nome" [(ngModel)]="novo.nome" placeholder="Nome (ex.: Gerente HCAB)" required>
+      <input name="email" [(ngModel)]="novo.email" placeholder="email@dicasanet.com.br" type="email" required>
+      <select name="loja" [(ngModel)]="novo.id_empresa">
+        <option [ngValue]="null">Todas as lojas</option>
+        <option *ngFor="let e of empresas" [ngValue]="e.id">{{ e.id }} · {{ e.apelido }}</option>
+      </select>
+      <button mat-flat-button color="primary" type="submit" [disabled]="salvando || !novo.nome.trim() || !novo.email.trim()">
+        <mat-icon>person_add</mat-icon> Adicionar
+      </button>
+    </form>
+
+    <div class="vazio" *ngIf="!destinatarios.length">Ninguém cadastrado ainda. Sem destinatário, o consolidado não é enviado.</div>
+
+    <div class="dest" *ngFor="let d of destinatarios" [class.inativo]="!d.ativo">
+      <ng-container *ngIf="editandoId !== d.id; else formEdicao">
+        <div class="dest-info">
+          <strong>{{ d.nome }}</strong>
+          <small>{{ d.email }} · {{ rotuloLoja(d.id_empresa) }}</small>
+        </div>
+        <div class="dest-acoes">
+          <label class="chk"><input type="checkbox" [checked]="d.ativo" (change)="alternarAtivo(d)"> Ativo</label>
+          <button mat-stroked-button (click)="testar(d)" [disabled]="testandoId === d.id">
+            {{ testandoId === d.id ? 'Enviando...' : 'E-mail de teste' }}
+          </button>
+          <button mat-icon-button matTooltip="Editar" (click)="editar(d)"><mat-icon>edit</mat-icon></button>
+          <button mat-icon-button matTooltip="Remover" class="btn-remover" (click)="remover(d)"><mat-icon>delete</mat-icon></button>
+        </div>
+      </ng-container>
+      <ng-template #formEdicao>
+        <div class="linha-add linha-edit">
+          <input name="enome" [(ngModel)]="edicao.nome">
+          <input name="eemail" [(ngModel)]="edicao.email" type="email">
+          <select name="eloja" [(ngModel)]="edicao.id_empresa">
+            <option [ngValue]="null">Todas as lojas</option>
+            <option *ngFor="let e of empresas" [ngValue]="e.id">{{ e.id }} · {{ e.apelido }}</option>
+          </select>
+          <button mat-button type="button" (click)="cancelarEdicao()">Cancelar</button>
+          <button mat-flat-button color="primary" type="button" (click)="salvarEdicao(d.id)" [disabled]="salvando">Salvar</button>
+        </div>
+      </ng-template>
+    </div>
+  </section>
+
+  <!-- 2. PRÉVIA -->
+  <section class="bloco">
+    <div class="bloco-head">
+      <h2>2. Prévia</h2>
+      <small>Consulta o CISS e mostra quem receberia o e-mail agora. Não envia nada.</small>
+    </div>
+    <button mat-stroked-button (click)="gerarPrevia()" [disabled]="carregandoPrevia">
+      <mat-icon>visibility</mat-icon> {{ carregandoPrevia ? 'Consultando o CISS...' : (previa ? 'Gerar de novo' : 'Gerar prévia') }}
+    </button>
+
+    <ng-container *ngIf="previa">
+      <div class="kpis">
+        <div class="kpi"><span>Total vencido</span><strong>{{ moeda(previa.totais.valor) }}</strong>
+          <small>{{ previa.totais.qtdClientes }} clientes · {{ previa.totais.qtdTitulos }} títulos</small></div>
+        <div class="kpi"><span>Com vendedor</span><strong>{{ moeda(previa.totais.comVendedor.valor) }}</strong>
+          <small>{{ previa.totais.comVendedor.qtdTitulos }} títulos</small></div>
+        <div class="kpi"><span>Sem vendedor (acordos)</span><strong>{{ moeda(previa.totais.semVendedor.valor) }}</strong>
+          <small>{{ previa.totais.semVendedor.qtdTitulos }} títulos · só no consolidado</small></div>
+        <div class="kpi"><span>Jurídico</span><strong>{{ moeda(previa.totais.juridico.valor) }}</strong>
+          <small>{{ previa.totais.juridico.qtdTitulos }} títulos</small></div>
+        <div class="kpi kpi-ok"><span>Vendedores que recebem</span><strong>{{ qtdComEmail }}</strong></div>
+        <div class="kpi kpi-erro"><span>Vendedores sem e-mail válido</span><strong>{{ qtdSemEmail }}</strong></div>
+      </div>
+
+      <div class="previa-acoes">
+        <div class="seg">
+          <button type="button" [class.ativo]="filtroPrevia === 'todos'" (click)="filtroPrevia = 'todos'">Todos ({{ previa.vendedores.length }})</button>
+          <button type="button" [class.ativo]="filtroPrevia === 'semEmail'" (click)="filtroPrevia = 'semEmail'">Sem e-mail ({{ qtdSemEmail }})</button>
+        </div>
+        <button mat-button (click)="copiarSemEmail()" [disabled]="!qtdSemEmail">
+          <mat-icon>content_copy</mat-icon> Copiar lista sem e-mail (para o T.I.)
+        </button>
+      </div>
+
+      <div class="tabela-wrap">
+        <table class="tabela">
+          <thead>
+            <tr><th>Cód.</th><th>Vendedor</th><th>E-mail</th><th class="num">Clientes</th><th class="num">Títulos</th><th class="num">Valor</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let v of vendedoresPrevia">
+              <td>{{ v.idVendedor }}</td>
+              <td>{{ v.vendedor }}</td>
+              <td>
+                <span *ngIf="v.email" class="ok">{{ v.email }}</span>
+                <span *ngIf="!v.email" class="erro">{{ v.motivoSemEmail }}</span>
+              </td>
+              <td class="num">{{ v.qtdClientes }}</td>
+              <td class="num">{{ v.qtdTitulos }}</td>
+              <td class="num">{{ moeda(v.valor) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p class="nota" *ngIf="previa.destinatariosConsolidado.length">
+        Consolidado vai para: {{ previa.destinatariosConsolidado.length }} destinatário(s) ativo(s).
+      </p>
+    </ng-container>
+  </section>
+
+  <!-- 3. ENVIO MANUAL -->
+  <section class="bloco">
+    <div class="bloco-head">
+      <h2>3. Enviar agora</h2>
+      <small>Faz o mesmo que o envio automático de segunda: um e-mail por vendedor e o consolidado.</small>
+    </div>
+
+    <button *ngIf="!confirmandoEnvio" mat-flat-button color="primary" (click)="pedirEnvio()" [disabled]="enviando">
+      <mat-icon>send</mat-icon> Enviar agora
+    </button>
+
+    <div class="painel-confirma" *ngIf="confirmandoEnvio" [class.painel-prod]="!modoTeste">
+      <p *ngIf="modoTeste"><strong>Modo teste:</strong> todos os e-mails vão só para o endereço de teste do servidor.</p>
+      <p *ngIf="!modoTeste"><strong>Atenção: produção.</strong> Cada vendedor com e-mail válido vai receber a lista de clientes em atraso, e os destinatários ativos vão receber o consolidado.</p>
+      <p class="nota">Pode levar alguns minutos (consulta ao CISS e um e-mail a cada 1,5 segundo). O envio roda no servidor.</p>
+      <div class="painel-botoes">
+        <button mat-button (click)="cancelarEnvio()" [disabled]="enviando">Cancelar</button>
+        <button mat-flat-button [color]="modoTeste ? 'primary' : 'warn'" (click)="enviar()" [disabled]="enviando">
+          <mat-icon>send</mat-icon> {{ enviando ? 'Enviando...' : 'Sim, enviar' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="resultado" *ngIf="acompanhando as ex" [class.em-andamento]="ex.status === 'EXECUTANDO'" [class.falhou]="ex.status === 'FALHA'">
+      <strong>
+        Execução {{ ex.id }}{{ ex.modo_teste ? ' (modo teste)' : '' }}:
+        {{ ex.status === 'EXECUTANDO' ? 'enviando...' : (ex.status === 'CONCLUIDO' ? 'concluída' : 'falhou') }}
+      </strong>
+      <span *ngIf="ex.status !== 'EXECUTANDO'">
+        {{ ex.qtd_titulos ?? 0 }} títulos · {{ moeda(ex.valor_total) }} ·
+        {{ ex.qtd_emails_ok ?? 0 }} e-mails enviados · {{ ex.qtd_sem_email ?? 0 }} vendedores sem e-mail · {{ ex.qtd_emails_falha ?? 0 }} falhas
+      </span>
+      <span *ngIf="ex.status === 'EXECUTANDO'">Pode fechar a tela: o envio continua no servidor e aparece no histórico.</span>
+    </div>
+  </section>
+
+  <!-- 4. HISTÓRICO -->
+  <section class="bloco">
+    <div class="bloco-head">
+      <h2>4. Histórico</h2>
+      <small>Clique numa execução para ver cada e-mail.</small>
+    </div>
+    <div class="vazio" *ngIf="!execucoes.length">Nenhum envio ainda.</div>
+
+    <div class="tabela-wrap" *ngIf="execucoes.length">
+      <table class="tabela">
+        <thead>
+          <tr><th>#</th><th>Quando</th><th>Origem</th><th>Situação</th><th class="num">Títulos</th><th class="num">Valor</th>
+            <th class="num">E-mails ok</th><th class="num">Falhas</th><th class="num">Sem e-mail</th></tr>
+        </thead>
+        <tbody>
+          <ng-container *ngFor="let ex of execucoes">
+            <tr class="clicavel" [class.aberta]="abertaId === ex.id" (click)="abrirExecucao(ex)">
+              <td>{{ ex.id }}</td>
+              <td>{{ dataHora(ex.iniciado_em) }}</td>
+              <td>{{ ex.origem === 'AGENDADO' ? 'Automático' : 'Manual · ' + (ex.disparado_por || '') }}
+                <span class="tag tag-teste" *ngIf="ex.modo_teste">teste</span></td>
+              <td><span class="tag" [ngClass]="'st-' + ex.status">{{ ex.status }}</span></td>
+              <td class="num">{{ ex.qtd_titulos ?? '-' }}</td>
+              <td class="num">{{ ex.valor_total != null ? moeda(ex.valor_total) : '-' }}</td>
+              <td class="num">{{ ex.qtd_emails_ok ?? '-' }}</td>
+              <td class="num">{{ ex.qtd_emails_falha ?? '-' }}</td>
+              <td class="num">{{ ex.qtd_sem_email ?? '-' }}</td>
+            </tr>
+            <tr *ngIf="abertaId === ex.id" class="detalhe">
+              <td colspan="9">
+                <div *ngIf="ex.erro" class="erro">Erro: {{ ex.erro }}</div>
+                <div *ngIf="carregandoEnvios">Carregando...</div>
+                <table class="tabela sub" *ngIf="!carregandoEnvios && envios.length">
+                  <thead><tr><th>Tipo</th><th>Nome</th><th>Para</th><th>Lojas</th><th class="num">Títulos</th><th class="num">Valor</th><th>Situação</th></tr></thead>
+                  <tbody>
+                    <tr *ngFor="let e of envios">
+                      <td>{{ e.tipo === 'GESTOR' ? 'Consolidado' : 'Vendedor' }}</td>
+                      <td>{{ e.nome }}</td>
+                      <td>{{ e.destinatarios || '-' }}</td>
+                      <td>{{ e.empresas }}</td>
+                      <td class="num">{{ e.qtd_titulos }}</td>
+                      <td class="num">{{ moeda(e.valor) }}</td>
+                      <td><span class="tag" [ngClass]="'st-' + e.status" [matTooltip]="e.motivo || ''">{{ e.status }}</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </td>
+            </tr>
+          </ng-container>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>

@@ -101,6 +101,47 @@
           <div class="kpi-value bad">R$ {{ moeda(devolucoesTotal) }}</div>
         </div>
       </div>
+
+      <!-- Ritmo do mês (2.1 e 2.2) -->
+      <div class="ritmo-bloco" *ngIf="ritmo && metaMesTotal > 0">
+        <div class="ritmo-head">
+          <span class="ritmo-titulo"><mat-icon>speed</mat-icon> Ritmo do mês</span>
+          <small *ngIf="temRitmo">
+            Base: dia 01 até {{ rotuloCorte }} · {{ ritmo.diasDecorridos }} de {{ ritmo.diasMes }} dias de venda
+            · {{ mesEncerrado ? 'mês encerrado' : ritmo.diasRestantes + ' dias restantes, contando hoje' }}
+          </small>
+          <small *ngIf="!temRitmo">Disponível a partir do 2º dia de venda do mês.</small>
+        </div>
+        <div class="summary-grid" *ngIf="temRitmo">
+          <div class="summary-item" *ngIf="!modoCompartilhamento">
+            <div class="kpi-label">Meta do mês</div>
+            <div class="kpi-value meta-val">R$ {{ moeda(metaMesTotal) }}</div>
+          </div>
+          <div class="summary-item" *ngIf="!modoCompartilhamento">
+            <div class="kpi-label">Realizado até {{ rotuloCorte }}</div>
+            <div class="kpi-value">R$ {{ moeda(realizadoMesTotal) }}</div>
+          </div>
+          <div class="summary-item" *ngIf="!modoCompartilhamento"
+            matTooltip="Média diária dos dias já fechados × dias de venda do mês">
+            <div class="kpi-label">Tendência de fechamento</div>
+            <div class="kpi-value" [ngClass]="corNum(tendenciaPercGeral - 100)">R$ {{ moeda(tendenciaGeral) }}</div>
+          </div>
+          <div class="summary-item">
+            <div class="kpi-label">Tendência vs meta</div>
+            <div class="kpi-value" [ngClass]="corNum(tendenciaPercGeral - 100)">{{ pct(tendenciaPercGeral) }}</div>
+          </div>
+          <div class="summary-item" *ngIf="!modoCompartilhamento">
+            <div class="kpi-label">Média diária atual</div>
+            <div class="kpi-value">R$ {{ moeda(mediaDiariaGeral) }}</div>
+          </div>
+          <div class="summary-item" *ngIf="!modoCompartilhamento && !mesEncerrado"
+            matTooltip="(Meta do mês − realizado) ÷ dias de venda restantes, somado loja a loja">
+            <div class="kpi-label">Meta diária necessária</div>
+            <div class="kpi-value" [ngClass]="corNecessidade(metaDiariaNecGeral, metaDiariaOrigGeral)">R$ {{ moeda(metaDiariaNecGeral) }}</div>
+            <div class="kpi-sub">meta original: R$ {{ moeda(metaDiariaOrigGeral) }}/dia</div>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -184,6 +225,31 @@
             <strong class="bad">R$ {{ moeda(c.devolucoes) }}</strong>
           </div>
 
+          <!-- Ritmo do mês (2.1 e 2.2) -->
+          <ng-container *ngIf="temRitmo && c.metaMes > 0">
+            <div class="row row-sep" *ngIf="!modoCompartilhamento">
+              <span>Realizado até {{ rotuloCorte }}</span>
+              <strong>R$ {{ moeda(c.realizadoMes) }}</strong>
+            </div>
+            <div class="row" [class.row-sep]="modoCompartilhamento"
+              matTooltip="Média diária dos dias já fechados × dias de venda do mês">
+              <span>Tendência de fechamento</span>
+              <strong [ngClass]="corNum(tendenciaPercEmp(c) - 100)">
+                <ng-container *ngIf="!modoCompartilhamento">R$ {{ moeda(tendenciaEmp(c)) }} · </ng-container>{{ pct(tendenciaPercEmp(c)) }}
+              </strong>
+            </div>
+            <div class="row" *ngIf="!modoCompartilhamento">
+              <span>Média diária atual</span>
+              <strong>R$ {{ moeda(mediaDiariaEmp(c)) }}</strong>
+            </div>
+            <div class="row" *ngIf="!modoCompartilhamento && !mesEncerrado"
+              [matTooltip]="'Meta original: R$ ' + moeda(metaDiariaOrigEmp(c)) + ' por dia'">
+              <span>Meta diária necessária</span>
+              <strong *ngIf="!atingiuMetaEmp(c)" [ngClass]="corNecessidade(metaDiariaNecEmp(c), metaDiariaOrigEmp(c))">R$ {{ moeda(metaDiariaNecEmp(c)) }}</strong>
+              <strong *ngIf="atingiuMetaEmp(c)" class="ok">Meta do mês batida</strong>
+            </div>
+          </ng-container>
+
           <!-- 41646: Ticket médio (meta cheia × realizado) -->
           <div class="row row-sep" *ngIf="!modoCompartilhamento">
             <span>Meta Ticket Médio</span>
@@ -204,6 +270,78 @@
             <strong *ngIf="!c.metaTicket" class="tkm-sem-meta">—</strong>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FATURAMENTO POR SETOR (departamento do vendedor) -->
+  <section class="setores-section" *ngIf="!carregando && cards.length > 0">
+    <div class="cards-header setores-header">
+      <div>
+        <span class="section-eyebrow">Setores</span>
+        <h2>Faturamento por setor</h2>
+        <p class="setores-sub">Setor = departamento do vendedor no CISS na data da venda. Mesmo período do filtro acima.</p>
+      </div>
+      <button mat-stroked-button class="btn-setores" (click)="carregarSetores()" [disabled]="carregandoSetores">
+        <mat-icon>{{ carregandoSetores ? 'hourglass_top' : (setoresLojas ? 'refresh' : 'donut_small') }}</mat-icon>
+        {{ carregandoSetores ? 'Carregando setores...' : (setoresLojas ? 'Atualizar setores' : 'Ver por setor') }}
+      </button>
+    </div>
+
+    <div class="aviso-sem-meta" *ngIf="erroSetores">
+      <mat-icon>error_outline</mat-icon><span>{{ erroSetores }}</span>
+    </div>
+
+    <div class="setores-lista" *ngIf="setoresLojas">
+      <div class="setor-loja" *ngFor="let loja of setoresLojas; trackBy: trackLojaSetor" [class.aberta]="lojaSetoresAberta === loja.idEmpresa">
+        <button class="setor-loja-head" (click)="toggleLojaSetores(loja.idEmpresa)">
+          <mat-icon>{{ lojaSetoresAberta === loja.idEmpresa ? 'expand_less' : 'expand_more' }}</mat-icon>
+          <strong>{{ loja.apelido }}</strong>
+          <span class="setor-loja-resumo">
+            {{ loja.linhas.length }} setores
+            <ng-container *ngIf="!modoCompartilhamento"> · R$ {{ moeda(loja.realizado) }}</ng-container>
+            <ng-container *ngIf="loja.metaProp > 0"> · {{ pct(loja.metaProp ? loja.realizado / loja.metaProp * 100 : 0) }} da meta dos setores</ng-container>
+          </span>
+        </button>
+
+        <table class="setores-table" *ngIf="lojaSetoresAberta === loja.idEmpresa">
+          <thead>
+            <tr>
+              <th>Setor</th>
+              <th class="num" *ngIf="!modoCompartilhamento">Realizado</th>
+              <th class="num">Part. na loja</th>
+              <th class="num" *ngIf="!modoCompartilhamento">Meta proporcional</th>
+              <th class="num">% da meta</th>
+              <th class="num" *ngIf="!modoCompartilhamento">Saldo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of loja.linhas; trackBy: trackSetor" [class.sem-dep]="l.idDepartamento === -1">
+              <td>{{ l.departamento }}</td>
+              <td class="num" *ngIf="!modoCompartilhamento">R$ {{ moeda(l.realizado) }}</td>
+              <td class="num">{{ pct(partSetor(l, loja)) }}</td>
+              <td class="num" *ngIf="!modoCompartilhamento">{{ l.metaProp ? 'R$ ' + moeda(l.metaProp) : '—' }}</td>
+              <td class="num">
+                <strong *ngIf="l.metaProp" [ngClass]="corNum(percSetor(l) - 100)">{{ pct(percSetor(l)) }}</strong>
+                <span *ngIf="!l.metaProp" class="tkm-sem-meta">sem meta</span>
+              </td>
+              <td class="num" *ngIf="!modoCompartilhamento">
+                <strong *ngIf="l.metaProp" [ngClass]="corNum(l.realizado - l.metaProp)">R$ {{ moeda(l.realizado - l.metaProp) }}</strong>
+                <span *ngIf="!l.metaProp">—</span>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td><strong>Total da loja</strong></td>
+              <td class="num" *ngIf="!modoCompartilhamento"><strong>R$ {{ moeda(loja.realizado) }}</strong></td>
+              <td class="num">100,0%</td>
+              <td class="num" *ngIf="!modoCompartilhamento"><strong>{{ loja.metaProp ? 'R$ ' + moeda(loja.metaProp) : '—' }}</strong></td>
+              <td class="num"><strong *ngIf="loja.metaProp">{{ pct(loja.realizado / loja.metaProp * 100) }}</strong></td>
+              <td class="num" *ngIf="!modoCompartilhamento"></td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
     </div>
   </section>

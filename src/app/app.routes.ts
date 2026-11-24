@@ -30,6 +30,8 @@ import { PremiacaoComponent } from './pages/comercial/premiacao/premiacao.compon
 import { DreComponent } from './pages/financeiro/dre/dre.component';
 import { ColaboradorCadastroComponent } from './pages/comercial/colaborador-cadastro/colaborador-cadastro.component';
 import { PremiacaoDestinatariosComponent } from './settings/premiacao-destinatarios/premiacao-destinatarios.component';
+import { InadimplenciaComponent } from './pages/financeiro/inadimplencia/inadimplencia.component';
+import { InadimplenciaConfigComponent } from './settings/inadimplencia-config/inadimplencia-config.component';
 
 
 
@@ -37,6 +39,13 @@ const guard = (role: string) => () => {
   const auth = inject(AuthService);
   const router = inject(Router);
   if (auth.hasRole(role)) return true;
+  return router.createUrlTree(['/menu/home']);
+};
+
+const guardAlgum = (...roles: string[]) => () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (roles.some((r) => auth.hasRole(r))) return true;
   return router.createUrlTree(['/menu/home']);
 };
 
@@ -75,6 +84,7 @@ export const routes: Routes = [
       { path: 'comercial/meu-painel', component: MeuPainelComponent, canActivate: [guard('COM_MEU_PAINEL')] },
       { path: 'comercial/premiacao', component: PremiacaoComponent, canActivate: [guard('COM_PREMIACAO')] },   // era COM_COLABORADOR
       { path: 'comercial/colaborador-cadastro',  component: ColaboradorCadastroComponent, canActivate: [guard('COM_COLABORADOR')],},
+      { path: 'comercial/clientes-em-atraso', component: InadimplenciaComponent, canActivate: [guardAlgum('FIN_INADIMPLENCIA', 'FIN_INADIMPLENCIA_GESTOR')] },
 
       { path: 'compras/encomendas', component: EncomendasComponent, canActivate: [guard('MOD_COMPRAS')] },
 
@@ -95,6 +105,7 @@ export const routes: Routes = [
         component: PremiacaoDestinatariosComponent,
         canActivate: [guard('CFG_PREMIACAO_DESTINATARIOS')],
       },
+      { path: 'settings/inadimplencia', component: InadimplenciaConfigComponent, canActivate: [guard('CFG_INADIMPLENCIA')] },
       {
         path: 'settings',
         canActivate: [guard('MOD_CONFIGURACOES')],
