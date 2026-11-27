@@ -278,6 +278,15 @@
 
 ::ng-deep .tooltip-multilinha { white-space: pre-line; }
 
+/* ── Por vendedor ── */
+.col-setor-vend { min-width: 160px; font-size: 13px; color: #334155; }
+.col-setor-vend.sem-setor { color: #c2410c; font-weight: 600; }
+.cod-vendedor { margin-left: 6px; font-size: 11px; font-weight: 600; color: #94a3b8; }
+.dif-setor { font-weight: 700; }
+.dif-setor.ok   { color: #16a34a; }
+.dif-setor.warn { color: #b45309; }
+.dif-setor.bad  { color: #dc2626; }
+
 @media (max-width: 900px) {
   .hero { flex-direction: column; }
   .hero-info-card { flex-direction: column; gap: 12px; }

@@ -27,6 +27,10 @@ export interface ColaboradorProdutividade {
   // ── Desconto FINANCEIRO ──
   descontoFinanceiroValor: number;
   descontoFinanceiroPerc:  number;
+
+  // ── Setor (departamento do vendedor no último dia do período; -1 = sem departamento) ──
+  idDepartamento?: number | null;
+  departamento?:   string;
 }
 
 @Injectable({ providedIn: 'root' })

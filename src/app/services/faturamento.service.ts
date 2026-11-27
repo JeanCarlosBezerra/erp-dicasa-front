@@ -7,6 +7,7 @@ export interface FaturamentoFiltros {
   empresas: number[];
   dataInicio: string;
   dataFim: string;
+  tipoPessoa?: 'PJ' | 'PF';   // só na forma de pagamento (4.4)
 }
 
 export interface FaturamentoEmpresaItem {
@@ -26,6 +27,7 @@ export interface FaturamentoFormaPagamentoItem {
   IDRECEBIMENTO: number;
   DESCRICAO: string;
   TOTALDUP: number;
+  TOTALCANCELAMENTO?: number;
 }
 
 @Injectable({

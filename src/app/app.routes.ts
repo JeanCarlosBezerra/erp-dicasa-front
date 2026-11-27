@@ -18,6 +18,7 @@ import { AvaliacaoDesempenhoComponent } from './pages/rh/avaliacao-desempenho/av
 import { FormularioAvaliacaoComponent } from './pages/rh/formulario-avaliacao/formulario-avaliacao.component';
 import { GestaoRhComponent } from './pages/rh/gestao-rh/gestao-rh.component';
 import { MetasComponent } from './pages/comercial/metas/metas.component';
+import { ComparativosComponent } from './pages/comercial/comparativos/comparativos.component';
 import { PdiComponent } from './pages/rh/pdi/pdi.component';
 import { AlertasComponent } from './pages/estoque/alertas/alertas.component';
 import { RelatoriosComponent } from './pages/relatorios/relatorios.component';
@@ -81,6 +82,7 @@ export const routes: Routes = [
       { path: 'comercial/colaborador', component: ColaboradorComponent,         canActivate: [guard('COM_COLABORADOR')] },
       { path: 'comercial/faturamento', component: FaturamentoComponent,         canActivate: [guard('COM_FATURAMENTO')] },
       { path: 'comercial/metas',       component: MetasComponent,               canActivate: [guard('COM_METAS')] },
+      { path: 'comercial/comparativos', component: ComparativosComponent,      canActivate: [guard('COM_DASHBOARD')] },
       { path: 'comercial/meu-painel', component: MeuPainelComponent, canActivate: [guard('COM_MEU_PAINEL')] },
       { path: 'comercial/premiacao', component: PremiacaoComponent, canActivate: [guard('COM_PREMIACAO')] },   // era COM_COLABORADOR
       { path: 'comercial/colaborador-cadastro',  component: ColaboradorCadastroComponent, canActivate: [guard('COM_COLABORADOR')],},

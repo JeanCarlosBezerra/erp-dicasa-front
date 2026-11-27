@@ -8,7 +8,7 @@
         <h1>{{ isGestor ? 'Painel da Equipe' : 'Meu Painel' }}</h1>
       </div>
       <div class="header-empresa" *ngIf="empresas.length > 1 && isGestor">
-        <select [(ngModel)]="empresaSelecionada" (ngModelChange)="carregar()">
+        <select [(ngModel)]="empresaSelecionada" (ngModelChange)="trocarEmpresa()">
           @for (e of empresas; track e.id) {
             <option [value]="e.id.toString()">{{ e.apelido }}</option>
           }
@@ -40,6 +40,63 @@
     }
 
   </div>
+
+  <!-- ════ RITMO DO MÊS DE UM VENDEDOR (usado nas duas visões) ════ -->
+  <ng-template #ritmoTpl let-r let-titulo="titulo">
+    <div class="ritmo-card">
+      <div class="ritmo-header">
+        <span class="ritmo-titulo"><mat-icon>speed</mat-icon> {{ titulo }}</span>
+        <span class="ritmo-base">
+          @if (temCorte) { dia 01 até {{ rotuloCorte }} · {{ r.diasDecorridos }} de {{ r.diasMes }} dias de venda }
+        </span>
+      </div>
+
+      <div class="ritmo-meta-row">
+        <div>
+          <span class="kpi-label">Meta do mês</span>
+          <strong class="ritmo-meta">R$ {{ moeda(r.meta) }}</strong>
+        </div>
+        <div class="ritmo-realizado">
+          <span class="kpi-label">Realizado até {{ rotuloCorte || 'ontem' }}</span>
+          <strong>R$ {{ moeda(r.realizado) }} <small>({{ perc(r.percAtingido) }}%)</small></strong>
+        </div>
+      </div>
+
+      <div class="prog-wrap">
+        <div class="prog-bar" [class.prog-ok]="r.atingiu" [class.prog-info]="!r.atingiu"
+             [style.width.%]="r.percAtingido > 100 ? 100 : r.percAtingido"></div>
+      </div>
+
+      @if (!temCorte) {
+        <p class="ritmo-aviso">A tendência aparece a partir do dia 2, quando houver um dia de venda fechado.</p>
+      } @else if (r.atingiu) {
+        <p class="ritmo-aviso ok"><mat-icon>emoji_events</mat-icon> Meta do mês batida.</p>
+      }
+
+      @if (temCorte) {
+        <div class="ritmo-grid">
+          <div class="ritmo-item">
+            <span class="kpi-label">Tendência de fechamento</span>
+            <span class="kpi-val" [class]="'kpi-val kpi-' + r.corTendencia">R$ {{ moeda(r.tendencia) }}</span>
+            <span class="kpi-sub">{{ perc(r.tendenciaPerc) }}% da meta</span>
+          </div>
+          <div class="ritmo-item">
+            <span class="kpi-label">Média diária atual</span>
+            <span class="kpi-val">R$ {{ moeda(r.mediaDiaria) }}</span>
+            <span class="kpi-sub">por dia de venda fechado</span>
+          </div>
+          @if (!r.atingiu && r.diasRestantes > 0) {
+            <div class="ritmo-item"
+                 [matTooltip]="'Meta diária original: R$ ' + moeda(r.metaDiariaOrig)">
+              <span class="kpi-label">Meta diária necessária</span>
+              <span class="kpi-val" [class]="'kpi-val kpi-' + r.corNecessidade">R$ {{ moeda(r.metaDiariaNec) }}</span>
+              <span class="kpi-sub">restam {{ r.diasRestantes }} dias de venda, contando hoje</span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </ng-template>
 
   <!-- LOADING -->
   @if (carregando) {
@@ -73,28 +130,48 @@
         <div class="vendedor-avatar">{{ iniciais(meusDados.nome) }}</div>
         <div class="vendedor-info">
           <strong>{{ meusDados.nome }}</strong>
-          <span>{{ nomeEmpresa(empresaSelecionada) }} · {{ periodoLabel }}</span>
+          <span>{{ nomeEmpresa(lojaPrincipal) }} · {{ periodoLabel }}</span>
         </div>
-        @if (rankingPosicao > 0) {
+        <!-- só com a equipe carregada: o vendedor recebe só os próprios dados, e aí sempre daria 1º -->
+        @if (rankingPosicao > 0 && vendedoresFiltrados.length > 1) {
           <div class="ranking-badge" [class.ouro]="rankingPosicao === 1"
                [class.prata]="rankingPosicao === 2" [class.bronze]="rankingPosicao === 3">
             {{ rankingPosicao }}º lugar
           </div>
         }
       </div>
+    }
+  }
 
-      <!-- Meta placeholder -->
+  <!-- Ritmo do mês do vendedor (independe do período escolhido) -->
+  @if (!isGestor && dadosCarregados) {
+    @if (carregandoRitmo) {
+      <div class="ritmo-carregando"><mat-icon>hourglass_top</mat-icon> Calculando o ritmo do mês...</div>
+    } @else if (erroRitmo) {
+      <div class="erro-state"><mat-icon>error_outline</mat-icon> {{ erroRitmo }}</div>
+    } @else if (ritmoMes) {
+      @for (r of meusRitmos; track r.idEmpresa) {
+        <ng-container *ngTemplateOutlet="ritmoTpl; context: {
+          $implicit: r,
+          titulo: 'Minha meta de ' + nomeMesRitmo + (meusRitmos.length > 1 ? ' · ' + nomeEmpresa(r.idEmpresa) : '')
+        }"></ng-container>
+      } @empty {
+        <div class="meta-sem-meta">
+          <mat-icon>flag</mat-icon> Sua meta individual de {{ nomeMesRitmo }} ainda não foi cadastrada.
+        </div>
+      }
+    }
+  }
+
+  @if (!isGestor && dadosCarregados && !carregando && meusDados) {
+      <!-- Faturamento do período escolhido -->
       <div class="meta-card">
         <div class="meta-header">
           <span class="meta-label">Faturamento {{ periodoLabel | lowercase }}</span>
-          <span class="meta-sem-info">Meta a definir com Dr. Ricardo</span>
         </div>
         <div class="meta-valor">R$ {{ moeda(meusDados.faturamento) }}</div>
         <div class="meta-sub-row">
           <span><mat-icon>trending_up</mat-icon> {{ meusDados.qtdvenda }} vendas no período</span>
-          @if (periodoLabel === 'Este mês') {
-            <span class="ritmo">R$ {{ moeda(mediadiaria) }}/dia útil</span>
-          }
         </div>
       </div>
 
@@ -106,56 +183,41 @@
         </div>
         <div class="kpi-card">
           <span class="kpi-label">Lucro líquido</span>
-          <span class="kpi-val" [class]="'kpi-' + corMargem(meusDados.margem)">
+          <span class="kpi-val" [class]="'kpi-val kpi-' + corMargem(meusDados.margem, lojaPrincipal)">
             R$ {{ moeda(meusDados.lucro) }}
           </span>
         </div>
         <div class="kpi-card">
           <span class="kpi-label">Margem</span>
-          <span class="kpi-val" [class]="'kpi-' + corMargem(meusDados.margem)">
-            {{ meusDados.margem.toFixed(1) }}%
+          <span class="kpi-val" [class]="'kpi-val kpi-' + corMargem(meusDados.margem, lojaPrincipal)">
+            {{ perc(meusDados.margem) }}%
           </span>
-          <span class="kpi-sub">meta: ≥20%</span>
+          @if (metaMargemPerc(lojaPrincipal) > 0) {
+            <span class="kpi-sub">meta da loja: {{ perc(metaMargemPerc(lojaPrincipal)) }}%</span>
+          }
         </div>
-        <div class="kpi-card">
-          <span class="kpi-label">Desconto médio</span>
-          <span class="kpi-val" [class]="'kpi-' + corDesconto(meusDados.descontoPerc)">
-            {{ meusDados.descontoPerc.toFixed(1) }}%
+        <div class="kpi-card" matTooltip="Desconto no produto: negociação no balcão.">
+          <span class="kpi-label">Desc. produto</span>
+          <span class="kpi-val" [class]="'kpi-val kpi-' + corDesconto(meusDados.descontoProdutoPerc)">
+            {{ perc(meusDados.descontoProdutoPerc) }}%
           </span>
-          <span class="kpi-sub">limite: 5%</span>
+          <span class="kpi-sub">R$ {{ moeda(meusDados.descontoProdutoValor) }} · limite: 5%</span>
         </div>
-        <div class="kpi-card">
-          <span class="kpi-label">Desc. concedido</span>
-          <span class="kpi-val kpi-warn">R$ {{ moeda(meusDados.descontoValor) }}</span>
+        <div class="kpi-card" matTooltip="Desconto financeiro: condição de pagamento ou política da loja.">
+          <span class="kpi-label">Desc. financeiro</span>
+          <span class="kpi-val">{{ perc(meusDados.descontoFinanceiroPerc) }}%</span>
+          <span class="kpi-sub">R$ {{ moeda(meusDados.descontoFinanceiroValor) }}</span>
         </div>
         <div class="kpi-card">
           <span class="kpi-label">Devoluções</span>
-          <span class="kpi-val" [class]="meusDados.devolucoes > 0 ? 'kpi-danger' : 'kpi-ok'">
+          <span class="kpi-val" [class]="meusDados.devolucoes > 0 ? 'kpi-val kpi-danger' : 'kpi-val kpi-ok'">
             R$ {{ moeda(meusDados.devolucoes) }}
           </span>
         </div>
       </div>
 
-      <!-- Dias úteis (só no mês) -->
-      @if (periodoLabel === 'Este mês') {
-        <div class="dias-card">
-          <div class="dias-header">
-            <span>Dias úteis do mês</span>
-            <span class="dias-info">{{ diasUteisPassados }} de {{ diasUteis }} passados</span>
-          </div>
-          <div class="prog-wrap">
-            <div class="prog-bar prog-info"
-                 [style.width.%]="(diasUteisPassados / diasUteis) * 100"></div>
-          </div>
-          <div class="dias-footer">
-            <span>Restam <strong>{{ diasUteisRestantes }}</strong> dias úteis</span>
-            <span class="ritmo">Ritmo atual: R$ {{ moeda(mediadiaria) }}/dia</span>
-          </div>
-        </div>
-      }
-
       <!-- Ranking na equipe -->
-      @if (!isGestor && meusDados && vendedoresFiltrados.length > 1) {
+      @if (vendedoresFiltrados.length > 1) {
       <div class="posicao-card">
         <div class="posicao-header">
           <mat-icon>leaderboard</mat-icon> Sua posição na equipe
@@ -190,13 +252,12 @@
         </div>
         <div class="prog-wrap" style="margin-top:10px">
           <div class="prog-bar"
-               [class]="meusDados.faturamento >= mediaFaturamento ? 'prog-ok' : 'prog-warn'"
+               [class]="meusDados.faturamento >= mediaFaturamento ? 'prog-bar prog-ok' : 'prog-bar prog-warn'"
                [style.width.%]="barraVendedor(meusDados)">
           </div>
         </div>
       </div>
-}
-    }
+      }
   }
 
   <!-- ════ VISÃO GESTOR ════ -->
@@ -217,6 +278,19 @@
         </div>
       </div>
 
+      <!-- Ritmo do mês do vendedor nesta loja -->
+      @if (carregandoRitmo) {
+        <div class="ritmo-carregando"><mat-icon>hourglass_top</mat-icon> Calculando o ritmo do mês...</div>
+      } @else if (ritmoDoVendedor(vendedorSelecionado.idVendedor); as r) {
+        @if (r.meta > 0) {
+          <ng-container *ngTemplateOutlet="ritmoTpl; context: { $implicit: r, titulo: 'Meta de ' + nomeMesRitmo }"></ng-container>
+        } @else {
+          <div class="meta-sem-meta"><mat-icon>flag</mat-icon> Sem meta individual em {{ nomeMesRitmo }}. Cadastre em Metas &gt; Por vendedor.</div>
+        }
+      } @else if (ritmoMes) {
+        <div class="meta-sem-meta"><mat-icon>flag</mat-icon> Sem meta individual em {{ nomeMesRitmo }}. Cadastre em Metas &gt; Por vendedor.</div>
+      }
+
       <div class="kpi-grid">
         <div class="kpi-card">
           <span class="kpi-label">Faturamento</span>
@@ -224,23 +298,25 @@
         </div>
         <div class="kpi-card">
           <span class="kpi-label">Lucro líquido</span>
-          <span class="kpi-val" [class]="'kpi-' + corMargem(vendedorSelecionado.margem)">
+          <span class="kpi-val" [class]="'kpi-val kpi-' + corMargem(vendedorSelecionado.margem, empresaSelecionada)">
             R$ {{ moeda(vendedorSelecionado.lucro) }}
           </span>
         </div>
         <div class="kpi-card">
           <span class="kpi-label">Margem</span>
-          <span class="kpi-val" [class]="'kpi-' + corMargem(vendedorSelecionado.margem)">
-            {{ vendedorSelecionado.margem.toFixed(1) }}%
+          <span class="kpi-val" [class]="'kpi-val kpi-' + corMargem(vendedorSelecionado.margem, empresaSelecionada)">
+            {{ perc(vendedorSelecionado.margem) }}%
           </span>
-          <span class="kpi-sub">meta: ≥20%</span>
+          @if (metaMargemPerc(empresaSelecionada) > 0) {
+            <span class="kpi-sub">meta da loja: {{ perc(metaMargemPerc(empresaSelecionada)) }}%</span>
+          }
         </div>
-        <div class="kpi-card">
-          <span class="kpi-label">Desconto médio</span>
-          <span class="kpi-val" [class]="'kpi-' + corDesconto(vendedorSelecionado.descontoPerc)">
-            {{ vendedorSelecionado.descontoPerc.toFixed(1) }}%
+        <div class="kpi-card" matTooltip="Desconto no produto: negociação no balcão.">
+          <span class="kpi-label">Desc. produto</span>
+          <span class="kpi-val" [class]="'kpi-val kpi-' + corDesconto(vendedorSelecionado.descontoProdutoPerc)">
+            {{ perc(vendedorSelecionado.descontoProdutoPerc) }}%
           </span>
-          <span class="kpi-sub">limite: 5%</span>
+          <span class="kpi-sub">R$ {{ moeda(vendedorSelecionado.descontoProdutoValor) }} · limite: 5%</span>
         </div>
         <div class="kpi-card">
           <span class="kpi-label">Qtd. vendas</span>
@@ -248,12 +324,12 @@
         </div>
         <div class="kpi-card">
           <span class="kpi-label">Devoluções</span>
-          <span class="kpi-val" [class]="vendedorSelecionado.devolucoes > 0 ? 'kpi-danger' : 'kpi-ok'">
+          <span class="kpi-val" [class]="vendedorSelecionado.devolucoes > 0 ? 'kpi-val kpi-danger' : 'kpi-val kpi-ok'">
             R$ {{ moeda(vendedorSelecionado.devolucoes) }}
           </span>
         </div>
       </div>
-      <!-- Após o kpi-grid do vendedor selecionado, dentro do @if (vendedorSelecionado) -->
+
       <div class="ranking-card">
         <div class="ranking-titulo">
           <mat-icon>leaderboard</mat-icon> Posição na equipe
@@ -274,7 +350,7 @@
             <span class="posicao-media">Média da equipe: R$ {{ moeda(mediaFaturamento) }}</span>
           </div>
         </div>
-      
+
         @for (v of vendedoresFiltrados.slice(0, 5); track v.idVendedor; let i = $index) {
           <div class="ranking-row" [class.minha-row]="v.idVendedor === vendedorSelecionado.idVendedor">
             <span class="rank-pos" [class.pos-top]="i < 3">{{ i + 1 }}º</span>
@@ -295,12 +371,15 @@
       <!-- KPIs da equipe -->
       <div class="equipe-resumo">
         <div class="equipe-kpi">
-          <span class="kpi-label">Total equipe</span>
-          <span class="kpi-val kpi-info">R$ {{ moeda(totalEquipe) }}</span>
+          <span class="kpi-label">{{ setorFiltro ? 'Total do setor' : 'Total equipe' }}</span>
+          <span class="kpi-val kpi-info">R$ {{ moeda(totalSetor) }}</span>
+          @if (setorFiltro && totalEquipe > 0) {
+            <span class="kpi-label">{{ (totalSetor / totalEquipe * 100) | number:'1.1-1' }}% da equipe</span>
+          }
         </div>
         <div class="equipe-kpi">
           <span class="kpi-label">Vendedores</span>
-          <span class="kpi-val">{{ vendedoresFiltrados.length }}</span>
+          <span class="kpi-val">{{ vendedoresDoSetor.length }}</span>
         </div>
         <div class="equipe-kpi">
           <span class="kpi-label">Média por vendedor</span>
@@ -308,7 +387,46 @@
         </div>
       </div>
 
-      <!-- Busca -->
+      <!-- Metas individuais do mês (independe do período escolhido) -->
+      @if (carregandoRitmo) {
+        <div class="ritmo-carregando"><mat-icon>hourglass_top</mat-icon> Calculando o ritmo do mês...</div>
+      } @else if (resumoMetasEquipe; as m) {
+        <div class="metas-equipe">
+          <div class="metas-equipe-titulo"><mat-icon>speed</mat-icon> Metas individuais de {{ nomeMesRitmo }}
+            @if (temCorte) { <small>· até {{ rotuloCorte }}</small> }
+          </div>
+          <div class="metas-equipe-grid">
+            <div><span class="kpi-label">Vendedores com meta</span><strong>{{ m.comMeta }}</strong></div>
+            <div><span class="kpi-label">Soma das metas</span><strong>{{ moedaK(m.metaTotal) }}</strong></div>
+            <div><span class="kpi-label">Realizado</span><strong>{{ moedaK(m.realizado) }}</strong></div>
+            <div><span class="kpi-label">Tendência</span>
+              <strong [class]="m.tendencia >= m.metaTotal ? 'kpi-ok' : (m.tendencia >= m.metaTotal * 0.9 ? 'kpi-warn' : 'kpi-danger')">
+                {{ moedaK(m.tendencia) }}
+              </strong>
+            </div>
+            <div><span class="kpi-label">Fora do ritmo</span>
+              <strong [class]="m.foraDoRitmo > 0 ? 'kpi-danger' : 'kpi-ok'">{{ m.foraDoRitmo }}</strong>
+            </div>
+          </div>
+        </div>
+      } @else if (ritmoMes) {
+        <div class="meta-sem-meta"><mat-icon>flag</mat-icon> Nenhum vendedor desta loja tem meta individual em {{ nomeMesRitmo }}. Cadastre em Metas &gt; Por vendedor.</div>
+      } @else if (erroRitmo) {
+        <div class="erro-state"><mat-icon>error_outline</mat-icon> {{ erroRitmo }}</div>
+      }
+
+      <!-- Filtro por setor (3.3) + busca -->
+      @if (setoresDisponiveis.length > 1) {
+        <div class="setor-filtro">
+          <mat-icon>groups</mat-icon>
+          <select [(ngModel)]="setorFiltro" aria-label="Filtrar por setor">
+            <option value="">Todos os setores</option>
+            @for (s of setoresDisponiveis; track s.id) {
+              <option [value]="'' + s.id">{{ s.nome }} ({{ s.qtd }})</option>
+            }
+          </select>
+        </div>
+      }
       <div class="busca-wrap">
         <mat-icon>search</mat-icon>
         <input type="text" [(ngModel)]="buscaVendedor"
@@ -322,18 +440,28 @@
             <div class="vr-pos" [class.pos-top]="i < 3">{{ i + 1 }}º</div>
             <div class="vr-avatar">{{ iniciais(v.nome) }}</div>
             <div class="vr-body">
-              <div class="vr-nome">{{ v.nome.split(' ').slice(0,3).join(' ') }}</div>
+              <div class="vr-nome">{{ v.nome.split(' ').slice(0,3).join(' ') }}
+                @if (!setorFiltro && v.departamento) { <small class="vr-setor">{{ v.departamento }}</small> }
+              </div>
               <div class="vr-bar-wrap">
                 <div class="vr-bar" [style.width.%]="barraVendedor(v)"></div>
               </div>
               <div class="vr-sub-row">
                 <span class="vr-fat">R$ {{ moeda(v.faturamento) }}</span>
                 <span class="vr-badges">
-                  <span class="badge-mini" [class]="'badge-' + corMargem(v.margem)">
-                    {{ v.margem.toFixed(1) }}% mg
+                  @if (ritmoDoVendedor(v.idVendedor); as r) {
+                    @if (r.meta > 0 && temCorte) {
+                      <span class="badge-mini" [class]="'badge-mini badge-' + (r.corTendencia || 'ok')"
+                            [matTooltip]="'Tendência do mês: R$ ' + moeda(r.tendencia) + ' de R$ ' + moeda(r.meta)">
+                        tend. {{ r.tendenciaPerc.toFixed(0) }}%
+                      </span>
+                    }
+                  }
+                  <span class="badge-mini" [class]="'badge-mini badge-' + corMargem(v.margem, empresaSelecionada)">
+                    {{ perc(v.margem) }}% mg
                   </span>
-                  @if (v.descontoPerc > 5) {
-                    <span class="badge-mini badge-danger">{{ v.descontoPerc.toFixed(1) }}% desc</span>
+                  @if (v.descontoProdutoPerc > 5) {
+                    <span class="badge-mini badge-danger">{{ perc(v.descontoProdutoPerc) }}% desc</span>
                   }
                 </span>
               </div>
@@ -360,46 +488,67 @@
     </div>
   }
 
-  <!-- ════ BOTA-FORA — aparece nas duas visões (MOCK · validar fonte: DIVISAO 23) ════ -->
+  <!-- ════ BOTA-FORA (divisão 23) — período dos botões; vendedor = só ele, gestor = loja ════ -->
   @if (dadosCarregados && !carregando && (meusDados || isGestor) && !vendedorSelecionado) {
     <div class="botafora-card">
       <div class="bf-header">
         <div class="bf-titulo">
           <mat-icon>local_offer</mat-icon>
-          <span>Bota-Fora <small>· {{ isGestor ? 'equipe' : 'prioridade de venda' }}</small></span>
-        </div>
-        <span class="bf-chip-mock">dados de exemplo</span>
-      </div>
-
-      <div class="bf-destaque">
-        <div class="bf-valor-bloco">
-          <span class="bf-label">{{ isGestor ? 'Vendido pela equipe' : 'Vendido no período' }}</span>
-          <strong class="bf-valor">R$ {{ moeda(botaForaMock.vendido) }}</strong>
-        </div>
-        <div class="bf-meta-bloco">
-          <span class="bf-pct" [class.bf-ok]="botaForaMock.pctMeta >= 100">{{ botaForaMock.pctMeta }}%</span>
-          <span class="bf-label">da meta ({{ moedaK(botaForaMock.meta) }})</span>
+          <span>Bota-Fora <small>· {{ isGestor ? 'loja' : 'prioridade de venda' }} · {{ periodoLabel.toLowerCase() }}</small></span>
         </div>
       </div>
 
-      <div class="prog-wrap">
-        <div class="prog-bar" [class.prog-ok]="botaForaMock.pctMeta >= 100"
-             [class.prog-warn]="botaForaMock.pctMeta < 100"
-             [style.width.%]="botaForaMock.pctMeta > 100 ? 100 : botaForaMock.pctMeta"></div>
-      </div>
+      @if (carregandoBotaFora && !botaFora) {
+        <div class="bf-vazio">Carregando Bota-Fora...</div>
+      } @else if (erroBotaFora) {
+        <div class="bf-vazio">{{ erroBotaFora }}</div>
+      } @else if (botaFora) {
+        <div class="bf-destaque" [class.bf-atualizando]="carregandoBotaFora">
+          <div class="bf-valor-bloco">
+            <span class="bf-label">{{ isGestor ? 'Vendido pela loja' : 'Vendido no período' }}</span>
+            <strong class="bf-valor">R$ {{ moeda(botaFora.faturamento) }}</strong>
+          </div>
+          <div class="bf-meta-bloco">
+            @if (botaForaParticipacao !== null) {
+              <span class="bf-pct">{{ botaForaParticipacao | number:'1.1-1' }}%</span>
+              <span class="bf-label">{{ isGestor ? 'do faturamento da equipe' : 'do seu faturamento' }}</span>
+            }
+            @if (botaForaMargem !== null) {
+              <span class="bf-label">margem {{ botaForaMargem | number:'1.1-1' }}%</span>
+            }
+          </div>
+        </div>
 
-      <div class="bf-secoes">
-        @for (s of botaForaMock.secoes; track s.nome) {
-          <div class="bf-secao-row">
-            <span class="bf-secao-nome">{{ s.nome }}</span>
-            <div class="bf-secao-bar-wrap">
-              <div class="bf-secao-bar" [style.width.%]="s.pct"></div>
-            </div>
-            <span class="bf-secao-val">{{ moedaK(s.valor) }}</span>
+        @if (botaForaSecoes.length) {
+          <div class="bf-secoes">
+            @for (s of botaForaSecoes; track s.nome) {
+              <div class="bf-secao-row">
+                <span class="bf-secao-nome" [matTooltip]="s.nome">{{ s.nome }}</span>
+                <div class="bf-secao-bar-wrap">
+                  <div class="bf-secao-bar" [style.width.%]="s.pct"></div>
+                </div>
+                <span class="bf-secao-val">{{ moedaK(s.valor) }}</span>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="bf-vazio">Nenhuma venda de Bota-Fora no período.</div>
+        }
+
+        @if (isGestor && botaForaTopVendedores.length) {
+          <div class="bf-top">
+            <span class="bf-label">Quem mais vendeu Bota-Fora</span>
+            @for (v of botaForaTopVendedores; track v.idEmpresa + '-' + v.idVendedor) {
+              <div class="bf-top-row">
+                <span class="bf-secao-nome">{{ v.nome }}</span>
+                <span class="bf-secao-val">{{ moedaK(v.faturamento) }}</span>
+              </div>
+            }
           </div>
         }
-      </div>
+      }
     </div>
   }
+
 
 </div>

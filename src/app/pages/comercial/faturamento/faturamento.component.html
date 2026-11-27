@@ -154,6 +154,38 @@
       </div>
     </div>
 
+    <!-- 4.3: destaques (clique para isolar na tabela) e 4.4: PJ em boleto -->
+    <div class="fp-destaques" *ngIf="dadosFormaPagamento.length">
+      <button type="button" class="fp-card" *ngFor="let d of resumoDestaques"
+              [class.ativo]="isolar === d.chave" (click)="alternarIsolar(d.chave)"
+              [attr.title]="d.formas.length ? 'Formas: ' + d.formas.join(', ') : 'Nenhuma forma com este nome no período'">
+        <span class="fp-titulo">{{ d.titulo }}</span>
+        <strong class="fp-valor">{{ moeda(d.valor) }}</strong>
+        <span class="fp-sub">{{ percentual(d.perc) }} do total · {{ d.formas.length }} forma(s)</span>
+        <span class="fp-acao">{{ isolar === d.chave ? 'Mostrar todas' : 'Isolar na tabela' }}</span>
+      </button>
+
+      <div class="fp-card fp-pj">
+        <span class="fp-titulo">PJ em boleto</span>
+        <ng-container *ngIf="carregandoPJ">
+          <span class="fp-sub">Calculando a venda PJ...</span>
+        </ng-container>
+        <ng-container *ngIf="!carregandoPJ && erroPJ">
+          <span class="fp-sub">{{ erroPJ }}</span>
+          <button type="button" class="fp-btn" (click)="calcularPJ()">Tentar de novo</button>
+        </ng-container>
+        <ng-container *ngIf="!carregandoPJ && !erroPJ && !dadosPJ">
+          <span class="fp-sub">{{ carregando ? 'Aguardando o relatório principal...' : 'Venda PJ ainda não calculada.' }}</span>
+          <button type="button" class="fp-btn" *ngIf="!carregando" (click)="calcularPJ()">Calcular</button>
+        </ng-container>
+        <ng-container *ngIf="!carregandoPJ && !erroPJ && dadosPJ">
+          <strong class="fp-valor">{{ percentual(pjPercBoleto) }}</strong>
+          <span class="fp-sub">{{ moeda(pjBoleto) }} em boleto de {{ moeda(pjTotal) }} vendidos a PJ</span>
+          <span class="fp-sub">PJ = {{ percentual(pjPercFaturamento) }} do total das formas</span>
+        </ng-container>
+      </div>
+    </div>
+
     <div class="table-panel">
       <table class="custom-table">
         <thead>
@@ -161,16 +193,25 @@
             <th>Código</th>
             <th>Descrição</th>
             <th>Valor Venda</th>
+            <th>% do total</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of dadosFormaPagamento">
+          <tr *ngFor="let item of linhasFormaPagamento">
             <td>{{ item.IDRECEBIMENTO }}</td>
             <td>{{ item.DESCRICAO }}</td>
             <td>{{ moeda(item.TOTALDUP) }}</td>
+            <td>{{ percentual(percDoTotal(item.TOTALDUP)) }}</td>
           </tr>
 
-          <tr *ngIf="!dadosFormaPagamento.length">
+          <tr *ngIf="linhasFormaPagamento.length" class="total-row">
+            <td></td>
+            <td>{{ isolar ? 'Total isolado' : 'Total' }}</td>
+            <td>{{ moeda(totalLinhasVisiveis) }}</td>
+            <td>{{ percentual(percDoTotal(totalLinhasVisiveis)) }}</td>
+          </tr>
+
+          <tr *ngIf="!linhasFormaPagamento.length">
             <td colspan="4" class="empty-row">Nenhum dado encontrado.</td>
           </tr>
         </tbody>

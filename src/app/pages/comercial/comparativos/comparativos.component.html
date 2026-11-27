@@ -1,0 +1,133 @@
+<div class="comp-shell">
+  <section class="hero">
+    <div class="hero-left">
+      <span class="eyebrow">Comercial</span>
+      <h1>Comparativos</h1>
+      <p>
+        O período escolhido contra o mesmo intervalo no mês anterior e no ano anterior,
+        por loja, por setor e por vendedor.
+      </p>
+    </div>
+    @if (periodos) {
+      <div class="hero-right">
+        <div class="hero-card">
+          <div><span class="hc-label">Atual</span><strong>{{ rotuloPeriodo('atual') }}</strong></div>
+          <div><span class="hc-label">Mês anterior</span><strong>{{ rotuloPeriodo('mesAnterior') }}</strong></div>
+          <div><span class="hc-label">Ano anterior</span><strong>{{ rotuloPeriodo('anoAnterior') }}</strong></div>
+        </div>
+      </div>
+    }
+  </section>
+
+  <section class="filtros-card">
+    <label class="campo">
+      <span>De</span>
+      <input type="date" [(ngModel)]="dataInicio" />
+    </label>
+    <label class="campo">
+      <span>Até</span>
+      <input type="date" [(ngModel)]="dataFim" />
+    </label>
+
+    <mat-form-field appearance="outline" class="campo-lojas" subscriptSizing="dynamic">
+      <mat-label>Lojas</mat-label>
+      <mat-select [(ngModel)]="lojasSelecionadas" multiple (selectionChange)="atualizar()">
+        <mat-select-trigger>{{ resumoLojas }}</mat-select-trigger>
+        @for (e of empresas; track e.id) {
+          <mat-option [value]="e.id">{{ e.id }} - {{ e.apelido }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <button type="button" class="btn-acao" (click)="carregar()" [disabled]="carregando">
+      <mat-icon>compare_arrows</mat-icon> {{ carregando ? 'Comparando...' : 'Comparar' }}
+    </button>
+
+    @if (carregando) {
+      <span class="etapa"><mat-icon>hourglass_top</mat-icon> {{ etapa }}</span>
+    }
+  </section>
+
+  @for (e of erros; track e) {
+    <div class="aviso bad"><mat-icon>error_outline</mat-icon> {{ e }}</div>
+  }
+
+  <section class="painel">
+    <div class="painel-topo">
+      <div class="abas">
+        <button type="button" [class.ativa]="visao === 'geral'" (click)="trocarVisao('geral')">
+          <mat-icon>store</mat-icon> Geral (lojas)
+        </button>
+        <button type="button" [class.ativa]="visao === 'setor'" (click)="trocarVisao('setor')">
+          <mat-icon>category</mat-icon> Por setor
+        </button>
+        <button type="button" [class.ativa]="visao === 'vendedor'" (click)="trocarVisao('vendedor')">
+          <mat-icon>badge</mat-icon> Por vendedor
+        </button>
+      </div>
+
+      <div class="indicadores">
+        @for (i of indicadores; track i.chave) {
+          @if (!(visao === 'vendedor' && i.chave === 'produtividade') && !(visao !== 'geral' && i.soGeral)) {
+            <button type="button" class="chip" [class.ativo]="indicador === i.chave"
+                    [attr.title]="i.dica" (click)="indicador = i.chave; atualizar()">
+              {{ i.nome }}
+            </button>
+          }
+        }
+      </div>
+    </div>
+
+    @if (visao === 'vendedor') {
+      <div class="filtros-vendedor">
+        <select [(ngModel)]="setorVendedor" (ngModelChange)="atualizar()" aria-label="Setor">
+          <option value="">Todos os setores</option>
+          @for (s of setoresAtual; track s.id) {
+            <option [value]="'' + s.id">{{ s.nome }}</option>
+          }
+        </select>
+        <input type="text" [(ngModel)]="buscaVendedor" (ngModelChange)="atualizar()" placeholder="Buscar vendedor..." />
+      </div>
+    }
+
+    <div class="tabela-wrap">
+      <table class="tabela">
+        <thead>
+          <tr>
+            <th class="col-nome">{{ visao === 'geral' ? 'Loja' : (visao === 'setor' ? 'Setor' : 'Vendedor') }}</th>
+            <th>Atual</th>
+            <th>Mês anterior</th>
+            <th>Var.</th>
+            <th>Ano anterior</th>
+            <th>Var.</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (l of linhas; track l.chave) {
+            <tr [class.total]="l.total">
+              <td class="col-nome">
+                {{ l.nome }}
+                @if (l.sub) { <small>{{ l.sub }}</small> }
+              </td>
+              <td class="num">{{ fmt(l.atual) }}</td>
+              <td class="num muted">{{ fmt(l.mesAnterior) }}</td>
+              @let vm = variacao(l.atual, l.mesAnterior);
+              <td class="num var" [class]="'num var ' + vm.classe">{{ vm.texto }}</td>
+              <td class="num muted">{{ fmt(l.anoAnterior) }}</td>
+              @let va = variacao(l.atual, l.anoAnterior);
+              <td class="num var" [class]="'num var ' + va.classe">{{ va.texto }}</td>
+            </tr>
+          } @empty {
+            <tr><td colspan="6" class="vazio">{{ carregando ? 'Carregando...' : 'Nenhum dado no período.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <p class="nota">
+      Base do Dashboard (validada com o CISS). Na visão Geral os números por loja são os mesmos do Dashboard.
+      Setor = departamento do vendedor no fim de cada período. Ainda não entram: forma de pagamento,
+      visitantes, conversão e parceiros.
+    </p>
+  </section>
+</div>

@@ -48,6 +48,9 @@
       <button class="aba" [class.ativa]="aba === 'setor'" (click)="trocarAba('setor')">
         <mat-icon>donut_small</mat-icon> Por setor
       </button>
+      <button class="aba" [class.ativa]="aba === 'vendedor'" (click)="trocarAba('vendedor')">
+        <mat-icon>badge</mat-icon> Por vendedor
+      </button>
       <button class="aba" [class.ativa]="aba === 'dias'" (click)="trocarAba('dias')">
         <mat-icon>event</mat-icon> Dias de venda
         <span class="aba-badge" *ngIf="qtdExcecoesMes > 0">{{ qtdExcecoesMes }}</span>
@@ -307,6 +310,192 @@
         <button class="btn-secundario" (click)="adicionarSetor()" [disabled]="novoDepartamento == null">
           <mat-icon>add</mat-icon> Adicionar
         </button>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ═══════════════════════ ABA: POR VENDEDOR ═══════════════════════ -->
+  <ng-container *ngIf="!carregando && aba === 'vendedor'">
+
+    <div class="diarizacao-info">
+      <mat-icon>info_outline</mat-icon>
+      <span>
+        A meta do vendedor é <strong>por loja</strong>: conta só o que ele vendeu nesta loja, com a mesma base do Dashboard.
+        Assim a soma dos vendedores fecha com a loja. O setor mostrado é o departamento atual do vendedor no CISS.
+      </span>
+    </div>
+
+    <section class="setor-toolbar">
+      <mat-form-field appearance="outline" class="filtro-field">
+        <mat-label>Loja</mat-label>
+        <mat-select [(ngModel)]="lojaVendedor" (selectionChange)="trocarLojaVendedor()">
+          <mat-option *ngFor="let e of empresasVendedor" [value]="e.id">{{ e.apelido }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <button class="btn-secundario" (click)="sugerirVendedoresPelaParticipacao()" [disabled]="carregandoSugestaoVend"
+        matTooltip="Divide a meta da loja pela participação de cada vendedor nas vendas desta loja nos 3 meses anteriores. Nada é gravado até você clicar em Salvar vendedores.">
+        <mat-icon>{{ carregandoSugestaoVend ? 'hourglass_top' : 'auto_awesome' }}</mat-icon>
+        {{ carregandoSugestaoVend ? 'Calculando (pode levar até 1 minuto)...' : 'Sugerir pela participação' }}
+      </button>
+
+      <button class="btn-salvar-todas" (click)="salvarVendedores()" [disabled]="!temAlteracaoVendedor || salvandoVendedores">
+        <mat-icon>{{ salvandoVendedores ? 'hourglass_top' : 'save' }}</mat-icon> Salvar vendedores
+      </button>
+    </section>
+
+    <!-- Distribuição da meta da loja -->
+    <section class="distribuicao" [class.ok]="metaLojaVendedor > 0 && naoDistribuidoVend === 0"
+      [class.warn]="naoDistribuidoVend > 0" [class.bad]="naoDistribuidoVend < 0">
+      <div class="dist-item">
+        <span class="info-label">Meta da loja</span>
+        <strong>R$ {{ formatMoney(metaLojaVendedor) }}</strong>
+      </div>
+      <div class="dist-item">
+        <span class="info-label">Soma dos vendedores</span>
+        <strong>R$ {{ formatMoney(totalVendedores) }} <small>({{ formatPerc(percDistribuidoVend) }}%)</small></strong>
+      </div>
+      <div class="dist-item">
+        <span class="info-label">{{ naoDistribuidoVend >= 0 ? 'Falta distribuir' : 'Passou da meta da loja' }}</span>
+        <strong>R$ {{ formatMoney(naoDistribuidoVend < 0 ? -naoDistribuidoVend : naoDistribuidoVend) }}</strong>
+      </div>
+      <div class="dist-barra">
+        <div class="dist-fill" [style.width.%]="percDistribuidoVend > 100 ? 100 : percDistribuidoVend"></div>
+      </div>
+    </section>
+
+    <div class="aviso erro" *ngIf="erroVendedor"><mat-icon>error_outline</mat-icon> {{ erroVendedor }}</div>
+    <div class="aviso" *ngIf="metaLojaVendedor === 0 && !erroVendedor">
+      <mat-icon>info_outline</mat-icon> Esta loja ainda não tem meta no mês. Cadastre na aba "Por loja" para usar os percentuais.
+    </div>
+    <div class="aviso" *ngIf="foraDoCadastroLoja.length > 0">
+      <mat-icon>person_off</mat-icon>
+      <span>
+        {{ foraDoCadastroLoja.length }} pessoa(s) venderam nesta loja em {{ periodoSugestaoVend }} (R$ {{ formatMoney(totalForaDoCadastro) }}),
+        mas não estão ativas no cadastro de colaboradores do ERP e ficaram fora da divisão: {{ nomesForaDoCadastro }}.
+        Se for vendedor, cadastre em Comercial &gt; Cadastro de Colaboradores e clique em Sugerir de novo.
+      </span>
+    </div>
+    <div class="aviso" *ngIf="empresasVendedor.length === 0">
+      <mat-icon>lock_outline</mat-icon> Seu usuário não tem loja liberada para cadastrar metas de vendedores.
+    </div>
+
+    <section class="tabela-section">
+      <div class="tabela-header">
+        <span class="section-eyebrow">{{ apelidoLoja(lojaVendedor) }}</span>
+        <h2>Metas por vendedor — {{ nomeMes(mesSelecionado) }} / {{ anoSelecionado }}</h2>
+      </div>
+
+      <div class="tabela-card">
+        <table class="metas-table">
+          <thead>
+            <tr>
+              <th class="col-empresa">Vendedor</th>
+              <th class="col-setor-vend">Setor</th>
+              <th class="col-hist" *ngIf="periodoSugestaoVend">Participação {{ periodoSugestaoVend }}</th>
+              <th class="col-meta">Meta (R$)</th>
+              <th class="col-perc">% da loja</th>
+              <th class="col-acao"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of vendedoresDaLoja" [class.row-salvo]="r._salvo" [class.row-alterado]="r._alterado">
+              <td class="col-empresa">
+                <div class="empresa-cell">
+                  <mat-icon class="empresa-icon">person</mat-icon>
+                  <span>{{ r.nome }} <small class="cod-vendedor">{{ r.id_vendedor }}</small></span>
+                </div>
+              </td>
+              <td class="col-setor-vend" [class.sem-setor]="r.id_departamento === -1">{{ r.departamento }}</td>
+              <td class="col-hist" *ngIf="periodoSugestaoVend">
+                {{ r.participacao != null ? formatPerc(r.participacao * 100) + '%' : '—' }}
+              </td>
+              <td class="col-meta">
+                <div class="input-wrap">
+                  <input class="meta-input" type="text" inputmode="decimal"
+                    [(ngModel)]="r._editFat" (focus)="selectAll($event)" (blur)="onVendedorFatBlur(r)" placeholder="0,00" />
+                  <span class="input-suffix">R$</span>
+                </div>
+              </td>
+              <td class="col-perc">
+                <div class="input-wrap">
+                  <input class="meta-input" type="text" inputmode="decimal"
+                    [(ngModel)]="r._editPerc" (focus)="selectAll($event)" (blur)="onVendedorPercBlur(r)"
+                    [disabled]="metaLojaVendedor === 0" placeholder="0,0" />
+                  <span class="input-suffix">%</span>
+                </div>
+              </td>
+              <td class="col-acao">
+                <button class="btn-icone" (click)="removerVendedor(r)" matTooltip="Remover vendedor">
+                  <mat-icon>{{ r._salvo ? 'check_circle' : (r._salvando ? 'hourglass_top' : 'delete_outline') }}</mat-icon>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="vendedoresDaLoja.length === 0">
+              <td [attr.colspan]="periodoSugestaoVend ? 6 : 5" class="vazio">
+                Nenhum vendedor com meta. Use "Sugerir pela participação" ou adicione um vendedor abaixo.
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="totais-row">
+              <td><strong>TOTAL</strong></td>
+              <td>{{ vendedoresDaLoja.length }} vendedor(es)</td>
+              <td *ngIf="periodoSugestaoVend"></td>
+              <td><strong>R$ {{ formatMoney(totalVendedores) }}</strong></td>
+              <td><strong>{{ formatPerc(percDistribuidoVend) }}%</strong></td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="adicionar-setor">
+        <mat-form-field appearance="outline" class="filtro-field larga">
+          <mat-label>Adicionar vendedor</mat-label>
+          <mat-select [(ngModel)]="novoVendedor">
+            <mat-option *ngFor="let v of vendedoresDisponiveis" [value]="v.id_vendedor">{{ v.nome }} ({{ v.id_vendedor }})</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button class="btn-secundario" (click)="adicionarVendedor()" [disabled]="novoVendedor == null">
+          <mat-icon>add</mat-icon> Adicionar
+        </button>
+      </div>
+    </section>
+
+    <!-- Conferência por setor (só aviso, não bloqueia) -->
+    <section class="tabela-section" *ngIf="resumoSetoresVendedores.length > 0">
+      <div class="tabela-header">
+        <span class="section-eyebrow">Conferência</span>
+        <h2>Vendedores x meta do setor</h2>
+      </div>
+      <div class="tabela-card">
+        <table class="metas-table">
+          <thead>
+            <tr>
+              <th class="col-empresa">Setor</th>
+              <th class="col-meta">Meta do setor</th>
+              <th class="col-meta">Soma dos vendedores</th>
+              <th class="col-meta">Diferença</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of resumoSetoresVendedores">
+              <td class="col-empresa">
+                {{ s.departamento }} <small class="cod-vendedor">{{ s.qtdVendedores }} vendedor(es)</small>
+              </td>
+              <td class="col-meta">{{ s.metaSetor == null ? 'sem meta' : 'R$ ' + formatMoney(s.metaSetor) }}</td>
+              <td class="col-meta">R$ {{ formatMoney(s.somaVendedores) }}</td>
+              <td class="col-meta">
+                <span *ngIf="s.metaSetor != null" class="dif-setor"
+                  [class.ok]="difSetor(s) === 0" [class.warn]="difSetor(s) > 0" [class.bad]="difSetor(s) < 0">
+                  {{ difSetor(s) === 0 ? 'fechado' : (difSetor(s) > 0 ? 'falta R$ ' + formatMoney(difSetor(s)) : 'passou R$ ' + formatMoney(-difSetor(s))) }}
+                </span>
+                <span *ngIf="s.metaSetor == null">—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
   </ng-container>

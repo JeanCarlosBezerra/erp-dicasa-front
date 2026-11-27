@@ -103,6 +103,11 @@
                   <mat-icon>dashboard</mat-icon> Dashboard
                 </button>
               }
+              @if (auth.hasRole('COM_DASHBOARD')) {
+                <button mat-button class="submenu-btn" routerLink="/menu/comercial/comparativos" routerLinkActive="active-submenu">
+                  <mat-icon>compare_arrows</mat-icon> Comparativos
+                </button>
+              }
               @if (auth.hasRole('COM_COLABORADOR')) {
                 <button mat-button class="submenu-btn" routerLink="/menu/comercial/colaborador" routerLinkActive="active-submenu">
                   <mat-icon>groups</mat-icon> Colaborador

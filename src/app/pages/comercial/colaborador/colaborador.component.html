@@ -13,7 +13,7 @@
       <div class="hero-meta-card">
         <span class="meta-label">Módulo</span>
         <strong>Produtividade Comercial</strong>
-        <small>{{ dataSource.data.length }} colaboradores retornados</small>
+        <small>{{ dataSource.data.length }} colaboradores retornados{{ setorFiltro ? ' · ' + nomeSetorFiltro : '' }}</small>
       </div>
     </div>
   </section>
@@ -53,6 +53,17 @@
       </mat-select>
     </mat-form-field>
 
+    <mat-form-field appearance="outline" class="filter-field">
+      <mat-label>Setor</mat-label>
+      <mat-select [(ngModel)]="setorFiltro" (selectionChange)="aplicarFiltroSetor()"
+                  [disabled]="!setoresDisponiveis.length">
+        <mat-option value="">Todos os setores</mat-option>
+        @for (s of setoresDisponiveis; track s.id) {
+          <mat-option [value]="'' + s.id">{{ s.nome }} ({{ s.qtd }})</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
     <button mat-flat-button color="primary" class="btn-filtrar" (click)="carregar()">
       <mat-icon>filter_alt</mat-icon> Filtrar
     </button>
@@ -87,6 +98,14 @@
           <ng-container matColumnDef="nome">
             <th mat-header-cell *matHeaderCellDef>Nome</th>
             <td mat-cell *matCellDef="let row">{{ row.nome }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="departamento">
+            <th mat-header-cell *matHeaderCellDef
+              matTooltip="Departamento do vendedor no último dia do período (histórico do CISS).">
+              Setor
+            </th>
+            <td mat-cell *matCellDef="let row">{{ row.departamento || '—' }}</td>
           </ng-container>
 
           <ng-container matColumnDef="qtdvenda">

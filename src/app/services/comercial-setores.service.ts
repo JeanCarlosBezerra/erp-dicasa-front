@@ -37,6 +37,52 @@ export interface FaturamentoSetor {
 
 export interface FeriadoCiss { data: string; descricao: string; }
 
+/** Meta de um vendedor numa loja (id_vendedor = IDCLIFOR do CISS). */
+export interface MetaVendedorApi {
+  id?: number;
+  id_empresa: number;
+  id_vendedor: number;
+  nome: string;
+  mes: number;
+  ano: number;
+  meta_fat: number;
+  id_departamento?: number | null;   // setor atual (-1 = sem departamento; null = não consultado)
+  departamento?: string;
+  atualizado_por?: string | null;
+  atualizado_em?: string;
+}
+
+export interface SugestaoVendedor {
+  idEmpresa: number;
+  idVendedor: number;
+  nome: string;
+  idDepartamento: number;
+  departamento: string;
+  faturamento: number;
+  participacao: number;   // fração da loja
+}
+
+/** Vendeu na loja no período da sugestão, mas não está ativo no cadastro do ERP: não entra na divisão. */
+export interface VendedorForaCadastro {
+  idEmpresa: number;
+  idVendedor: number;
+  nome: string;
+  faturamento: number;
+}
+
+export interface SugestaoVendedoresResp {
+  periodo: { inicio: string; fim: string };
+  vendedores: SugestaoVendedor[];
+  foraDoCadastro: VendedorForaCadastro[];
+}
+
+export interface VendedorCadastro {
+  id_vendedor: number;
+  nome: string;
+  id_empresa: number | null;
+  tipo: string;
+}
+
 export interface DiasVendaMes {
   mes: number;
   ano: number;
@@ -69,6 +115,23 @@ export class ComercialSetoresService {
   }
   excluirMetaSetor(id: number): Observable<{ ok: boolean }> {
     return this.http.delete<{ ok: boolean }>(`${this.apiMetas}/setores/${id}`);
+  }
+
+  // ── Metas por vendedor ──
+  metasVendedor(mes: number, ano: number): Observable<MetaVendedorApi[]> {
+    return this.http.get<MetaVendedorApi[]>(`${this.apiMetas}/vendedores`, { params: this.mesAno(mes, ano) });
+  }
+  vendedoresCadastro(): Observable<VendedorCadastro[]> {
+    return this.http.get<VendedorCadastro[]>(`${this.apiMetas}/vendedores/cadastro`);
+  }
+  sugestaoVendedores(mes: number, ano: number): Observable<SugestaoVendedoresResp> {
+    return this.http.get<any>(`${this.apiMetas}/vendedores/sugestao`, { params: this.mesAno(mes, ano) });
+  }
+  salvarMetaVendedor(m: MetaVendedorApi): Observable<MetaVendedorApi> {
+    return this.http.post<MetaVendedorApi>(`${this.apiMetas}/vendedores`, m);
+  }
+  excluirMetaVendedor(id: number): Observable<{ ok: boolean }> {
+    return this.http.delete<{ ok: boolean }>(`${this.apiMetas}/vendedores/${id}`);
   }
 
   // ── Dias de venda ──
